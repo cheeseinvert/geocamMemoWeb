@@ -14,6 +14,8 @@ from django.shortcuts import render_to_response
 from django.views.generic.simple import redirect_to
 from django import forms
 
+# random comment -adamg
+
 @login_required
 def message_list(request):
     return render_to_response('home.html',
