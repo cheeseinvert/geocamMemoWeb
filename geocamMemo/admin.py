@@ -5,3 +5,6 @@
 # __END_LICENSE__
 
 from django.contrib import admin
+from geocamMemo.models import GeocamMessage
+
+admin.site.register(GeocamMessage)
