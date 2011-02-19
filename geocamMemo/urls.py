@@ -8,5 +8,6 @@ from django.conf.urls.defaults import *
 
 
 urlpatterns = patterns('',
-    url(r'^$', 'views.index', name='index'),
+    url(r'^index', 'views.message_list'),
+    #url(r'^$', 'views.index', name='index'),
 )
