@@ -6,5 +6,14 @@
 
 from django.contrib import admin
 from geocamMemo.models import GeocamMessage
+from django.contrib import admin
 
-admin.site.register(GeocamMessage)
+class GeocamMessageAdmin(admin.ModelAdmin):
+    list_display = ('author', 
+                    'content', 
+                    'lat', 
+                    'lon')
+    list_filter = ['author']
+
+admin.site.register(GeocamMessage, GeocamMessageAdmin)
+

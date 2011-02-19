@@ -13,11 +13,16 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.views.generic.simple import redirect_to
 from django import forms
+from geocamMemo.models import GeocamMessage, GeocamMessageForm
 
 # random comment -adamg
 
 @login_required
 def message_list(request):
+    return render_to_response('home.html',
+                              {}, context_instance=RequestContext(request))
+
+def index(request):
     return render_to_response('home.html',
                               {}, context_instance=RequestContext(request))
 
@@ -45,7 +50,24 @@ def login_view(request):
         return render_to_response('login.html',
                                 {'form':LoginForm()},
                                 context_instance=RequestContext(request))
-        
+
+def create_message(request):
+    if request.method == 'POST':
+        form = GeocamMessageForm(request.POST)
+        if form.is_valid():
+            form.save()        
+            return HttpResponseRedirect('/')
+        else:
+            return render_to_response('message.html',
+                                  {'form':form},
+                                  context_instance=RequestContext(request))
+    else:
+        form = GeocamMessageForm()
+        return render_to_response('message.html',
+                                  {'form':form },                                   
+                                  context_instance=RequestContext(request))
+    
+       
 class LoginForm(forms.Form):
     username = forms.CharField(label=(u'Username'))
     password = forms.CharField(label=(u'Password'),widget=forms.PasswordInput(render_value=False))
