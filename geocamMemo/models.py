@@ -15,3 +15,15 @@ class GeocamMessage(models.Model):
     lon = models.FloatField()
     author = models.ForeignKey(User)
     create_date = models.DateTimeField()
+    
+    def get_date_string(self):
+        return self.create_date.strftime("%m/%d %H:%M:%S")
+    
+    def get_author_string(self):
+        if self.author.first_name:
+              return (self.author.first_name + " " + self.author.last_name)
+        else:
+              return (self.author.username)
+          
+    def has_geolocation(self):
+        return (self.lat and self.lon)

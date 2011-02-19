@@ -13,11 +13,14 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.views.generic.simple import redirect_to
 from django import forms
+from models import GeocamMessage
 
 @login_required
 def message_list(request):
-    return render_to_response('home.html',
-                              {}, context_instance=RequestContext(request))
+    
+    messages = GeocamMessage.objects.all()
+    return render_to_response('messagelist.html', 
+                              {"gc_msg": messages}, context_instance=RequestContext(request))
 
 def logout_view(request):
     logout(request)

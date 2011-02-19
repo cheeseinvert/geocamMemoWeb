@@ -20,12 +20,51 @@ class geocamMemoTest(TestCase):
         pass
     
     def testListmessages(self):
-        print "listmessages test!"
         
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/messages/index')
         self.assertEqual(response.status_code, 200, "ensure all users can see list")
+              
+    def testMessageDateFormat(self):
         
-        #        messages = GeocamMessage.objects.all()
+        messages = GeocamMessage.objects.all()
+        body = self._get_messages_body()
+        for m in messages:
+            self.assertContains(body, m.create_date.strftime("%m/%d %H:%M:%S"), None, 200)
         
+    def testMessageAuthorFormat(self):
+        
+        messages = GeocamMessage.objects.all()
+        body = self._get_messages_body()
+        
+        for m in messages:
+            if m.author.first_name:
+              self.assertContains(body, m.author.first_name + " " + m.author.last_name)
+            else:
+              self.assertContains(body, m.author.username)
+        
+    def testMessageContentFormat(self):
+        
+        messages = GeocamMessage.objects.all()
+        body = self._get_messages_body()
+        for m in messages:
+            self.assertContains(body, m.content)
+    
+    def testMessageGeoLocationPresent(self):
+        
+        messages = GeocamMessage.objects.all()
+        body = self._get_messages_body()
+        geocount = 0
+        for m in messages:
+            if m.lat and m.lon:
+              geocount = geocount+1
+        
+        self.assertContains(body, "GEO!", geocount)          
+    
+    def _get_messages_body(self):
+        
+        u = User.objects.all()[0]
+        self.client.login(username=u.username, password='geocam')
+        response = self.client.get('/messages/index')
+        return response

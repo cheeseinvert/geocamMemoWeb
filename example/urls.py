@@ -24,11 +24,11 @@ urlpatterns = patterns('',
     url(r'^accounts/logout/$', 'geocamMemo.views.logout_view'),
     url(r'^accounts/login/$', 'geocamMemo.views.login_view'),
     url(r'^$', 'geocamMemo.views.message_list'),
-    url(r'^messages/', include('geocamMemo.urls')),
+    url(r'^messages/index',  'geocamMemo.views.message_list'),  #include('geocamMemo.urls')),
 )
 
-urlpatterns = urlpatterns + patterns('',
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': settings.MEDIA_ROOT}),
-    ) if settings.DEBUG else urlpatterson
+#urlpatterns = urlpatterns + patterns('',
+#    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
+#        {'document_root': settings.MEDIA_ROOT}),
+#    ) if settings.DEBUG else urlpatterson
 
