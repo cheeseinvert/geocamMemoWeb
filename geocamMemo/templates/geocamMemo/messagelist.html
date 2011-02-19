@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<blink>Home</blink>
+<ul>
+{% for m in gc_msg %}
+<li>
+  {{ m.get_date_string }} : {{ m.get_author_string}} : {{ m.content}} :
+  {% if m.has_geolocation %}
+  	"GEO!"
+  {% endif %}
+</li>
+{% endfor %}
+</ul>
+
+{% endblock %}
