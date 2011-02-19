@@ -11,3 +11,4 @@ media/css/*.r*.css
 *.egg-info
 .project
 .pydevproject
+.tmp*

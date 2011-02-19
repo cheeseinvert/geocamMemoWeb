@@ -13,14 +13,13 @@ class geocamMemoTest(TestCase):
     Tests for geocamMemoWeb
     """
 
-    fixtures = ['User.json', 'geocamMemo.json']
+    fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
 
     
     def test_geocamMemo(self):
         pass
     
-    def testListmessages(self):
-        
+    def testMessageOrder(self):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/messages/index')
@@ -60,7 +59,7 @@ class geocamMemoTest(TestCase):
             if m.lat and m.lon:
               geocount = geocount+1
         
-        self.assertContains(body, "GEO!", geocount)          
+        self.assertContains(body, "geoloc.png", geocount)          
     
     def _get_messages_body(self):
         

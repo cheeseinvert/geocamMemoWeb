@@ -1,0 +1,11 @@
+[
+{"pk": 1, "model": "geocamMemo.geocammessage", "fields":
+   {"content": "Tesing 1 2 3", "create_date": "2011-02-19 12:24:49", "author": 2}
+}, 
+{"pk": 2, "model": "geocamMemo.geocammessage", "fields": 
+   {"content": "Testing 1 2 3 4", "lat": 45.1, "create_date": "2011-02-19 12:25:06", "lon": 45.1, "author": 2}
+}, 
+{"pk": 3, "model": "geocamMemo.geocammessage", "fields":
+   {"content": "Testing 1 2 3 4 5", "lat": 45.2, "create_date": "2011-02-19 12:25:22", "lon": 45.2, "author": 3}
+}
+]
