@@ -29,7 +29,7 @@ class geocamMemoTest(TestCase):
         for m in displayedmessages:
             displayed_message_ids.append(m.pk)
         
-        messages = GeocamMessage.objects.order_by("create_date")
+        messages = GeocamMessage.objects.order_by("-create_date") #descending (newest at top)
         message_ids = []        
         for m in messages:
             message_ids.append(m.pk)
