@@ -91,5 +91,19 @@ class GeocamTalkMessageSaveTest(TestCase):
         
         for u in User.objects.all():
             self.assertTrue(self.client.login(username=u.username, password='geocam'))
+           
+    def test_MessageContentOrdering(self):
+        
+        ordered_messages = GeocamMessage.objects.all().order_by('content_timestamp').reverse()
+        response = self._get_messages_response()
+        response_ordered_messages = response.context["gc_msg"]
+        self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
+    
+    def _get_messages_response(self):
+        
+        u = User.objects.all()[0]
+        self.client.login(username=u.username, password='geocam')
+        response = self.client.get('/talk/messages/')
+        return response
     
     

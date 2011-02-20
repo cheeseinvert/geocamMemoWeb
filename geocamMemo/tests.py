@@ -89,14 +89,14 @@ class GeocamMemoListViewTest(TestCase):
     def testMessageDateFormat(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_body()
+        body = self._get_messages_response()
         for m in messages:
             self.assertContains(body, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
         
     def testMessageAuthorFormat(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_body()
+        body = self._get_messages_response()
         
         for m in messages:
             if m.author.first_name:
@@ -107,22 +107,30 @@ class GeocamMemoListViewTest(TestCase):
     def testMessageContentFormat(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_body()
+        body = self._get_messages_response()
         for m in messages:
             self.assertContains(body, m.content)
     
     def testMessageGeoLocationPresent(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_body()
+        body = self._get_messages_response()
         geocount = 0
         for m in messages:
             if m.latitude and m.longitude:
               geocount = geocount+1
         
-        self.assertContains(body, "geoloc.png", geocount)          
+        self.assertContains(body, "geoloc.png", geocount)
+
+    def test_MessageContentOrdering(self):
+        
+        ordered_messages = GeocamMessage.objects.all().order_by('content_timestamp').reverse()
+        response = self._get_messages_response()
+        response_ordered_messages = response.context["gc_msg"]
+        self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
+            
     
-    def _get_messages_body(self):
+    def _get_messages_response(self):
         
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
