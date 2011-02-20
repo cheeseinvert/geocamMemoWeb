@@ -77,8 +77,8 @@ ROOT_URLCONF = 'example.urls'
 
 TEMPLATE_DIRS = (
                  './templates/',
-                 '../geocamMemo/templates/geocamMemo/',
-                 '../geocamTalk/templates/geocamTalk/',
+                 '../geocamMemo/templates/',
+                 '../geocamTalk/templates/',
                  
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.

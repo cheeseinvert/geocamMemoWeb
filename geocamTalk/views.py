@@ -15,12 +15,12 @@ from geocamTalk.forms import GeocamTalkForm
 def message_list(request):
     
     messages = GeocamMessage.objects.all()
-    return render_to_response('talk_messagelist.html', 
+    return render_to_response('geocamTalk/messagelist.html', 
                               {"gc_msg": messages}, context_instance=RequestContext(request))
 
 @login_required
 def index(request):
-    return render_to_response('talk_home.html',
+    return render_to_response('geocamTalk/home.html',
                               {}, context_instance=RequestContext(request))
 
 @login_required
@@ -31,11 +31,11 @@ def create_message(request):
             form.save()        
             return HttpResponseRedirect('/talk/messages/')
         else:
-            return render_to_response('talk_message_form.html',
+            return render_to_response('geocamTalk/message_form.html',
                                   {'form':form},
                                   context_instance=RequestContext(request))
     else:
         form = GeocamTalkForm()
-        return render_to_response('talk_message_form.html',
+        return render_to_response('geocamTalk/message_form.html',
                                   {'form':form },                                   
                                   context_instance=RequestContext(request))

@@ -27,11 +27,11 @@ def login_view(request):
                 return HttpResponseRedirect('/')
         else:
             # Return an 'invalid login' error message.
-            return render_to_response('login.html',
+            return render_to_response('example/login.html',
                                 {'form':LoginForm()},
                                 context_instance=RequestContext(request))
     else:
-        return render_to_response('login.html',
+        return render_to_response('example/login.html',
                                 {'form':LoginForm()},
                                 context_instance=RequestContext(request))
         

@@ -15,12 +15,12 @@ from geocamMemo.forms import GeocamMessageForm
 def message_list(request):
     
     messages = GeocamMessage.objects.all()
-    return render_to_response('messagelist.html', 
+    return render_to_response('geocamMemo/messagelist.html', 
                               {"gc_msg": messages}, context_instance=RequestContext(request))
 
 @login_required
 def index(request):
-    return render_to_response('home.html',
+    return render_to_response('geocamMemo/home.html',
                               {}, context_instance=RequestContext(request))
 
 @login_required
@@ -31,11 +31,11 @@ def create_message(request):
             form.save()        
             return HttpResponseRedirect('/memo/messages/')
         else:
-            return render_to_response('message_form.html',
+            return render_to_response('geocamMemo/message_form.html',
                                   {'form':form},
                                   context_instance=RequestContext(request))
     else:
         form = GeocamMessageForm()
-        return render_to_response('message_form.html',
+        return render_to_response('geocamMemo/message_form.html',
                                   {'form':form },                                   
                                   context_instance=RequestContext(request))
