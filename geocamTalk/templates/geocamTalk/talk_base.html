@@ -3,7 +3,7 @@
     <head>
         <title>
             {% block title %}
-            GeoCam
+            GeoCam Talk
             {% endblock %}
         </title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
@@ -12,7 +12,7 @@
     <body>
         <header>
             {% if user.is_authenticated %}
-                <a href="/memo/messages/">Messages</a> | 
+                <a href="/talk/messages/">Messages</a> | 
                 Hello {% firstof user.first_name user.username %} <a href="/accounts/logout/">Logout</a>
             {% else %}
                 <a href="/accounts/login/">Login</a>

@@ -25,12 +25,11 @@ def login_view(request):
                 login(request, user)
                 # Redirect to a success page
                 return HttpResponseRedirect('/')
-            else:
-                # Return a 'disabled account' error message
-                pass
         else:
             # Return an 'invalid login' error message.
-            pass
+            return render_to_response('login.html',
+                                {'form':LoginForm()},
+                                context_instance=RequestContext(request))
     else:
         return render_to_response('login.html',
                                 {'form':LoginForm()},

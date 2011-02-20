@@ -76,6 +76,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'example.urls'
 
 TEMPLATE_DIRS = (
+                 './templates/',
                  '../geocamMemo/templates/geocamMemo/',
                  '../geocamTalk/templates/geocamTalk/',
                  

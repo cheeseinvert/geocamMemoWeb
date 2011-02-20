@@ -53,6 +53,7 @@ class GeocamTalkMessageSaveTest(TestCase):
     def test_submitFormToCreateMessage(self):
         """ submit the Talk Message through the form """
         
+        msgCnt = GeocamMessage.objects.all().count()
         content = "Whoa man, that burning building almost collapsed on me!"
         author = User.objects.get(username="avagadia")
         self.client.login(username=author.username, password='geocam')
@@ -60,19 +61,30 @@ class GeocamTalkMessageSaveTest(TestCase):
         response = self.client.post("/talk/messages/create/",
                                   data={"content":content,
                                         "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
-                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon})
-        self.assertEqual(response.status_code, 200, "submitFormToCreateMessage Failed")
+                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon,
+                                        "author":author.pk})
+        # should be redirected when form post is successful:
+        self.assertEqual(response.status_code, 302, "submitFormToCreateMessage Failed")
+        newMsgCnt = GeocamMessage.objects.all().count()
+        self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message through view Failed.")
+        
         
     def test_submitFormWithoutContentTalkMessage(self):
         """ submit the Talk Message without content through the form """
         
+        msgCnt = GeocamMessage.objects.all().count()
         author = User.objects.get(username="avagadia")
         self.client.login(username=author.username, password='geocam')
         
         response = self.client.post("/talk/messages/create/",
                                   data={"latitude":GeocamTalkMessageSaveTest.cmusv_lat,
-                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon})
-        self.assertEqual(response.status_code, 302, "test_submitFormWithoutContentTalkMessage Failed")
+                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon,
+                                        "author":author.pk})
+        # should get 200 on render_to_response when is_valid fails (which should occur)
+        self.assertEqual(response.status_code, 200, "test_submitFormWithoutContentTalkMessage Failed")
+        newMsgCnt = GeocamMessage.objects.all().count()
+        self.assertEqual(msgCnt, newMsgCnt, "Creating a Talk Message through view Succeeded with no content.")
+         
                
     def test_login(self):
         """ Make sure all users can login """

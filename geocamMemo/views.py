@@ -11,16 +11,19 @@ from django.contrib.auth.decorators import login_required
 from geocamMemo.models import GeocamMessage
 from geocamMemo.forms import GeocamMessageForm
 
+@login_required
 def message_list(request):
     
     messages = GeocamMessage.objects.all()
     return render_to_response('messagelist.html', 
                               {"gc_msg": messages}, context_instance=RequestContext(request))
 
+@login_required
 def index(request):
     return render_to_response('home.html',
                               {}, context_instance=RequestContext(request))
 
+@login_required
 def create_message(request):
     if request.method == 'POST':
         form = GeocamMessageForm(request.POST)

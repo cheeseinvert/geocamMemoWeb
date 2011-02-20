@@ -7,25 +7,23 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.template import RequestContext
-from django.utils.translation import ugettext, ugettext_lazy as _
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
-from django.views.generic.simple import redirect_to
-from django import forms
 from geocamMemo.models import GeocamMessage
 from geocamTalk.forms import GeocamTalkForm
 
+@login_required
 def message_list(request):
     
     messages = GeocamMessage.objects.all()
     return render_to_response('talk_messagelist.html', 
                               {"gc_msg": messages}, context_instance=RequestContext(request))
 
+@login_required
 def index(request):
     return render_to_response('talk_home.html',
                               {}, context_instance=RequestContext(request))
 
+@login_required
 def create_message(request):
     if request.method == 'POST':
         form = GeocamTalkForm(request.POST)
