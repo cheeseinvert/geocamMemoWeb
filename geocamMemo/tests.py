@@ -103,11 +103,7 @@ class GeocamMemoListViewTest(TestCase):
         messages = GeocamMessage.objects.all()
         response = self._get_messages_response()
         for m in messages:
-<<<<<<< HEAD
-            self.assertContains(response, m.create_date.strftime("%m/%d %H:%M:%S"), None, 200)
-=======
             self.assertContains(body, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
->>>>>>> iteration1
         
     def testMessageListAuthorFormat(self):
         
