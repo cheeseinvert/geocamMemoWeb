@@ -18,7 +18,7 @@ from models import GeocamMessage
 @login_required
 def message_list(request):
     
-    messages = GeocamMessage.objects.all()
+    messages = GeocamMessage.objects.order_by('create_date')
     return render_to_response('messagelist.html', 
                               {"gc_msg": messages}, context_instance=RequestContext(request))
 

@@ -19,49 +19,60 @@ class geocamMemoTest(TestCase):
     def test_geocamMemo(self):
         pass
     
-    def testMessageOrder(self):
+    def testMessageListSizeAndOrder(self):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
-        response = self.client.get('/messages/index')
-        self.assertEqual(response.status_code, 200, "ensure all users can see list")
-              
-    def testMessageDateFormat(self):
+        response = self._get_messages_response()
         
-        messages = GeocamMessage.objects.all()
-        body = self._get_messages_body()
+        displayedmessages = response.context[-1]['gc_msg'] # get the data object sent to the template
+        displayed_message_ids = []
+        for m in displayedmessages:
+            displayed_message_ids.append(m.pk)
+        
+        messages = GeocamMessage.objects.order_by("create_date")
+        message_ids = []        
         for m in messages:
-            self.assertContains(body, m.create_date.strftime("%m/%d %H:%M:%S"), None, 200)
-        
-    def testMessageAuthorFormat(self):
+            message_ids.append(m.pk)
+
+        self.assertEqual(displayed_message_ids, message_ids, "Order should be the same")
+              
+    def testMessageListDateFormat(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_body()
+        response = self._get_messages_response()
+        for m in messages:
+            self.assertContains(response, m.create_date.strftime("%m/%d %H:%M:%S"), None, 200)
+        
+    def testMessageListAuthorFormat(self):
+        
+        messages = GeocamMessage.objects.all()
+        response = self._get_messages_response()
         
         for m in messages:
             if m.author.first_name:
-              self.assertContains(body, m.author.first_name + " " + m.author.last_name)
+              self.assertContains(response, m.author.first_name + " " + m.author.last_name)
             else:
-              self.assertContains(body, m.author.username)
+              self.assertContains(response, m.author.username)
         
-    def testMessageContentFormat(self):
+    def testMessageListContentFormat(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_body()
+        response = self._get_messages_response()
         for m in messages:
-            self.assertContains(body, m.content)
+            self.assertContains(response, m.content)
     
-    def testMessageGeoLocationPresent(self):
+    def testMessageListGeoLocationPresent(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_body()
+        response = self._get_messages_response()
         geocount = 0
         for m in messages:
             if m.lat and m.lon:
               geocount = geocount+1
         
-        self.assertContains(body, "geoloc.png", geocount)          
+        self.assertContains(response, "geoloc.png", geocount)          
     
-    def _get_messages_body(self):
+    def _get_messages_response(self):
         
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
