@@ -7,7 +7,8 @@
 from django.conf.urls.defaults import *
 
 
+
 urlpatterns = patterns('',
-    url(r'^index', 'views.message_list'),
-    #url(r'^$', 'views.index', name='index'),
+    url(r'messages/create', 'geocamMemo.views.create_message'),
+    url(r'messages',  'geocamMemo.views.message_list'),  #include('geocamMemo.urls')),
 )

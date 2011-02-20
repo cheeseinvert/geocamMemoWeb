@@ -6,6 +6,7 @@
 
 from django.conf.urls.defaults import *
 from django.conf import settings
+import geocamMemo
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin 
@@ -24,7 +25,7 @@ urlpatterns = patterns('',
     url(r'^accounts/logout/$', 'geocamMemo.views.logout_view'),
     url(r'^accounts/login/$', 'geocamMemo.views.login_view'),
     url(r'^$', 'geocamMemo.views.message_list'),
-    url(r'^messages/index',  'geocamMemo.views.message_list'),  #include('geocamMemo.urls')),
+    url(r'^memo/', include('geocamMemo.urls'))
 )
 
 urlpatterns = urlpatterns + patterns('',
