@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
-from models import GeocamMessage
+from models import GeocamMessage, get_user_string
 
 class GeocamMemoMessageSaveTest(TestCase):
     fixtures = ['teamUsers.json', 'msgs.json']
@@ -149,6 +149,63 @@ class GeocamMemoListViewTest(TestCase):
             self.assertContains(response, m.content)
         for m in notUserMessages:
             self.assertNotContains(response, m.content)                
+      
+    def testEnsureFilteredMessageListSizeAndOrder(self):        
+        #arrange
+        u = User.objects.all()[1]     
+        
+        #descending (newest at top)
+        messages = GeocamMessage.objects.filter(author = u.pk).order_by("-content_timestamp") 
+        message_ids = []        
+        for m in messages:
+            message_ids.append(m.pk)   
+        
+        #act
+        response = self._get_messages_response_filtered(u)
+        
+        #Looks at last parameter of context. Denoted by -1
+        displayedmessages = response.context[-1]['gc_msg'] # get the data object sent to the template
+        displayed_message_ids = []
+        for m in displayedmessages:
+            displayed_message_ids.append(m.pk)
+        
+        #assert
+        self.assertEqual(displayed_message_ids, message_ids, "Order should be the same")
+ 
+    def testEnsureMessageListAuthorLinksPresent(self):
+        #arrange        
+        messages = GeocamMessage.objects.all()
+        
+        #act
+        response = self._get_messages_response()
+        
+        #assert
+        for m in messages:            
+            self.assertContains(response, 'href="/memo/messages/' + m.author.username)
+    
+    def testEnsureListAuthorPresent(self):
+        #arrange
+        u = User.objects.all()[1]
+        
+        #act
+        response = self._get_messages_response_filtered(u)
+        
+        #assert            
+        self.assertContains(response, 'Memos by ' + get_user_string(u))
+    
+    def testEnsureGetUserStringReturnsFullNameWhenFullNameExist(self):
+        #arrange
+        u = User(username="johndoe", password="geocam", first_name="John", last_name="Doe")
+                        
+        #assert
+        self.assertEqual('John Doe', get_user_string(u))
+          
+    def testEnsureGetUserStringReturnsUserNameWhenFullNameDoesntExist(self):
+        #arrange
+        u = User(username="johndoe", password="geocam")                        
+        #assert
+        self.assertEqual('johndoe', get_user_string(u))
+
         
     def _get_messages_response_filtered(self, user):
         self.client.login(username=user.username, password='geocam')

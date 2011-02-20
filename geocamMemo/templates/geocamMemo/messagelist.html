@@ -3,12 +3,22 @@
 {% block title%}GeoCam Memo Messages{% endblock %}
 
 {% block content %}
-<div id="messages">
+
+<section id="messages">
+   {% if userstring %}
+      <h1>Memos by {{ userstring }}</h1>
+   {% else %}
+      <h1>All Memos</h1>
+   {% endif %}
+
 <ul id="message_list">
 {% for m in gc_msg %}
     <li id="message_{{m.pk}}">
       <p id="message_{{m.pk}}_header">
-          On {{ m.get_date_string }} {{ m.get_author_string}} said
+          On {{ m.get_date_string }} 
+          <a href="{% url geocamMemo.views.message_list_filtered_username m.author.username %}"> 
+          {{ m.get_author_string}}</a>
+          
           {% if m.has_geolocation %}<img src="/media/geocamMemo/geoloc.png" />{%endif%}
       </p>
       <p id="message_{{m.pk}}_content">{{ m.content}}</p>
@@ -16,5 +26,5 @@
 {% endfor %}
 </ul>
 <a href="/memo/messages/create/">New Message</a>
-</div>
+</section>
 {% endblock %}

@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render_to_response
 from django.views.generic.simple import redirect_to
 from django import forms
-from geocamMemo.models import GeocamMessage
+from geocamMemo.models import GeocamMessage, get_user_string
 from geocamMemo.forms import GeocamMessageForm
 
 @login_required
@@ -26,9 +26,11 @@ def message_list(request):
 @login_required
 def message_list_filtered_username(request, username):
     user = get_object_or_404(User, username=username)
+    
     messages = GeocamMessage.objects.filter(author = user.pk).order_by('-content_timestamp')
     return render_to_response('messagelist.html', 
-                              {"gc_msg": messages}, context_instance=RequestContext(request))
+                              {"gc_msg": messages,
+                               "userstring": get_user_string(user)}, context_instance=RequestContext(request))
 
 def index(request):
     return render_to_response('home.html',
