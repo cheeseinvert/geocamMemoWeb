@@ -19,7 +19,7 @@ from geocamMemo.forms import GeocamMessageForm
 @login_required
 def message_list(request):
     
-    messages = GeocamMessage.objects.order_by('-create_date')
+    messages = GeocamMessage.objects.order_by('-content_timestamp')
     return render_to_response('messagelist.html', 
                               {"gc_msg": messages}, context_instance=RequestContext(request))
 
