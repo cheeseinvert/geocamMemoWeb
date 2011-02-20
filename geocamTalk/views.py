@@ -8,3 +8,36 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.template import RequestContext
 from django.utils.translation import ugettext, ugettext_lazy as _
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render_to_response
+from django.views.generic.simple import redirect_to
+from django import forms
+from geocamMemo.models import GeocamMessage
+from geocamTalk.forms import GeocamTalkForm
+
+def message_list(request):
+    
+    messages = GeocamMessage.objects.all()
+    return render_to_response('talk_messagelist.html', 
+                              {"gc_msg": messages}, context_instance=RequestContext(request))
+
+def index(request):
+    return render_to_response('talk_home.html',
+                              {}, context_instance=RequestContext(request))
+
+def create_message(request):
+    if request.method == 'POST':
+        form = GeocamTalkForm(request.POST)
+        if form.is_valid():
+            form.save()        
+            return HttpResponseRedirect('/talk/messages/')
+        else:
+            return render_to_response('talk_message_form.html',
+                                  {'form':form},
+                                  context_instance=RequestContext(request))
+    else:
+        form = GeocamTalkForm()
+        return render_to_response('talk_message_form.html',
+                                  {'form':form },                                   
+                                  context_instance=RequestContext(request))

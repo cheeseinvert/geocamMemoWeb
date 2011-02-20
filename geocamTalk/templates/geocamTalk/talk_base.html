@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            {% block title %}
+            GeoCam
+            {% endblock %}
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        {% block css %}{% endblock %}
+    </head>
+    <body>
+        <header>
+            {% if user.is_authenticated %}
+                <a href="/memo/messages/">Messages</a> | 
+                Hello {% firstof user.first_name user.username %} <a href="/accounts/logout/">Logout</a>
+            {% else %}
+                <a href="/accounts/login/">Login</a>
+            {% endif %}
+        </header>
+        <content>
+            {% block content %}
+            {% endblock %}
+        </content>
+        <footer>
+        </footer>
+        {% block js %}
+        {% endblock %}
+    </body>
+</html>

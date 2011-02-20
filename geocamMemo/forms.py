@@ -15,17 +15,17 @@ class GeolocationTimestampDateTimeFormField(forms.DateTimeField):
         ex: Sat Feb 19 2011 15:37:53 GMT-0800 (PST)"""
         
         #=======================================================================
-        # try:
-        #    if value is None or value == "":
-        #        return ""
-        #    clean_date = re.match(r"(\S+ \S+ \d+ \d+ \d+\:\d+\:\d+)", 
-        #                          value).group(1)
-        #    dt = datetime.strptime(clean_date, "%a %b %d %Y %H:%M:%S")
-        #    return dt
-        # except:
-        #    raise forms.ValidationError
+        try:
+            if value is None or value == "":
+                return ""
+            clean_date = re.match(r"(\S+ \S+ \d+ \d+ \d+\:\d+\:\d+)", 
+                                  value).group(1)
+            dt = datetime.strptime(clean_date, "%a %b %d %Y %H:%M:%S")
+            return dt
+        except:
+            raise forms.ValidationError
         #=======================================================================
-    
+            
 class GeocamMessageForm(forms.ModelForm):
     position_timestamp = GeolocationTimestampDateTimeFormField()
     class Meta:
