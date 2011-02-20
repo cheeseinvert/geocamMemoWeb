@@ -4,17 +4,17 @@
 
 {% block content %}
 <div id="messages">
-<dl id="message_list">
+<ul id="message_list">
 {% for m in gc_msg %}
-	<dt id="message_{{m.pk}}">
-	  On {{ m.get_date_string }} {{ m.get_author_string}} said
-	  {% if m.has_geolocation %}<img src="/media/geocamMemo/geoloc.png" />{%endif%}
-	</dt>
-	<dd id="message_{{m.pk}}_content">
-    	<p>{{ m.content}}</p>
-	</dd>
+    <li id="message_{{m.pk}}">
+      <p id="message_{{m.pk}}_header">
+          On {{ m.get_date_string }} {{ m.get_author_string}} said
+          {% if m.has_geolocation %}<img src="/media/geocamMemo/geoloc.png" />{%endif%}
+      </p>
+      <p id="message_{{m.pk}}_content">{{ m.content}}</p>
+    </li>
 {% endfor %}
-</dl>
+</ul>
 <a href="/memo/messages/create/">New Message</a>
 </div>
 {% endblock %}
