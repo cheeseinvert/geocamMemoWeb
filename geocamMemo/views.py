@@ -13,7 +13,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.views.generic.simple import redirect_to
 from django import forms
-from geocamMemo.models import GeocamMessage, GeocamMessageForm
+from geocamMemo.models import GeocamMessage
+from geocamMemo.forms import GeocamMessageForm
 
 # random comment -adamg
 
@@ -50,7 +51,7 @@ def login_view(request):
         return render_to_response('login.html',
                                 {'form':LoginForm()},
                                 context_instance=RequestContext(request))
-
+@login_required 
 def create_message(request):
     if request.method == 'POST':
         form = GeocamMessageForm(request.POST)
@@ -58,12 +59,12 @@ def create_message(request):
             form.save()        
             return HttpResponseRedirect('/')
         else:
-            return render_to_response('message.html',
+            return render_to_response('message_form.html',
                                   {'form':form},
                                   context_instance=RequestContext(request))
     else:
         form = GeocamMessageForm()
-        return render_to_response('message.html',
+        return render_to_response('message_form.html',
                                   {'form':form },                                   
                                   context_instance=RequestContext(request))
     

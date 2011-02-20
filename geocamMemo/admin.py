@@ -10,9 +10,15 @@ from django.contrib import admin
 
 class GeocamMessageAdmin(admin.ModelAdmin):
     list_display = ('author', 
-                    'content', 
-                    'lat', 
-                    'lon')
+                    'content',
+                    'content_timestamp', 
+                    'latitude', 
+                    'longitude',
+                    'altitude',
+                    'accuracy',
+                    'heading',
+                    'speed',
+                    'position_timestamp' )
     list_filter = ['author']
 
 admin.site.register(GeocamMessage, GeocamMessageAdmin)

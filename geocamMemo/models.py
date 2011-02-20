@@ -6,21 +6,20 @@
 
 from django.db import models
 from django.contrib.auth.models import User
-from django.forms import ModelForm
 
 class GeocamMessage(models.Model):
     """ This is the data model for geocam messages """
-    
-    content = models.TextField(max_length=1024)
-    lat = models.FloatField()
-    lon = models.FloatField()
     author = models.ForeignKey(User)
-    create_date = models.DateTimeField(auto_now_add=True)
+    content = models.TextField(max_length=1024)
+    content_timestamp = models.DateTimeField(auto_now_add=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    altitude = models.FloatField(null=True, blank=True)
+    accuracy = models.FloatField(null=True, blank=True)
+    heading = models.FloatField(null=True, blank=True)
+    speed = models.FloatField(null=True, blank=True)
+    position_timestamp = models.DateTimeField(null=True, blank=True)
+    
     
     def __unicode__(self):
         return "Message from %s %s" % (self.author.username, self.content)
-    
-
-class GeocamMessageForm(ModelForm):
-    class Meta:
-        model = GeocamMessage
