@@ -99,11 +99,10 @@ class GeocamMemoListViewTest(TestCase):
 
               
     def testMessageListDateFormat(self):
-        
         messages = GeocamMessage.objects.all()
         response = self._get_messages_response()
         for m in messages:
-            self.assertContains(body, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
+            self.assertContains(response, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
         
     def testMessageListAuthorFormat(self):
         
@@ -132,7 +131,29 @@ class GeocamMemoListViewTest(TestCase):
             if m.latitude and m.longitude:
               geocount = geocount+1
         
-        self.assertContains(response, "geoloc.png", geocount)          
+        self.assertContains(response, "geoloc.png", geocount)
+        
+    def testEnsureMessagesAreFilteredByUser(self):
+        # arrange
+        user = User.objects.all()[1]
+        messages = GeocamMessage.objects.filter(author = user.pk)
+        
+        notUserMessages = GeocamMessage.objects.exclude(author = user.pk)
+        
+        # act
+        response = self._get_messages_response_filtered(user)
+        
+        # assert
+        self.assertEqual(200, response.status_code)
+        for m in messages:
+            self.assertContains(response, m.content)
+        for m in notUserMessages:
+            self.assertNotContains(response, m.content)                
+        
+    def _get_messages_response_filtered(self, user):
+        self.client.login(username=user.username, password='geocam')
+        response = self.client.get('/memo/messages/' + user.username)
+        return response
     
     def _get_messages_response(self):
         

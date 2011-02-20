@@ -10,5 +10,7 @@ from django.conf.urls.defaults import *
 
 urlpatterns = patterns('',
     url(r'messages/create', 'geocamMemo.views.create_message'),
+    url(r'messages/(?P<username>[a-zA-Z][a-zA-Z0-9@+.\-]*[a-zA-Z0-9])',
+         'geocamMemo.views.message_list_filtered_username'),
     url(r'messages',  'geocamMemo.views.message_list'),  #include('geocamMemo.urls')),
 )
