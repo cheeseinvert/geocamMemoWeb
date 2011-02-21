@@ -25,13 +25,16 @@ class GeocamMessage(models.Model):
         return self.content_timestamp.strftime("%m/%d %H:%M:%S")
     
     def get_author_string(self):
-        if self.author.first_name:
-              return (self.author.first_name + " " + self.author.last_name)
-        else:
-              return (self.author.username)
+        return get_user_string(self.author)
           
     def has_geolocation(self):
         return (self.latitude and self.longitude)
 
     def __unicode__(self):
         return "Message from %s %s" % (self.author.username, self.content)
+
+def get_user_string(user):
+    if user.first_name and user.last_name:
+        return (user.first_name + " " + user.last_name)
+    else:
+        return (user.username)

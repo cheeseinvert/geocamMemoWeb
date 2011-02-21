@@ -1,11 +1,13 @@
 [
 {"pk": 1, "model": "geocamMemo.geocammessage", "fields":
-   {"content": "Tesing 1 2 3", "content_timestamp": "2011-02-19 12:24:49", "author": 2}
+   {"content": "Bowser", "content_timestamp": "2011-02-14 12:24:49", "author": 2}
 }, 
 {"pk": 2, "model": "geocamMemo.geocammessage", "fields": 
-   {"content": "Testing 1 2 3 4", "latitude": 45.1, "content_timestamp": "2011-02-19 12:25:06", "longitude": 45.1, "author": 2}
+   {"content": "Super Duper", "latitude": 12.1, "content_timestamp": "2011-02-15 12:25:06",
+    "longitude": 70.0, "author": 2}
 }, 
 {"pk": 3, "model": "geocamMemo.geocammessage", "fields":
-   {"content": "Testing 1 2 3 4 5", "latitude": 45.2, "content_timestamp": "2011-02-19 12:25:22", "longitude": 45.2, "author": 3}
+   {"content": "Mario Bros", "latitude": -5.2, "content_timestamp": "2011-03-17 12:25:22",
+    "longitude": 33.3, "author": 3}
 }
 ]

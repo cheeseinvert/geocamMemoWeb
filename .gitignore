@@ -12,3 +12,4 @@ media/css/*.r*.css
 .project
 .pydevproject
 .tmp*
+.settings

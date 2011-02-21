@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
-from models import GeocamMessage
+from models import GeocamMessage, get_user_string
 
 class GeocamMemoMessageSaveTest(TestCase):
     fixtures = ['teamUsers.json', 'msgs.json']
@@ -80,55 +80,141 @@ class GeocamMemoMessageSaveTest(TestCase):
 class GeocamMemoListViewTest(TestCase):
     fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
     
-    def testMessageOrder(self):
+    def testMessageListSizeAndOrder(self):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
-        response = self.client.get('/memo/messages')
-        self.assertEqual(response.status_code, 200, "ensure all users can see list")
-              
-    def testMessageDateFormat(self):
+        response = self._get_messages_response()
         
-        messages = GeocamMessage.objects.all()
-        body = self._get_messages_response()
+        displayedmessages = response.context[-1]['gc_msg'] # get the data object sent to the template
+        displayed_message_ids = []
+        for m in displayedmessages:
+            displayed_message_ids.append(m.pk)
+        
+        messages = GeocamMessage.objects.order_by("-content_timestamp") #descending (newest at top)
+        message_ids = []        
         for m in messages:
-            self.assertContains(body, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
+            message_ids.append(m.pk)
+
+        self.assertEqual(displayed_message_ids, message_ids, "Order should be the same")
+
+              
+    def testMessageListDateFormat(self):
+        messages = GeocamMessage.objects.all()
+        response = self._get_messages_response()
+        for m in messages:
+            self.assertContains(response, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
         
-    def testMessageAuthorFormat(self):
+    def testMessageListAuthorFormat(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_response()
+        response = self._get_messages_response()
         
         for m in messages:
             if m.author.first_name:
-              self.assertContains(body, m.author.first_name + " " + m.author.last_name)
+              self.assertContains(response, m.author.first_name + " " + m.author.last_name)
             else:
-              self.assertContains(body, m.author.username)
+              self.assertContains(response, m.author.username)
         
-    def testMessageContentFormat(self):
+    def testMessageListContentFormat(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_response()
+        response = self._get_messages_response()
         for m in messages:
-            self.assertContains(body, m.content)
+            self.assertContains(response, m.content)
     
-    def testMessageGeoLocationPresent(self):
+    def testMessageListGeoLocationPresent(self):
         
         messages = GeocamMessage.objects.all()
-        body = self._get_messages_response()
+        response = self._get_messages_response()
+
         geocount = 0
         for m in messages:
             if m.latitude and m.longitude:
               geocount = geocount+1
         
+        self.assertContains(response, "geoloc.png", geocount)
+        
+    def testEnsureMessagesAreFilteredByUser(self):
+        # arrange
+        user = User.objects.all()[1]
+        messages = GeocamMessage.objects.filter(author = user.pk)
+        
+        notUserMessages = GeocamMessage.objects.exclude(author = user.pk)
+        
+        # act
+        response = self._get_messages_response_filtered(user)
+        
+        # assert
+        self.assertEqual(200, response.status_code)
+        for m in messages:
+            self.assertContains(response, m.content)
+        for m in notUserMessages:
+            self.assertNotContains(response, m.content)                
+      
+    def testEnsureFilteredMessageListSizeAndOrder(self):        
+        #arrange
+        u = User.objects.all()[1]     
+        
+        #descending (newest at top)
+        messages = GeocamMessage.objects.filter(author = u.pk).order_by("-content_timestamp") 
+        message_ids = []        
+        for m in messages:
+            message_ids.append(m.pk)   
+        
+        #act
+        response = self._get_messages_response_filtered(u)
+        
+        #Looks at last parameter of context. Denoted by -1
+        displayedmessages = response.context[-1]['gc_msg'] # get the data object sent to the template
+        displayed_message_ids = []
+        for m in displayedmessages:
+            displayed_message_ids.append(m.pk)
+        
+        #assert
+        self.assertEqual(displayed_message_ids, message_ids, "Order should be the same")
+ 
+    def testEnsureMessageListAuthorLinksPresent(self):
+        #arrange        
+        messages = GeocamMessage.objects.all()
+        
+        #act
+        response = self._get_messages_response()
+        
+        #assert
+        for m in messages:            
+            self.assertContains(response, 'href="/memo/messages/' + m.author.username)
+    
+    def testEnsureListAuthorPresent(self):
+        #arrange
+        u = User.objects.all()[1]
+        
+        #act
+        response = self._get_messages_response_filtered(u)
+        
+        #assert            
+        self.assertContains(response, 'Memos by ' + get_user_string(u))
+    
+    def testEnsureGetUserStringReturnsFullNameWhenFullNameExist(self):
+        #arrange
+        u = User(username="johndoe", password="geocam", first_name="John", last_name="Doe")
+                        
+        #assert
+        self.assertEqual('John Doe', get_user_string(u))
+          
+    def testEnsureGetUserStringReturnsUserNameWhenFullNameDoesntExist(self):
+        #arrange
+        u = User(username="johndoe", password="geocam")                        
+        #assert
+        self.assertEqual('johndoe', get_user_string(u))
+
+        
+    def _get_messages_response_filtered(self, user):
+        self.client.login(username=user.username, password='geocam')
+        response = self.client.get('/memo/messages/' + user.username)
+        return response
         self.assertContains(body, "geoloc.png", geocount)
 
-    def test_MessageContentOrdering(self):
-        
-        ordered_messages = GeocamMessage.objects.all().order_by('content_timestamp').reverse()
-        response = self._get_messages_response()
-        response_ordered_messages = response.context["gc_msg"]
-        self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
-            
+
     
     def _get_messages_response(self):
         
