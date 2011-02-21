@@ -1,0 +1,20 @@
+{% extends "geocamTalk/base.html" %}
+
+{% block title%}GeoCam Talk Messages{% endblock %}
+
+{% block content %}
+<div id="messages">
+<dl id="message_list">
+{% for m in gc_msg %}
+	<dt id="message_{{m.pk}}">
+	  On {{ m.get_date_string }} {{ m.get_author_string}} said
+	  {% if m.has_geolocation %}<img src="/media/geocamTalk/geoloc.png" />{%endif%}
+	</dt>
+	<dd id="message_{{m.pk}}_content">
+    	<p>{{ m.content}}</p>
+	</dd>
+{% endfor %}
+</dl>
+<a href="/talk/messages/create/">New Message</a>
+</div>
+{% endblock %}

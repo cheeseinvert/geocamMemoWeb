@@ -126,6 +126,7 @@ class GeocamMemoListViewTest(TestCase):
         
         messages = GeocamMessage.objects.all()
         response = self._get_messages_response()
+
         geocount = 0
         for m in messages:
             if m.latitude and m.longitude:
@@ -211,6 +212,9 @@ class GeocamMemoListViewTest(TestCase):
         self.client.login(username=user.username, password='geocam')
         response = self.client.get('/memo/messages/' + user.username)
         return response
+        self.assertContains(body, "geoloc.png", geocount)
+
+
     
     def _get_messages_response(self):
         

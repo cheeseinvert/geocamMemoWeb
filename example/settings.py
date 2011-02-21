@@ -76,8 +76,9 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'example.urls'
 
 TEMPLATE_DIRS = (
-                 '../geocamMemo/templates/geocamMemo/',
-                 '../geocamTalk/templates/geocamTalk/',
+                 './templates/',
+                 '../geocamMemo/templates/',
+                 '../geocamTalk/templates/',
                  
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.

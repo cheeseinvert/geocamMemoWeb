@@ -6,6 +6,7 @@
 
 from django.conf.urls.defaults import *
 
-urlpatterns = patterns('',
-    url(r'^$', 'views.index', name='index'),
+urlpatterns = patterns('geocamTalk.views',
+    url(r'messages/create', 'create_message'),
+    url(r'messages',  'message_list'),
 )
