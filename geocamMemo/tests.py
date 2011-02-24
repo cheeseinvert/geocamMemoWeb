@@ -83,7 +83,7 @@ class GeocamMemoListViewTest(TestCase):
     def testMessageListSizeAndOrder(self):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
-        response = self._get_messages_response()
+        response = self.get_messages_response()
         
         displayedmessages = response.context[-1]['gc_msg'] # get the data object sent to the template
         displayed_message_ids = []
@@ -100,14 +100,14 @@ class GeocamMemoListViewTest(TestCase):
               
     def testMessageListDateFormat(self):
         messages = GeocamMessage.objects.all()
-        response = self._get_messages_response()
+        response = self.get_messages_response()
         for m in messages:
             self.assertContains(response, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
         
     def testMessageListAuthorFormat(self):
         
         messages = GeocamMessage.objects.all()
-        response = self._get_messages_response()
+        response = self.get_messages_response()
         
         for m in messages:
             if m.author.first_name:
@@ -118,14 +118,14 @@ class GeocamMemoListViewTest(TestCase):
     def testMessageListContentFormat(self):
         
         messages = GeocamMessage.objects.all()
-        response = self._get_messages_response()
+        response = self.get_messages_response()
         for m in messages:
             self.assertContains(response, m.content)
     
     def testMessageListGeoLocationPresent(self):
         
         messages = GeocamMessage.objects.all()
-        response = self._get_messages_response()
+        response = self.get_messages_response()
 
         geocount = 0
         for m in messages:
@@ -142,7 +142,7 @@ class GeocamMemoListViewTest(TestCase):
         notUserMessages = GeocamMessage.objects.exclude(author = user.pk)
         
         # act
-        response = self._get_messages_response_filtered(user)
+        response = self.get_messages_response_filtered(user)
         
         # assert
         self.assertEqual(200, response.status_code)
@@ -162,7 +162,7 @@ class GeocamMemoListViewTest(TestCase):
             message_ids.append(m.pk)   
         
         #act
-        response = self._get_messages_response_filtered(u)
+        response = self.get_messages_response_filtered(u)
         
         #Looks at last parameter of context. Denoted by -1
         displayedmessages = response.context[-1]['gc_msg'] # get the data object sent to the template
@@ -178,7 +178,7 @@ class GeocamMemoListViewTest(TestCase):
         messages = GeocamMessage.objects.all()
         
         #act
-        response = self._get_messages_response()
+        response = self.get_messages_response()
         
         #assert
         for m in messages:            
@@ -189,7 +189,7 @@ class GeocamMemoListViewTest(TestCase):
         u = User.objects.all()[1]
         
         #act
-        response = self._get_messages_response_filtered(u)
+        response = self.get_messages_response_filtered(u)
         
         #assert            
         self.assertContains(response, 'Memos by ' + get_user_string(u))
@@ -207,18 +207,67 @@ class GeocamMemoListViewTest(TestCase):
         #assert
         self.assertEqual('johndoe', get_user_string(u))
 
+    def testEnsureMapDisplaysAndIsAtMostRecentMessageLocation(self):
+        #arrange
+        message = GeocamMessage.objects.all().order_by("-content_timestamp")[0]
+        lat = message.latitude
+        lon = message.longitude
+
+        #act
+        response = self.get_messages_response()
         
-    def _get_messages_response_filtered(self, user):
+        #assert
+        self.assertContains(response, "createMap("+str(lat)+","+str(lon)+")")
+        self.assertContains(response, "<section id=\"map_canvas\"")
+        self.assertContains(response, "<script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=")
+    
+    def testEnsureMapDisplaysAllMessagesWithGeolocationByAllUsers(self):
+        #arrange
+        messages = GeocamMessage.objects.all().order_by("-content_timestamp")
+                                
+        #act
+        response = self.get_messages_response()
+        
+        #assert
+        for m in messages:
+            if m.has_geolocation():
+                self.assertContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
+                self.assertContains(response, "title: '"+m.content+"'")   
+            else:
+                self.assertNotContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
+
+    def testEnsureMapCentersOnLatestMessageWithGeolocation(self):
+        # arrange
+        GeocamMessage.objects.create(content="testing" , author = User.objects.all()[0]) # newest timestamp
+        messages = GeocamMessage.objects.all().order_by("-content_timestamp")
+
+        # act
+        response = self.get_messages_response()
+
+        # assert
+        self.assertNotContains(response, "createMap(None")
+
+    def testEnsureGeolocationDetectionExists(self):
+        response = self.get_messages_response()
+        self.assertContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")  
+        self.assertContains(response, "createMap(latitude, longitude)")
+
+    def testEnsureGeolocationDetectionIsNotUsedOnFilteredList(self):
+        #arrange
+        u = User.objects.all()[1]
+        response = self.get_messages_response_filtered(u)
+        self.assertNotContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")  
+        
+    def get_messages_response_filtered(self, user):
         self.client.login(username=user.username, password='geocam')
         response = self.client.get('/memo/messages/' + user.username)
         return response
-        self.assertContains(response, "geoloc.png", geocount)
-
-
     
-    def _get_messages_response(self):
-        
+    def get_messages_response(self):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/memo/messages/')
         return response
+    
+    
+    
