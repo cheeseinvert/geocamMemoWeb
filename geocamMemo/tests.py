@@ -236,6 +236,17 @@ class GeocamMemoListViewTest(TestCase):
             else:
                 self.assertNotContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
 
+    def testEnsureMapCentersOnLatestMessageWithGeolocation(self):
+        # arrange
+        GeocamMessage.objects.create(content="testing" , author = User.objects.all()[0]) # newest timestamp
+        messages = GeocamMessage.objects.all().order_by("-content_timestamp")
+
+        # act
+        response = self._get_messages_response()
+
+        # assert
+        self.assertNotContains(response, "createMap(None")
+
     def testEnsureGeolocationDetectionExists(self):
         response = self._get_messages_response()
         self.assertContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")  

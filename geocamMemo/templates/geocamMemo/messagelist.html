@@ -21,7 +21,7 @@
 	
 	function failure(meh)
 	{
-		createMap({{ gc_msg.0.latitude }},{{ gc_msg.0.longitude }});
+		createMap({{ first_geolocation.0 }},{{ first_geolocation.1 }});
 	}
 
     function createMap(latitude, longitude) {
