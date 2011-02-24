@@ -212,7 +212,7 @@ class GeocamMemoListViewTest(TestCase):
         self.client.login(username=user.username, password='geocam')
         response = self.client.get('/memo/messages/' + user.username)
         return response
-        self.assertContains(body, "geoloc.png", geocount)
+        self.assertContains(response, "geoloc.png", geocount)
 
 
     

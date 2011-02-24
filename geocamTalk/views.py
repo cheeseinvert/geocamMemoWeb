@@ -5,11 +5,12 @@
 # __END_LICENSE__
 
 from django.shortcuts import render_to_response
-from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from geocamMemo.models import GeocamMessage
 from geocamTalk.forms import GeocamTalkForm
+import json
 
 @login_required
 def message_list(request):
@@ -19,6 +20,16 @@ def message_list(request):
     return render_to_response('geocamTalk/messagelist.html', 
                               {"gc_msg": messages}, context_instance=RequestContext(request))
 
+@login_required
+def feedMessages(request):
+    ordered_messages = GeocamMessage.objects.all().order_by('-content_timestamp')
+    stringified_msg_list = [{'pk':msg.pk,
+                             'author':msg.get_author_string(), 
+                            'content':msg.content, 
+                            'content_timestamp':msg.get_date_string(),
+                            'has_geolocation':bool(msg.has_geolocation()) } for msg in ordered_messages ]
+    return HttpResponse(json.dumps(stringified_msg_list))
+    
 @login_required
 def index(request):
     return render_to_response('geocamTalk/home.html',
