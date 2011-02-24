@@ -207,18 +207,31 @@ class GeocamMemoListViewTest(TestCase):
         #assert
         self.assertEqual('johndoe', get_user_string(u))
 
-    def testEnsureMapDisplaysAtMostRecentMessageLocation(self):
+    def testEnsureMapDisplaysAndIsAtMostRecentMessageLocation(self):
         #arrange
-        u = User.objects.all()[0]
-        fakelat = 1.2345678
-        fakelon = -45.123999778484
-        GeocamMessage.objects.create(content="test", latitude=fakelat, longitude=fakelon, author=u) 
-                          #content_timestamp=datetime.max)
+        message = GeocamMessage.objects.all().order_by("-content_timestamp")[0]
+        lat = message.latitude
+        lon = message.longitude
+
         #act
         response = self._get_messages_response()
         
         #assert
-        self.assertContains(response, "google.maps.LatLng("+str(fakelat)+","+str(fakelon)+")")
+        self.assertContains(response, "google.maps.LatLng("+str(lat)+","+str(lon)+")")
+        self.assertContains(response, "<section id=\"map_canvas\"")
+        self.assertContains(response, "<script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=false\"")
+    
+    def testEnsureMapDisplaysAllMessagesByAllUsers(self):
+        #arrange
+        messages = GeocamMessage.objects.all().order_by("-content_timestamp")
+                                
+        #act
+        response = self._get_messages_response()
+        
+        #assert
+        for m in messages:
+            self.assertContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")  
+            self.assertContains(response, "title: '"+m.content+"'")   
         
     def _get_messages_response_filtered(self, user):
         self.client.login(username=user.username, password='geocam')
