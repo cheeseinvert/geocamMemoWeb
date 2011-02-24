@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
 from geocamMemo.models import GeocamMessage
+import json
 
 class GeocamTalkMessageSaveTest(TestCase):
     """
@@ -99,6 +100,19 @@ class GeocamTalkMessageSaveTest(TestCase):
         response_ordered_messages = response.context["gc_msg"]
         self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
     
+    def test_MessageJsonFeed(self):
+        author = User.objects.get(username="avagadia")
+        self.client.login(username=author.username, password='geocam')
+        ordered_messages = GeocamMessage.objects.all().order_by('content_timestamp').reverse()
+        stringified_msg_list = [{'pk':msg.pk,
+                                 'author':msg.get_author_string(), 
+                                 'content':msg.content, 
+                                 'content_timestamp':msg.get_date_string(),
+                                 'has_geolocation':bool(msg.has_geolocation())} for msg in ordered_messages ]
+        jsonSerializedString = json.dumps(stringified_msg_list)
+        response = self.client.get('/talk/messagefeed.json')
+        self.assertContains(response, jsonSerializedString)
+
     def _get_messages_response(self):
         
         u = User.objects.all()[0]

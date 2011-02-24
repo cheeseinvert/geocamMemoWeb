@@ -9,4 +9,5 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns('geocamTalk.views',
     url(r'messages/create', 'create_message'),
     url(r'messages',  'message_list'),
+    url(r'messagefeed.json', 'feedMessages')
 )
