@@ -217,9 +217,9 @@ class GeocamMemoListViewTest(TestCase):
         response = self._get_messages_response()
         
         #assert
-        self.assertContains(response, "google.maps.LatLng("+str(lat)+","+str(lon)+")")
+        self.assertContains(response, "createMap("+str(lat)+","+str(lon)+")")
         self.assertContains(response, "<section id=\"map_canvas\"")
-        self.assertContains(response, "<script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=false\"")
+        self.assertContains(response, "<script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=")
     
     def testEnsureMapDisplaysAllMessagesByAllUsers(self):
         #arrange
@@ -232,6 +232,11 @@ class GeocamMemoListViewTest(TestCase):
         for m in messages:
             self.assertContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")  
             self.assertContains(response, "title: '"+m.content+"'")   
+
+    def testEnsureGeolocationDetectionExists(self):
+        response = self._get_messages_response()
+        self.assertContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")  
+        self.assertContains(response, "createMap(latitude, longitude)")
         
     def _get_messages_response_filtered(self, user):
         self.client.login(username=user.username, password='geocam')

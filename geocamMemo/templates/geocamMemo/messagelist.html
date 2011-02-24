@@ -7,25 +7,42 @@
 
 {% block js %}
 	<script>
-	var latlng = new google.maps.LatLng({{ gc_msg.0.latitude }},{{ gc_msg.0.longitude }});
-	var myOptions = {
-		    zoom: 12,
-		    center: latlng,
-		    mapTypeControl: false,
-		    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
-		    mapTypeId: google.maps.MapTypeId.ROADMAP
-		  };	
-	var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+    if (navigator.geolocation) {
+	   navigator.geolocation.getCurrentPosition(success, failure);
+	} else {
+	   failure(null);
+	}
 	
-	{% for m in gc_msg %}
-	   var latlng = new google.maps.LatLng({{m.latitude}},{{m.longitude}});
-	   var marker = new google.maps.Marker({
-                                            position: latlng, 
-                                            map: map, 
-                                            title: '{{ m.content }}' });
-	   
-	{% endfor %}
+	function success(position)
+	{
+		createMap(position.coords.latitude, position.coords.longitude);
+	}
 	
+	function failure(meh)
+	{
+		createMap({{ gc_msg.0.latitude }},{{ gc_msg.0.longitude }});
+	}
+
+    function createMap(latitude, longitude) {
+		var latlng = new google.maps.LatLng( latitude,longitude );
+		var myOptions = {
+			    zoom: 12,
+			    center: latlng,
+			    mapTypeControl: false,
+			    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
+			    mapTypeId: google.maps.MapTypeId.ROADMAP
+			  };	
+		var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+		
+		{% for m in gc_msg %}
+		   var latlng = new google.maps.LatLng({{m.latitude}},{{m.longitude}});
+		   var marker = new google.maps.Marker({
+	                                            position: latlng, 
+	                                            map: map, 
+	                                            title: '{{ m.content }}' });
+		   
+		{% endfor %}
+	}
 	</script>
 {% endblock %}
 
