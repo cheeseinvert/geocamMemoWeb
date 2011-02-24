@@ -207,14 +207,24 @@ class GeocamMemoListViewTest(TestCase):
         #assert
         self.assertEqual('johndoe', get_user_string(u))
 
+    def testEnsureMapDisplaysAtMostRecentMessageLocation(self):
+        #arrange
+        u = User.objects.all()[0]
+        fakelat = 1.2345678
+        fakelon = -45.123999778484
+        GeocamMessage.objects.create(content="test", latitude=fakelat, longitude=fakelon, author=u) 
+                          #content_timestamp=datetime.max)
+        #act
+        response = self._get_messages_response()
+        
+        #assert
+        self.assertContains(response, "google.maps.LatLng("+str(fakelat)+","+str(fakelon)+")")
         
     def _get_messages_response_filtered(self, user):
         self.client.login(username=user.username, password='geocam')
         response = self.client.get('/memo/messages/' + user.username)
         return response
         self.assertContains(body, "geoloc.png", geocount)
-
-
     
     def _get_messages_response(self):
         
@@ -222,3 +232,6 @@ class GeocamMemoListViewTest(TestCase):
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/memo/messages/')
         return response
+    
+    
+    
