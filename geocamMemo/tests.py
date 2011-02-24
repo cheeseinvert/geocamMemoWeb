@@ -221,7 +221,7 @@ class GeocamMemoListViewTest(TestCase):
         self.assertContains(response, "<section id=\"map_canvas\"")
         self.assertContains(response, "<script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=")
     
-    def testEnsureMapDisplaysAllMessagesByAllUsers(self):
+    def testEnsureMapDisplaysAllMessagesWithGeolocationByAllUsers(self):
         #arrange
         messages = GeocamMessage.objects.all().order_by("-content_timestamp")
                                 
@@ -230,22 +230,29 @@ class GeocamMemoListViewTest(TestCase):
         
         #assert
         for m in messages:
-            self.assertContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")  
-            self.assertContains(response, "title: '"+m.content+"'")   
+            if m.has_geolocation():
+                self.assertContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
+                self.assertContains(response, "title: '"+m.content+"'")   
+            else:
+                self.assertNotContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
 
     def testEnsureGeolocationDetectionExists(self):
         response = self._get_messages_response()
         self.assertContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")  
         self.assertContains(response, "createMap(latitude, longitude)")
+
+    def testEnsureGeolocationDetectionIsNotUsedOnFilteredList(self):
+        #arrange
+        u = User.objects.all()[1]
+        response = self._get_messages_response_filtered(u)
+        self.assertNotContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")  
         
     def _get_messages_response_filtered(self, user):
         self.client.login(username=user.username, password='geocam')
         response = self.client.get('/memo/messages/' + user.username)
         return response
-        self.assertContains(body, "geoloc.png", geocount)
     
     def _get_messages_response(self):
-        
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/memo/messages/')

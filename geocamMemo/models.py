@@ -28,7 +28,7 @@ class GeocamMessage(models.Model):
         return get_user_string(self.author)
           
     def has_geolocation(self):
-        return (self.latitude and self.longitude)
+        return bool(self.latitude and self.longitude)
 
     def __unicode__(self):
         return "Message from %s %s" % (self.author.username, self.content)
