@@ -56,7 +56,7 @@ def details(request, message_id):
         template_to_extend = 'geocamMemo/base.html'
             
     return render_to_response('geocamMemo/details.html',
-                              {'message':message,'template_to_extend':template_to_extend},
+                              {'message':message},
                               context_instance=RequestContext(request))
 
 @login_required

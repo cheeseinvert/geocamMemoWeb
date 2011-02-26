@@ -300,28 +300,3 @@ class GeocamMemoSingleMessageViewTest(TestCase):
         self.assertContains(response, str(m.longitude))
         self.assertContains(response, str(m.altitude))
         self.assertContains(response, str(m.accuracy))
-        
-    def testEnsureViewDoesNotExtendBaseWhenAjax(self):
-       # arrange
-       m = GeocamMessage.objects.get(pk = 3)
-       u = User.objects.all()[0]
-       self.client.login(username=u.username, password='geocam')
-       
-       # act
-       response = self.client.get('/memo/messages/details/' + str(m.pk), {},
-                  HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-       
-       # assert
-       self.assertTemplateNotUsed(response, 'geocamMemo/base.html')
-       
-    def testEnsureViewExtendsBaseWhenNotAjax(self):
-       # arrange
-       m = GeocamMessage.objects.get(pk = 3)
-       u = User.objects.all()[0]
-       self.client.login(username=u.username, password='geocam')
-       
-       # act
-       response = self.client.get('/memo/messages/details/' + str(m.pk))
-       
-       # assert
-       self.assertTemplateUsed(response, 'geocamMemo/base.html')
