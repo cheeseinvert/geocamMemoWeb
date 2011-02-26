@@ -97,7 +97,6 @@ class GeocamMemoListViewTest(TestCase):
 
         self.assertEqual(displayed_message_ids, message_ids, "Order should be the same")
 
-              
     def testMessageListDateFormat(self):
         messages = GeocamMessage.objects.all()
         response = self.get_messages_response()
@@ -105,7 +104,6 @@ class GeocamMemoListViewTest(TestCase):
             self.assertContains(response, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
         
     def testMessageListAuthorFormat(self):
-        
         messages = GeocamMessage.objects.all()
         response = self.get_messages_response()
         
@@ -123,16 +121,19 @@ class GeocamMemoListViewTest(TestCase):
             self.assertContains(response, m.content)
     
     def testMessageListGeoLocationPresent(self):
-        
+        # arrange
         messages = GeocamMessage.objects.all()
         response = self.get_messages_response()
 
+        # act
         geocount = 0
         for m in messages:
             if m.latitude and m.longitude:
               geocount = geocount+1
         
+        # assert
         self.assertContains(response, "geoloc.png", geocount)
+        self.assertContains(response, 'data-rel="dialog"', geocount)
         
     def testEnsureMessagesAreFilteredByUser(self):
         # arrange

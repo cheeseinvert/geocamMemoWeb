@@ -62,7 +62,10 @@
           <a href="{% url geocamMemo.views.message_list_filtered_username m.author.username %}"> 
           {{ m.get_author_string}}</a>
           
-          {% if m.has_geolocation %}<img src="/media/geocamMemo/geoloc.png" />{%endif%}
+          {% if m.has_geolocation %}
+          <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog">
+          	<img src="/media/geocamMemo/geoloc.png" /></a>
+          {%endif%}
       </p>
       <p id="message_{{m.pk}}_content">{{ m.content}}</p>
     </li>
