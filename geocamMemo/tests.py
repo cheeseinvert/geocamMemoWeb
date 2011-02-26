@@ -269,5 +269,73 @@ class GeocamMemoListViewTest(TestCase):
         response = self.client.get('/memo/messages/')
         return response
     
+class GeocamMemoMessageEditAndDeleteTest(TestCase):
+    fixtures = ['teamUsers.json', 'msgs.json']
     
+    def loginUser(self, author_pk):
+        user = User.objects.get(pk=author_pk)
+        self.client.login(username=user.username, password='geocam')
+
+    def test_ensureEditByNonAuthorForbidden(self):
+        original_msg = GeocamMessage.objects.all()[0]
+        
+        for user in User.objects.all():
+            if user.pk != original_msg.author.pk and not user.is_superuser:
+                self.loginUser(user.pk)
+                break                    
+        modified_content = "The content has been modified"
+        response = self.client.post("/memo/messages/edit/%s"% original_msg.pk,
+                                  data={"content":modified_content,
+                                        "author":original_msg.author.pk})
+        self.assertEqual(response.status_code, 302, "ensureEditByNonAuthorForbidden Failed") 
+        
+        new_msg = GeocamMessage.objects.get(pk=original_msg.pk)
+        
+        # should be redirected when form post is successful:
+        self.assertEquals(new_msg.content, original_msg.content, "ensureEditByNonAuthorForbidden Failed")
+        self.assertNotEqual(modified_content, new_msg.content, "ensureEditByNonAuthorForbidden Failed")
+        self.assertEqual(new_msg.content_timestamp, original_msg.content_timestamp, "ensureEditByNonAuthorForbidden Failed")  
+        self.assertEqual(new_msg.latitude, original_msg.latitude, "ensureEditByNonAuthorForbidden Failed")                                            
+        self.assertEqual(new_msg.longitude, original_msg.longitude, "ensureEditByNonAuthorForbidden Failed")   
     
+    def test_submitFormToEditMessage(self):        
+        """ submit the Memo Message through the form """
+        original_msg = GeocamMessage.objects.all()[0]        
+        self.loginUser(original_msg.author.pk)
+        modified_content = "The content has been modified"
+        response = self.client.post("/memo/messages/edit/%s"% original_msg.pk,
+                                  data={"content":modified_content,
+                                        "author":original_msg.author.pk})
+        self.assertEqual(response.status_code, 302, "submitFormToEditMessage Failed") 
+
+        new_msg = GeocamMessage.objects.get(pk=original_msg.pk)
+               
+        self.assertNotEquals(new_msg.content, original_msg.content, "submitFormToEditMessage Failed")
+        self.assertEqual(modified_content, new_msg.content, "submitFormToEditMessage Failed")
+        self.assertEqual(new_msg.content_timestamp, original_msg.content_timestamp, "submitFormToEditMessage Failed")  
+        self.assertEqual(new_msg.latitude, original_msg.latitude, "submitFormToEditMessage Failed")                                            
+        self.assertEqual(new_msg.longitude, original_msg.longitude, "submitFormToEditMessage Failed")                                            
+                                          
+
+    def test_ensureDeleteByNonAuthorForbidden(self):
+        m = GeocamMessage.objects.all()[0]
+        msgCnt = GeocamMessage.objects.all().count()
+        
+        for user in User.objects.all():
+            if user.pk != m.author.pk and not user.is_superuser:
+                self.loginUser(user.pk)
+                break                    
+        response = self.client.post("/memo/messages/delete/%s"% m.pk)                            
+        self.assertEqual(response.status_code, 302, "ensureDeleteByNonAuthorForbidden Failed") 
+        newMsgCnt = GeocamMessage.objects.all().count()
+        self.assertEqual(msgCnt, newMsgCnt, "ensureDeleteByNonAuthorForbidden Failed")
+
+    def test_deleteMessage(self):
+        "Delete the Memo Message"
+        m = GeocamMessage.objects.all()[0]
+        msgCnt = GeocamMessage.objects.all().count()
+        self.loginUser(m.author.pk)
+        response = self.client.post("/memo/messages/delete/%s"% m.pk)                                
+        self.assertEqual(response.status_code, 302, "deleteMessage Failed")
+        newMsgCnt = GeocamMessage.objects.all().count()
+        self.assertEqual(msgCnt - 1, newMsgCnt, "deleteMessage Failed")

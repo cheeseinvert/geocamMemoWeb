@@ -63,3 +63,35 @@ def create_message(request):
         return render_to_response('geocamMemo/message_form.html',
                                   {'form':form },                                   
                                   context_instance=RequestContext(request))
+
+@login_required
+def edit_message(request, message_pk):
+    message = GeocamMessage.objects.get(pk=message_pk)
+    if message.author.pk != request.user.pk and not request.user.is_superuser:
+         return HttpResponseRedirect('/memo/messages/')
+
+    if request.method == 'POST':
+        message.content = request.POST['content']
+        form = GeocamMessageForm(request.POST)   
+        if form.is_valid():
+            message.save()
+            #form.save()        
+            return HttpResponseRedirect('/memo/messages/')
+        else:
+            return render_to_response('geocamMemo/edit_message_form.html',
+                                  {'form':form,
+                                   'message':message},
+                                  context_instance=RequestContext(request))      
+    else:
+        form = GeocamMessageForm(instance=message)
+        return render_to_response('geocamMemo/edit_message_form.html',                                  
+                                  {'form':form, 
+                                   'message':message},                                   
+                                  context_instance=RequestContext(request))\
+
+@login_required
+def delete_message(request, message_pk):
+    message = GeocamMessage.objects.get(pk=message_pk)
+    if message.author.pk == request.user.pk or request.user.is_superuser:
+        message.delete()
+    return HttpResponseRedirect('/memo/messages/')
