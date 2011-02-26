@@ -1,10 +1,5 @@
-{% extends template_to_extend %}
 
-{% block title %}
-Message - {{ message.title }}
-{% endblock %}
-
-{% block content %}
+<div data-role="page">
 <dl>
     <dt>Longitude</dt>
 	<dd>{{ message.longitude }}</dd>
@@ -15,4 +10,4 @@ Message - {{ message.title }}
     <dt>Accuracy</dt>
 	<dd>{{ message.accuracy }}</dd>
 </dl>
-{% endblock %}
+</div>
