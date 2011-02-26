@@ -50,14 +50,9 @@ def index(request):
 @login_required
 def details(request, message_id):
     message = get_object_or_404(GeocamMessage, pk = message_id)
-    if request.is_ajax():
-        template_to_extend = 'geocamMemo/base_ajax.html'
-    else:
-        template_to_extend = 'geocamMemo/base.html'
             
     return render_to_response('geocamMemo/details.html',
-                              {'message':message,'template_to_extend':template_to_extend},
-                              context_instance=RequestContext(request))
+                              {'message':message}, context_instance=RequestContext(request))
 
 @login_required
 def create_message(request):
