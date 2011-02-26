@@ -97,7 +97,6 @@ class GeocamMemoListViewTest(TestCase):
 
         self.assertEqual(displayed_message_ids, message_ids, "Order should be the same")
 
-              
     def testMessageListDateFormat(self):
         messages = GeocamMessage.objects.all()
         response = self.get_messages_response()
@@ -105,7 +104,6 @@ class GeocamMemoListViewTest(TestCase):
             self.assertContains(response, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
         
     def testMessageListAuthorFormat(self):
-        
         messages = GeocamMessage.objects.all()
         response = self.get_messages_response()
         
@@ -123,16 +121,19 @@ class GeocamMemoListViewTest(TestCase):
             self.assertContains(response, m.content)
     
     def testMessageListGeoLocationPresent(self):
-        
+        # arrange
         messages = GeocamMessage.objects.all()
         response = self.get_messages_response()
 
+        # act
         geocount = 0
         for m in messages:
             if m.latitude and m.longitude:
               geocount = geocount+1
         
+        # assert
         self.assertContains(response, "geoloc.png", geocount)
+        self.assertContains(response, 'data-rel="dialog"', geocount)
         
     def testEnsureMessagesAreFilteredByUser(self):
         # arrange
@@ -219,7 +220,6 @@ class GeocamMemoListViewTest(TestCase):
         #assert
         self.assertContains(response, "createMap("+str(lat)+","+str(lon)+")")
         self.assertContains(response, "<section id=\"map_canvas\"")
-        self.assertContains(response, "<script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=")
     
     def testEnsureMapDisplaysAllMessagesWithGeolocationByAllUsers(self):
         #arrange
@@ -268,7 +268,7 @@ class GeocamMemoListViewTest(TestCase):
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/memo/messages/')
         return response
-    
+
 class GeocamMemoMessageEditAndDeleteTest(TestCase):
     fixtures = ['teamUsers.json', 'msgs.json']
     
@@ -339,3 +339,35 @@ class GeocamMemoMessageEditAndDeleteTest(TestCase):
         self.assertEqual(response.status_code, 302, "deleteMessage Failed")
         newMsgCnt = GeocamMessage.objects.all().count()
         self.assertEqual(msgCnt - 1, newMsgCnt, "deleteMessage Failed")
+
+class GeocamMemoUnitTest(TestCase):
+    fixtures = ['geocamMessage.json']
+    def testEnsureMessageTitleFormatIsCorrect(self):
+        # arrange
+        message = GeocamMessage.objects.get(pk = 777)
+        
+        # act
+        title = message.title()
+        
+        # assert
+        self.assertEquals(19, len(title))
+        self.assertEquals(message.content[:16] + "...", title)
+
+class GeocamMemoSingleMessageViewTest(TestCase):
+    fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
+
+    def testEnsureProperFieldsAreDisplayed(self):
+        # arrange
+        m = GeocamMessage.objects.get(pk = 3)
+        u = User.objects.all()[0]
+        self.client.login(username=u.username, password='geocam')
+        
+        # act
+        response = self.client.get('/memo/messages/details/' + str(m.pk))
+        
+        # assert
+        self.assertContains(response, str(m.latitude))
+        self.assertContains(response, str(m.longitude))
+        self.assertContains(response, str(m.altitude))
+        self.assertContains(response, str(m.accuracy))
+

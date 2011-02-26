@@ -6,10 +6,8 @@
             GeoCam Memo
             {% endblock %}
         </title>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-        {% block jsinclude %} {% endblock %}        
+        <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
         {% block css %}{% endblock %}
-
     </head>
     <body>
         <header>
@@ -26,7 +24,7 @@
         </content>
         <footer>
         </footer>
-        {% block js %}
-        {% endblock %}
+        <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+        {% block js %} {% endblock %}
     </body>
 </html>

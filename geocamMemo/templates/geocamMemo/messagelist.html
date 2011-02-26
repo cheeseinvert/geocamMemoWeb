@@ -1,9 +1,6 @@
 {% extends "geocamMemo/base.html" %}
 
 {% block title%}GeoCam Memo Messages{% endblock %}
-{% block jsinclude %}
-	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> 
-{% endblock %}  
 
 {% block js %}
 	<script>
@@ -65,7 +62,10 @@
           <a href="{% url geocamMemo.views.message_list_filtered_username m.author.username %}"> 
           {{ m.get_author_string}}</a>
           
-          {% if m.has_geolocation %}<img src="/media/geocamMemo/geoloc.png" />{%endif%}
+          {% if m.has_geolocation %}
+          <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog">
+            <img src="/media/geocamMemo/geoloc.png" /></a>
+          {%endif%}
           {% if m.author.pk == user.pk or user.is_superuser %} 
           	<a href="{% url geocamMemo.views.edit_message m.pk %}">edit</a>
           	<a href="{% url geocamMemo.views.delete_message m.pk %}">delete</a>

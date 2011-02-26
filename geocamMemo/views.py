@@ -46,6 +46,18 @@ def get_first_geolocation(messages):
 def index(request):
     return render_to_response('geocamMemo/home.html',
                               {}, context_instance=RequestContext(request))
+    
+@login_required
+def details(request, message_id):
+    message = get_object_or_404(GeocamMessage, pk = message_id)
+    if request.is_ajax():
+        template_to_extend = 'geocamMemo/base_ajax.html'
+    else:
+        template_to_extend = 'geocamMemo/base.html'
+            
+    return render_to_response('geocamMemo/details.html',
+                              {'message':message},
+                              context_instance=RequestContext(request))
 
 @login_required
 def create_message(request):
