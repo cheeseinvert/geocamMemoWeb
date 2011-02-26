@@ -219,7 +219,6 @@ class GeocamMemoListViewTest(TestCase):
         #assert
         self.assertContains(response, "createMap("+str(lat)+","+str(lon)+")")
         self.assertContains(response, "<section id=\"map_canvas\"")
-        self.assertContains(response, "<script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=")
     
     def testEnsureMapDisplaysAllMessagesWithGeolocationByAllUsers(self):
         #arrange
@@ -281,6 +280,7 @@ class GeocamMemoUnitTest(TestCase):
         
         # assert
         self.assertEquals(19, len(title))
+        self.assertEquals(message.content[:16] + "...", title)
 
 class GeocamMemoSingleMessageViewTest(TestCase):
     fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']

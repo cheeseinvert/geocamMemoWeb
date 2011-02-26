@@ -1,14 +1,18 @@
 {% extends template_to_extend %}
 
 {% block title %}
-Message - {{ message.content }}
+Message - {{ message.title }}
 {% endblock %}
 
 {% block content %}
-<ul>
-<li>Longitude</li>
-<li>Latitude</li>
-<li>Altitude</li>
-<li>Accuracy</li>
-</ul>
+<dl>
+    <dt>Longitude</dt>
+	<dd>{{ message.longitude }}</dd>
+    <dt>Latitude</dt>
+	<dd>{{ message.latitude }}</dd>
+    <dt>Altitude</dt>
+	<dd>{{ message.altitude }}</dd>
+    <dt>Accuracy</dt>
+	<dd>{{ message.accuracy }}</dd>
+</dl>
 {% endblock %}
