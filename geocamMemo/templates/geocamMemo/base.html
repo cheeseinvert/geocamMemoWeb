@@ -14,14 +14,14 @@
         {% block css %}{% endblock %}
     </head>
     <body>
-    	<div data-role="page" data-theme="c">
+    	<div id="bodydiv" data-role="page" data-theme="c">
 	        <header>
 	        	<div data-role="header">
 	        		<h1>Page Title</h1>
 	        	</div>
 	        	<div data-role="content">
 		            {% if user.is_authenticated %}
-		                <a href="/memo/messages/">Messages</a> | 
+		                <a href="/">Messages</a> | 
 		                Hello {% firstof user.first_name user.username %} <a href="/accounts/logout/">Logout</a>
 		            {% else %}
 		                <a href="/accounts/login/">Login</a>
