@@ -268,6 +268,59 @@ class GeocamMemoListViewTest(TestCase):
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/memo/messages/')
         return response
+
+class GeocamMemoUnitTest(TestCase):
+    fixtures = ['geocamMessage.json']
     
-    
-    
+    def testEnsureMessageTitleFormatIsCorrect(self):
+        # arrange
+        message = GeocamMessage.objects.get(pk = 777)
+        
+        # act
+        title = message.title()
+        
+        # assert
+        self.assertEquals(19, len(title))
+
+class GeocamMemoSingleMessageViewTest(TestCase):
+    fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
+
+    def testEnsureProperFieldsAreDisplayed(self):
+        # arrange
+        m = GeocamMessage.objects.get(pk = 3)
+        u = User.objects.all()[0]
+        self.client.login(username=u.username, password='geocam')
+        
+        # act
+        response = self.client.get('/memo/messages/details/' + str(m.pk))
+        
+        # assert
+        self.assertContains(response, str(m.latitude))
+        self.assertContains(response, str(m.longitude))
+        self.assertContains(response, str(m.altitude))
+        self.assertContains(response, str(m.accuracy))
+        
+    def testEnsureViewDoesNotExtendBaseWhenAjax(self):
+       # arrange
+       m = GeocamMessage.objects.get(pk = 3)
+       u = User.objects.all()[0]
+       self.client.login(username=u.username, password='geocam')
+       
+       # act
+       response = self.client.get('/memo/messages/details/' + str(m.pk), {},
+                  HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+       
+       # assert
+       self.assertTemplateNotUsed(response, 'geocamMemo/base.html')
+       
+    def testEnsureViewExtendsBaseWhenNotAjax(self):
+       # arrange
+       m = GeocamMessage.objects.get(pk = 3)
+       u = User.objects.all()[0]
+       self.client.login(username=u.username, password='geocam')
+       
+       # act
+       response = self.client.get('/memo/messages/details/' + str(m.pk))
+       
+       # assert
+       self.assertTemplateUsed(response, 'geocamMemo/base.html')

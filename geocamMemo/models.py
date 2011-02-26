@@ -26,6 +26,9 @@ class GeocamMessage(models.Model):
     
     def get_author_string(self):
         return get_user_string(self.author)
+    
+    def title(self):
+        return self.content[:16] + "..." if len(self.content) > 19 else self.content
           
     def has_geolocation(self):
         return bool(self.latitude and self.longitude)

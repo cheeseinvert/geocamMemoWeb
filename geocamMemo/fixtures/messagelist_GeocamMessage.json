@@ -7,7 +7,7 @@
     "longitude": 70.0, "author": 2}
 }, 
 {"pk": 3, "model": "geocamMemo.geocammessage", "fields":
-   {"content": "Mario Bros", "latitude": -5.2, "content_timestamp": "2011-02-17 12:25:22",
-    "longitude": 33.3, "author": 3}
+   {"content": "Mario Bros", "latitude": -106.5969, "content_timestamp": "2011-02-17 12:25:22",
+    "longitude": 35.1047, "author": 2, "altitude": 5700, "accuracy": 163}
 }
 ]
