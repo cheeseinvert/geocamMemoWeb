@@ -352,6 +352,17 @@ class GeocamMemoUnitTest(TestCase):
         # assert
         self.assertEquals(19, len(title))
         self.assertEquals(message.content[:16] + "...", title)
+        
+    def testEnsureDateStringFormat(self):
+        #arrange
+        d = datetime.now()
+        message = GeocamMessage.objects.create(content="test", creation_timestamp=d)
+        #act
+        datestring = message.get_date_string()
+        #assert
+        assertEqual(datestring, dstrftime("%m/%d %H:%M:%S"))
+        
+    
 
 class GeocamMemoSingleMessageViewTest(TestCase):
     fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
