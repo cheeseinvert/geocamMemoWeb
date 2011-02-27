@@ -381,7 +381,16 @@ class GeocamMemoUnitTest(TestCase):
         self.assertEqual("userwithlastname", messagewithlastname.get_author_string())        
         self.assertEqual("First Last", messagewithfullname.get_author_string()) 
         
-           
+    def testEnsureHasGeoLocation(self):
+        #arange
+        nogeomessage = GeocamMessage.objects.create(content="no geolocation here!", author_id=1) 
+        geomessage =   GeocamMessage.objects.create(content="geolocation here!", author_id=1, 
+                                                    latitude=0.0, longitude=1.0) #one value is zero as 0 = false
+        
+        #act
+        #assert
+        assert(not nogeomessage.has_geolocation())
+        assert(geomessage.has_geolocation())
 
 class GeocamMemoSingleMessageViewTest(TestCase):
     fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']

@@ -31,7 +31,7 @@ class GeocamMessage(models.Model):
         return self.content[:16] + "..." if len(self.content) > 19 else self.content
           
     def has_geolocation(self):
-        return bool(self.latitude and self.longitude)
+        return bool(self.latitude != None and self.longitude != None)
 
     def __unicode__(self):
         return "Message from %s on %s: %s" % (self.author.username, self.content_timestamp, self.content)
