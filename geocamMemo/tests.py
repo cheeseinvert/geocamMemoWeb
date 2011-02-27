@@ -356,13 +356,32 @@ class GeocamMemoUnitTest(TestCase):
     def testEnsureDateStringFormat(self):
         #arrange
         d = datetime.now()
-        message = GeocamMessage.objects.create(content="test", creation_timestamp=d)
+        message = GeocamMessage.objects.create(content="test", content_timestamp=d, author_id=1)
         #act
         datestring = message.get_date_string()
         #assert
-        assertEqual(datestring, dstrftime("%m/%d %H:%M:%S"))
+        self.assertEqual(datestring, d.strftime("%m/%d %H:%M:%S"))
         
-    
+    def testEnsureAuthorStringFormat(self):
+        #arrange
+        userwithoutrealname = User.objects.create(username="userwithoutrealname", password="geocam")
+        userwithfirstname = User.objects.create(username="userwithfirstname", password="geocam", first_name="First")
+        userwithlastname = User.objects.create(username="userwithlastname", password="geocam", last_name="Last")
+        userwithfullname = User.objects.create(username="userwithfullname", password="geocam", first_name="First", last_name="Last")
+        
+        messagewithoutrealname = GeocamMessage.objects.create(content="userwithoutrealname", author=userwithoutrealname)
+        messagewithfirstname = GeocamMessage.objects.create(content="userwithfirstname", author=userwithfirstname)
+        messagewithlastname = GeocamMessage.objects.create(content="userwithlastname", author=userwithlastname)
+        messagewithfullname = GeocamMessage.objects.create(content="userwithfullname", author=userwithfullname)
+        
+        #act
+        #assert
+        self.assertEqual("userwithoutrealname", messagewithoutrealname.get_author_string())        
+        self.assertEqual("userwithfirstname", messagewithfirstname.get_author_string())        
+        self.assertEqual("userwithlastname", messagewithlastname.get_author_string())        
+        self.assertEqual("First Last", messagewithfullname.get_author_string()) 
+        
+           
 
 class GeocamMemoSingleMessageViewTest(TestCase):
     fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
