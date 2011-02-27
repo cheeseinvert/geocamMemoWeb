@@ -68,8 +68,8 @@
           {{ m.get_author_string}}</a>
           
           {% if m.has_geolocation %}
-          <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog">
-          	<img src="/media/geocamMemo/geoloc.png" /></a>
+          <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog" data-transition="pop">
+          	<img src="http://www.ipevo.com/assets/index/images/new/category/map_pin.png" /></a>
           {%endif%}
       </p>
       <p id="message_{{m.pk}}_content">{{ m.content}}</p>
