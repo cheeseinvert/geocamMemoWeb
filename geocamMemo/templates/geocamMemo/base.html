@@ -17,16 +17,9 @@
     	<div id="bodydiv" data-role="page" data-theme="c">
 	        <header>
 	        	<div data-role="header">
-	        		<h1>Page Title</h1>
+	        		<h1>{% block pagetitle %}GeoCam Memo{% endblock %}</h1>
+	        		<a href="/" data-icon="home" data-iconpos="notext">Home</a>
 	        	</div>
-	        	<div data-role="content">
-		            {% if user.is_authenticated %}
-		                <a href="{% url geocamMemo.views.message_list %}">Messages</a> | 
-		                Hello {% firstof user.first_name user.username %} <a href="/accounts/logout/">Logout</a>
-		            {% else %}
-		                <a href="/accounts/login/">Login</a>
-		            {% endif %}
-	            </div>
 	        </header>
 	        <content>
 	            <div data-role="content">
@@ -34,7 +27,15 @@
 	            {% endblock %}
 	            </div>
 	        </content>
-	        <footer data-role="footer">
+	        <footer>
+	        	<div data-role="footer">
+	        		{% if user.is_authenticated %}
+	        	        <a href="/accounts/logout/" class="ui-btn-left">Logout {% firstof user.first_name user.username %}</a>
+	        	    {% else %}
+		                <a href="/accounts/login/">Login</a>
+		            {% endif %}
+	        	    <a href="index.html" data-icon="gear" class="ui-btn-right">Options</a>
+	        	</div>
 	        </footer>
 	        {% block js %} {% endblock %}
         </div>
