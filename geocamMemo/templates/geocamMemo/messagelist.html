@@ -64,7 +64,7 @@
           
           {% if m.has_geolocation %}
           <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog">
-            <img src="/media/geocamMemo/geoloc.png" /></a>
+            <img src="/resources/geoloc.png" /></a>
           {%endif%}
           {% if m.author.pk == user.pk or user.is_superuser %} 
           	<a href="{% url geocamMemo.views.edit_message m.pk %}">edit</a>
