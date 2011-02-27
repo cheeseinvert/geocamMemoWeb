@@ -27,8 +27,8 @@ class GeolocationTimestampDateTimeFormField(forms.DateTimeField):
                 return None     
         except:
             raise forms.ValidationError
-            
-class GeocamMessageForm(forms.ModelForm):
+    
+class GeocamTalkForm(forms.ModelForm):
     position_timestamp = GeolocationTimestampDateTimeFormField()
     class Meta:
         model = GeocamMessage

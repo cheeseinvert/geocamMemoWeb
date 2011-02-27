@@ -1,0 +1,84 @@
+{% extends "geocamMemo/base.html" %}
+
+{% block title%}GeoCam Memo Messages{% endblock %}
+
+{% block js %}
+	<script>
+    {% if not userstring %}
+	if (navigator.geolocation) {
+	   navigator.geolocation.getCurrentPosition(success, failure);
+	} else
+	{% endif %}
+	   failure(null);
+	
+	function success(position)
+	{
+		createMap(position.coords.latitude, position.coords.longitude);
+	}
+	
+	function failure(meh)
+	{
+		createMap({{ first_geolocation.0 }},{{ first_geolocation.1 }});
+	}
+
+    function createMap(latitude, longitude) {
+		var latlng = new google.maps.LatLng( latitude,longitude );
+		var myOptions = {
+			    zoom: 12,
+			    center: latlng,
+			    mapTypeControl: false,
+			    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
+			    mapTypeId: google.maps.MapTypeId.ROADMAP
+			  };	
+		var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+		
+		{% for m in gc_msg %}
+		   {% if m.has_geolocation %}
+		   var latlng = new google.maps.LatLng({{m.latitude}},{{m.longitude}});
+		   var marker = new google.maps.Marker({
+	                                            position: latlng, 
+	                                            map: map, 
+	                                            title: '{{ m.content }}' });
+		   {% endif %}
+		{% endfor %}
+	}
+	</script>
+{% endblock %}
+
+{% block content %}
+
+<section id="messages">
+   {% if userstring %}
+      <h1>Memos by {{ userstring }}</h1>
+   {% else %}
+      <h1>All Memos</h1>
+   {% endif %}
+
+<ul id="message_list">
+{% for m in gc_msg %}
+    <li id="message_{{m.pk}}">
+      <p id="message_{{m.pk}}_header">
+          On {{ m.get_date_string }} 
+          <a href="{% url geocamMemo.views.message_list_filtered_username m.author.username %}"> 
+          {{ m.get_author_string}}</a>
+          
+          {% if m.has_geolocation %}
+          <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog">
+            <img src="/resources/geoloc.png" /></a>
+          {%endif%}
+          {% if m.author.pk == user.pk or user.is_superuser %} 
+          	<a href="{% url geocamMemo.views.edit_message m.pk %}">edit</a>
+          	<a href="{% url geocamMemo.views.delete_message m.pk %}">delete</a>
+          {% endif %}
+      </p>
+      <p id="message_{{m.pk}}_content">{{ m.content}}</p>
+    </li>
+{% endfor %}
+</ul>
+<a href="/memo/messages/create/">New Message</a>
+</section>
+
+<section id="map_canvas" style="width: 560px; height: 400px">
+</section>
+
+{% endblock %}
