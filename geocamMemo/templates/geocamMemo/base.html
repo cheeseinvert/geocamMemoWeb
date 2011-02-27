@@ -21,16 +21,18 @@
 	        	</div>
 	        	<div data-role="content">
 		            {% if user.is_authenticated %}
-		                <a href="/">Messages</a> | 
+		                <a href="{% url geocamMemo.views.message_list %}">Messages</a> | 
 		                Hello {% firstof user.first_name user.username %} <a href="/accounts/logout/">Logout</a>
 		            {% else %}
 		                <a href="/accounts/login/">Login</a>
 		            {% endif %}
 	            </div>
 	        </header>
-	        <content data-role="content">
+	        <content>
+	            <div data-role="content">
 	            {% block content %}
 	            {% endblock %}
+	            </div>
 	        </content>
 	        <footer data-role="footer">
 	        </footer>
