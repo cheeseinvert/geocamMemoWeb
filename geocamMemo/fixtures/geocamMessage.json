@@ -1,0 +1,16 @@
+[
+{"pk": 123, "model": "geocamMemo.geocammessage", "fields":
+   {"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla nulla, auctor vel ultricies in, vehicula vel nibh. Maecenas a quam ligula, ut lobortis est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis arcu est, ultrices non congue a, consequat quis erat. Nulla facilisi. Nulla at tempor est. Nunc vehicula, tellus quis dapibus mollis, risus ipsum pulvinar est, quis laoreet diam urna at libero. Nam bibendum luctus orci, eget viverra ipsum vestibulum tempor. Nullam facilisis ullamcorper sem, ac faucibus nisl vestibulum non. Curabitur malesuada, ligula et consequat porta, ante arcu euismod urna, a porta magna tortor sit amet metus. Nulla varius lectus non dui tincidunt dictum. Curabitur semper metus nec felis feugiat id molestie risus rhoncus. Curabitur pellentesque pharetra libero non porta. Proin porttitor odio non enim fringilla ornare. Morbi ac magna eu nulla imperdiet facilisis quis a purus. Vivamus ullamcorper tempor cursus. Curabitur blandit cursus lobortis.",
+    "content_timestamp": "2011-01-14 12:24:49", "author": 2}
+}, 
+{"pk": 999, "model": "geocamMemo.geocammessage", "fields": 
+   {"content": "Integer ut est neque. Praesent sed neque metus, id eleifend urna. Duis in urna diam. Fusce imperdiet sem sollicitudin nunc ultrices lacinia. Mauris vehicula mauris vitae turpis elementum mattis. Proin ut justo at lacus facilisis fringilla. Praesent sed elit ante, in tincidunt ante. Etiam quis justo sit amet arcu facilisis scelerisque. Sed tortor odio, cursus at sodales in, aliquet id nibh. Donec ante magna, consectetur non vehicula id, consequat eu enim. Duis ut quam risus. Nam congue luctus venenatis. Quisque ac volutpat massa.",
+    "latitude": 12.1, "content_timestamp": "2011-02-15 12:25:06",
+    "longitude": 70.0, "author": 2}
+}, 
+{"pk": 777, "model": "geocamMemo.geocammessage", "fields":
+   {"content": "Cras quis mauris tellus. Suspendisse non lacus a ipsum euismod egestas. Integer viverra ultricies nunc, sed convallis tortor tempus non. Cras dapibus varius egestas. Nunc vel leo eros, nec venenatis nibh. Nullam scelerisque condimentum massa sit amet pulvinar. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent mattis, magna eget egestas pharetra, ipsum mauris pellentesque lorem, gravida varius tortor nunc et odio. Ut in erat quis quam semper laoreet id in quam. Etiam velit augue, pretium ut hendrerit ac, mattis nec leo. Aliquam malesuada, nulla at malesuada ultricies, ligula sem cursus massa, ut feugiat lacus nulla in magna. Integer ac ultrices dolor.",
+    "latitude": -106.5969, "content_timestamp": "2011-02-17 12:25:22",
+    "longitude": 35.1047, "author": 2, "altitude": 5700, "accuracy": 163}
+}
+]
