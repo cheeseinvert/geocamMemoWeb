@@ -8,21 +8,22 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from geocamMemo.models import GeocamMessage
+from geocamMemo.models import GeocamMessage, get_latest_message_revisions
 from geocamTalk.forms import GeocamTalkForm
+from datetime import datetime
 import json
 
 @login_required
 def message_list(request):
     
-    messages = GeocamMessage.objects.all().order_by( 'content_timestamp').reverse()
+    messages = get_latest_message_revisions()
 
     return render_to_response('geocamTalk/messagelist.html', 
                               {"gc_msg": messages}, context_instance=RequestContext(request))
 
 @login_required
 def feedMessages(request):
-    ordered_messages = GeocamMessage.objects.all().order_by('-content_timestamp')
+    ordered_messages = get_latest_message_revisions()
     stringified_msg_list = [{'pk':msg.pk,
                              'author':msg.get_author_string(), 
                             'content':msg.content, 
@@ -40,7 +41,11 @@ def create_message(request):
     if request.method == 'POST':
         form = GeocamTalkForm(request.POST)
         if form.is_valid():
-            form.save()        
+            msg = form.save(commit=False)
+            # Since revisions are now saved to db, this timestamp
+            # can't just be auto set since we want to preserve from creation time
+            msg.content_timestamp = datetime.now()
+            msg.save()    
             return HttpResponseRedirect('/talk/messages/')
         else:
             return render_to_response('geocamTalk/message_form.html',
