@@ -85,7 +85,7 @@ class GeocamMemoListViewTest(TestCase):
         self.client.login(username=u.username, password='geocam')
         response = self.get_messages_response()
         
-        displayedmessages = response.context[-1]['gc_msg'] # get the data object sent to the template
+        displayedmessages = response.context['gc_msg'] # get the data object sent to the template
         displayed_message_ids = []
         for m in displayedmessages:
             displayed_message_ids.append(m.pk)
