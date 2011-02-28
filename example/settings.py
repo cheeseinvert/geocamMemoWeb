@@ -70,6 +70,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'revisions.middleware.VersionedModelRedirectMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
@@ -92,5 +93,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'geocamMemo',
-    'geocamTalk'
+    'geocamTalk',
+    'revisions'
 )
