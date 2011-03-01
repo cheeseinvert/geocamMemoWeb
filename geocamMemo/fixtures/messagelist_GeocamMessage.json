@@ -1,12 +1,12 @@
 [
-{"pk": 1, "model": "geocamMemo.geocammessage", "fields":
+{"pk": 1, "model": "geocamMemo.memomessage", "fields":
    {"content": "Bowser", 
    "content_timestamp": 
    "2011-01-14 12:24:49", 
    "author": 2,
    "id": "5f01f5679c5a4606929e70cb4b903b95" }
 }, 
-{"pk": 2, "model": "geocamMemo.geocammessage", "fields": 
+{"pk": 2, "model": "geocamMemo.memomessage", "fields": 
    {"content": "Super Duper", 
    "latitude": 12.1, 
    "content_timestamp": "2011-02-15 12:25:06",
@@ -14,7 +14,7 @@
    "author": 2,
    "id": "9f01f5679c5a4606929e70cb4b903b65"}
 }, 
-{"pk": 3, "model": "geocamMemo.geocammessage", "fields":
+{"pk": 3, "model": "geocamMemo.memomessage", "fields":
    {"content": "Mario Bros", 
    "latitude": -106.5969, 
    "content_timestamp": 

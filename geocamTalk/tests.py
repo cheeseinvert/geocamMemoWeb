@@ -7,7 +7,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
-from geocamMemo.models import GeocamMessage, get_latest_message_revisions
+from geocamTalk.models import TalkMessage
+from geocamMemo.models import get_latest_message_revisions
 import json
 
 class GeocamTalkMessageSaveTest(TestCase):
@@ -29,34 +30,34 @@ class GeocamTalkMessageSaveTest(TestCase):
     def test_createTalkMessage(self):
         """ Create Geocam Talk Message """
         
-        msgCnt = len(get_latest_message_revisions())
+        msgCnt = len(get_latest_message_revisions(TalkMessage))
         
         content = "This is a message"
         author = User.objects.get(username="avagadia")
         
-        GeocamMessage.objects.create(content=content,
+        TalkMessage.objects.create(content=content,
                                     latitude=GeocamTalkMessageSaveTest.cmusv_lat,
                                     longitude=GeocamTalkMessageSaveTest.cmusv_lon,
                                     author=author,
                                     content_timestamp=self.now)
-        newMsgCnt = len(get_latest_message_revisions()) 
+        newMsgCnt = len(get_latest_message_revisions(TalkMessage)) 
         self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message Failed.")
   
     def test_deleteTalkMessage(self):
         """ Delete Geocam Talk Message """
         
-        msgCnt = len(get_latest_message_revisions())
+        msgCnt = len(get_latest_message_revisions(TalkMessage))
         # delete the first message:
-        msg = get_latest_message_revisions()[1]
+        msg = get_latest_message_revisions(TalkMessage)[1]
         numRevs = msg.get_revisions().count()
         msg.delete()
-        newMsgCnt = len(get_latest_message_revisions()) 
+        newMsgCnt = len(get_latest_message_revisions(TalkMessage)) 
         self.assertEqual(newMsgCnt + numRevs, msgCnt, "Deleting a Talk Message Failed.")
               
     def test_submitFormToCreateMessage(self):
         """ submit the Talk Message through the form """
         
-        msgCnt = len(get_latest_message_revisions())
+        msgCnt = len(get_latest_message_revisions(TalkMessage))
         content = "Whoa man, that burning building almost collapsed on me!"
         author = User.objects.get(username="avagadia")
         self.client.login(username=author.username, password='geocam')
@@ -68,14 +69,14 @@ class GeocamTalkMessageSaveTest(TestCase):
                                         "author":author.pk})
         # should be redirected when form post is successful:
         self.assertEqual(response.status_code, 302, "submitFormToCreateMessage Failed")
-        newMsgCnt = len(get_latest_message_revisions())
+        newMsgCnt = len(get_latest_message_revisions(TalkMessage))
         self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message through view Failed.")
         
         
     def test_submitFormWithoutContentTalkMessage(self):
         """ submit the Talk Message without content through the form """
         
-        msgCnt = len(get_latest_message_revisions())
+        msgCnt = len(get_latest_message_revisions(TalkMessage))
         author = User.objects.get(username="avagadia")
         self.client.login(username=author.username, password='geocam')
         
@@ -85,7 +86,7 @@ class GeocamTalkMessageSaveTest(TestCase):
                                         "author":author.pk})
         # should get 200 on render_to_response when is_valid fails (which should occur)
         self.assertEqual(response.status_code, 200, "test_submitFormWithoutContentTalkMessage Failed")
-        newMsgCnt = len(get_latest_message_revisions())
+        newMsgCnt = len(get_latest_message_revisions(TalkMessage))
         self.assertEqual(msgCnt, newMsgCnt, "Creating a Talk Message through view Succeeded with no content.")
          
                
@@ -97,7 +98,7 @@ class GeocamTalkMessageSaveTest(TestCase):
            
     def test_MessageContentOrdering(self):
         
-        ordered_messages = get_latest_message_revisions()
+        ordered_messages = get_latest_message_revisions(TalkMessage)
         response = self._get_messages_response()
         response_ordered_messages = response.context["gc_msg"]
         self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
@@ -105,7 +106,7 @@ class GeocamTalkMessageSaveTest(TestCase):
     def test_MessageJsonFeed(self):
         author = User.objects.get(username="avagadia")
         self.client.login(username=author.username, password='geocam')
-        ordered_messages = GeocamMessage.objects.all().order_by('content_timestamp').reverse()
+        ordered_messages = TalkMessage.objects.all().order_by('content_timestamp').reverse()
         stringified_msg_list = [{'pk':msg.pk,
                                  'author':msg.get_author_string(), 
                                  'content':msg.content, 
