@@ -14,13 +14,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render_to_response
 from django.views.generic.simple import redirect_to
 from django import forms
-from geocamMemo.models import GeocamMessage, get_user_string, get_latest_message_revisions
-from geocamMemo.forms import GeocamMessageForm
+from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
+from geocamMemo.forms import MemoMessageForm
 from datetime import datetime
 
 @login_required
 def message_list(request):
-    messages = get_latest_message_revisions()
+    messages = get_latest_message_revisions(MemoMessage)
     
     return render_to_response('geocamMemo/messagelist.html', 
                                
@@ -32,7 +32,7 @@ def message_list(request):
 def message_list_filtered_username(request, username):
     user = get_object_or_404(User, username=username)
     
-    messages = GeocamMessage.objects.filter(author = user.pk).order_by('-content_timestamp')
+    messages = MemoMessage.objects.filter(author = user.pk).order_by('-content_timestamp')
     return render_to_response('geocamMemo/messagelist.html', 
                               {"gc_msg": messages,
                                "first_geolocation":get_first_geolocation(messages),
@@ -54,7 +54,7 @@ def index(request):
     
 @login_required
 def details(request, message_id):
-    message = get_object_or_404(GeocamMessage, pk = message_id)
+    message = get_object_or_404(MemoMessage, pk = message_id)
             
     return render_to_response('geocamMemo/details.html',
                               {'message':message},
@@ -63,7 +63,7 @@ def details(request, message_id):
 @login_required
 def create_message(request):
     if request.method == 'POST':
-        form = GeocamMessageForm(request.POST)
+        form = MemoMessageForm(request.POST)
         if form.is_valid():
             msg = form.save(commit=False)
             # Since revisions are now saved to db, this timestamp
@@ -76,19 +76,19 @@ def create_message(request):
                                   {'form':form},
                                   context_instance=RequestContext(request))
     else:
-        form = GeocamMessageForm()
+        form = MemoMessageForm()
         return render_to_response('geocamMemo/message_form.html',
                                   {'form':form },                                   
                                   context_instance=RequestContext(request))
 
 @login_required
 def edit_message(request, message_pk):
-    message = GeocamMessage.objects.get(pk=message_pk)
+    message = MemoMessage.objects.get(pk=message_pk)
     if message.author.pk != request.user.pk and not request.user.is_superuser:
         return HttpResponseRedirect('/memo/messages/') # you get the boot!
     if request.method == 'POST':
         message.content = request.POST['content']
-        form = GeocamMessageForm(request.POST)   
+        form = MemoMessageForm(request.POST)   
         if form.is_valid():
             message.save()
             return HttpResponseRedirect('/memo/messages/')
@@ -98,7 +98,7 @@ def edit_message(request, message_pk):
                                    'message':message},
                                   context_instance=RequestContext(request))      
     else:
-        form = GeocamMessageForm(instance=message)
+        form = MemoMessageForm(instance=message)
         return render_to_response('geocamMemo/edit_message_form.html',                                  
                                   {'form':form, 
                                    'message':message},                                   
@@ -106,7 +106,7 @@ def edit_message(request, message_pk):
 
 @login_required
 def delete_message(request, message_pk):
-    message = GeocamMessage.objects.get(pk=message_pk)
+    message = MemoMessage.objects.get(pk=message_pk)
     if message.author.pk == request.user.pk or request.user.is_superuser:
         message.delete()
     return HttpResponseRedirect('/memo/messages/')

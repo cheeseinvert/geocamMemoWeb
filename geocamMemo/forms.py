@@ -6,7 +6,7 @@
 
 from django import forms
 from revisions.admin import AutoRevisionForm
-from geocamMemo.models import GeocamMessage
+from geocamMemo.models import MemoMessage
 from datetime import datetime
 import re
 
@@ -29,7 +29,7 @@ class GeolocationTimestampDateTimeFormField(forms.DateTimeField):
         except:
             raise forms.ValidationError
             
-class GeocamMessageForm(AutoRevisionForm):
+class MemoMessageForm(AutoRevisionForm):
     position_timestamp = GeolocationTimestampDateTimeFormField()
     class Meta:
-        model = GeocamMessage
+        model = MemoMessage

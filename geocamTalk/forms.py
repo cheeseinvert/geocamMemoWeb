@@ -5,7 +5,7 @@
 # __END_LICENSE__
 
 from django import forms
-from geocamMemo.models import GeocamMessage
+from geocamTalk.models import TalkMessage
 from datetime import datetime
 import re
 
@@ -31,4 +31,4 @@ class GeolocationTimestampDateTimeFormField(forms.DateTimeField):
 class GeocamTalkForm(forms.ModelForm):
     position_timestamp = GeolocationTimestampDateTimeFormField()
     class Meta:
-        model = GeocamMessage
+        model = TalkMessage
