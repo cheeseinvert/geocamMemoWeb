@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
-from models import GeocamMessage, get_user_string
+from models import GeocamMessage, get_user_string, get_latest_message_revisions
 
 class GeocamMemoMessageSaveTest(TestCase):
     fixtures = ['teamUsers.json', 'msgs.json']
@@ -16,6 +16,7 @@ class GeocamMemoMessageSaveTest(TestCase):
     cmusv_lon = -122.05944
         
     def setUp(self):
+        self.now = datetime.now()
         pass
     
     def tearDown(self):
@@ -28,13 +29,12 @@ class GeocamMemoMessageSaveTest(TestCase):
         
         content = "This is a message"
         author = User.objects.get(username="avagadia")
-        now = datetime.now()
         
         GeocamMessage.objects.create(content=content,
                                     latitude=GeocamMemoMessageSaveTest.cmusv_lat,
                                     longitude=GeocamMemoMessageSaveTest.cmusv_lon,
                                     author=author,
-                                    content_timestamp=now)
+                                    content_timestamp=self.now)
         newMsgCnt = GeocamMessage.objects.all().count() 
         self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Message Failed.")
   
@@ -42,10 +42,12 @@ class GeocamMemoMessageSaveTest(TestCase):
         """ Delete Geocam Message """
         
         msgCnt = GeocamMessage.objects.all().count()
-        # delete the first message:
-        GeocamMessage.objects.all()[1].delete()
+        msg = GeocamMessage.objects.all()[1]
+        numRevs = msg.get_revisions().count()
+        # delete the first message and all it's revisions:
+        msg.delete()
         newMsgCnt = GeocamMessage.objects.all().count() 
-        self.assertEqual(newMsgCnt + 1, msgCnt, "Deleting a Message Failed.")
+        self.assertEqual(newMsgCnt + numRevs, msgCnt, "Deleting a Message Failed.")
               
     def test_submitFormToCreateMessage(self):
         
@@ -80,17 +82,25 @@ class GeocamMemoMessageSaveTest(TestCase):
 class GeocamMemoListViewTest(TestCase):
     fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
     
+    def setUp(self):
+        self.now = datetime.now()
+        pass
+    
+    def tearDown(self):
+        pass
+
+
     def testMessageListSizeAndOrder(self):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
         response = self.get_messages_response()
         
-        displayedmessages = response.context[-1]['gc_msg'] # get the data object sent to the template
+        displayedmessages = response.context['gc_msg'] # get the data object sent to the template
         displayed_message_ids = []
         for m in displayedmessages:
             displayed_message_ids.append(m.pk)
         
-        messages = GeocamMessage.objects.order_by("-content_timestamp") #descending (newest at top)
+        messages = get_latest_message_revisions() #descending (newest at top)
         message_ids = []        
         for m in messages:
             message_ids.append(m.pk)
@@ -98,7 +108,7 @@ class GeocamMemoListViewTest(TestCase):
         self.assertEqual(displayed_message_ids, message_ids, "Order should be the same")
 
     def testMessageListDateFormat(self):
-        messages = GeocamMessage.objects.all()
+        messages = get_latest_message_revisions()
         response = self.get_messages_response()
         for m in messages:
             self.assertContains(response, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
@@ -115,14 +125,14 @@ class GeocamMemoListViewTest(TestCase):
         
     def testMessageListContentFormat(self):
         
-        messages = GeocamMessage.objects.all()
+        messages = get_latest_message_revisions()
         response = self.get_messages_response()
         for m in messages:
             self.assertContains(response, m.content)
     
     def testMessageListGeoLocationPresent(self):
         # arrange
-        messages = GeocamMessage.objects.all()
+        messages = get_latest_message_revisions()
         response = self.get_messages_response()
 
         # act
@@ -223,7 +233,7 @@ class GeocamMemoListViewTest(TestCase):
     
     def testEnsureMapDisplaysAllMessagesWithGeolocationByAllUsers(self):
         #arrange
-        messages = GeocamMessage.objects.all().order_by("-content_timestamp")
+        messages = get_latest_message_revisions()
                                 
         #act
         response = self.get_messages_response()
@@ -238,8 +248,9 @@ class GeocamMemoListViewTest(TestCase):
 
     def testEnsureMapCentersOnLatestMessageWithGeolocation(self):
         # arrange
-        GeocamMessage.objects.create(content="testing" , author = User.objects.all()[0]) # newest timestamp
-        messages = GeocamMessage.objects.all().order_by("-content_timestamp")
+        GeocamMessage.objects.create(content="testing", 
+                                     author = User.objects.all()[0],
+                                     content_timestamp=self.now) # newest timestamp
 
         # act
         response = self.get_messages_response()
@@ -269,8 +280,84 @@ class GeocamMemoListViewTest(TestCase):
         response = self.client.get('/memo/messages/')
         return response
 
+class GeocamMemoMessageEditAndDeleteTest(TestCase):
+    fixtures = ['teamUsers.json', 'msgs.json']
+    
+    def loginUser(self, author_pk):
+        user = User.objects.get(pk=author_pk)
+        self.client.login(username=user.username, password='geocam')
+
+    def test_ensureEditByNonAuthorForbidden(self):
+        original_msg = get_latest_message_revisions()[0]
+        
+        for user in User.objects.all():
+            if user.pk != original_msg.author.pk and not user.is_superuser:
+                self.loginUser(user.pk)
+                break                    
+        modified_content = "The content has been modified"
+        response = self.client.post("/memo/messages/edit/%s"% original_msg.pk,
+                                  data={"content":modified_content,
+                                        "author":original_msg.author.pk})
+        self.assertEqual(response.status_code, 302, "ensureEditByNonAuthorForbidden Failed") 
+        
+        new_msg = original_msg.get_latest_revision()
+
+        
+        # should be redirected when form post is successful:
+        self.assertEquals(new_msg.content, original_msg.content, "ensureEditByNonAuthorForbidden Failed")
+        self.assertNotEqual(modified_content, new_msg.content, "ensureEditByNonAuthorForbidden Failed")
+        self.assertEqual(new_msg.content_timestamp, original_msg.content_timestamp, "ensureEditByNonAuthorForbidden Failed")  
+        self.assertEqual(new_msg.latitude, original_msg.latitude, "ensureEditByNonAuthorForbidden Failed")                                            
+        self.assertEqual(new_msg.longitude, original_msg.longitude, "ensureEditByNonAuthorForbidden Failed")   
+    
+    def test_submitFormToEditMessage(self):        
+        """ submit the Memo Message through the form """
+        original_msg = get_latest_message_revisions()[0]
+        original_content = original_msg.content    
+        self.loginUser(original_msg.author.pk)
+        modified_content = "The content has been modified"
+        response = self.client.post("/memo/messages/edit/%s"% original_msg.pk,
+                                  data={"content":modified_content,
+                                        "author":original_msg.author.pk})
+        self.assertEqual(response.status_code, 302, "submitFormToEditMessage Failed") 
+        
+        new_msg = original_msg.get_latest_revision()
+        self.assertNotEquals(new_msg.content, original_content, "submitFormToEditMessage Failed")
+        self.assertEqual(modified_content, new_msg.content, "submitFormToEditMessage Failed")
+        self.assertEqual(new_msg.content_timestamp, original_msg.content_timestamp, "submitFormToEditMessage Failed")  
+        self.assertEqual(new_msg.latitude, original_msg.latitude, "submitFormToEditMessage Failed")                                            
+        self.assertEqual(new_msg.longitude, original_msg.longitude, "submitFormToEditMessage Failed")                                            
+                                          
+
+    def test_ensureDeleteByNonAuthorForbidden(self):
+        m = GeocamMessage.objects.all()[0]
+        msgCnt = GeocamMessage.objects.all().count()
+        
+        for user in User.objects.all():
+            if user.pk != m.author.pk and not user.is_superuser:
+                self.loginUser(user.pk)
+                break                    
+        response = self.client.post("/memo/messages/delete/%s"% m.pk)                            
+        self.assertEqual(response.status_code, 302, "ensureDeleteByNonAuthorForbidden Failed") 
+        newMsgCnt = GeocamMessage.objects.all().count()
+        self.assertEqual(msgCnt, newMsgCnt, "ensureDeleteByNonAuthorForbidden Failed")
+
+    def test_deleteMessage(self):
+        "Delete the Memo Message"
+        m = get_latest_message_revisions()[0]
+        msgCnt = GeocamMessage.objects.all().count()
+        numRevs = m.get_revisions().count()
+        self.loginUser(m.author.pk)
+        response = self.client.post("/memo/messages/delete/%s"% m.pk)                                
+        self.assertEqual(response.status_code, 302, "deleteMessage Failed")
+        newMsgCnt = GeocamMessage.objects.all().count()
+        self.assertEqual(msgCnt - numRevs, newMsgCnt, "deleteMessage Failed")
+
 class GeocamMemoUnitTest(TestCase):
     fixtures = ['geocamMessage.json']
+    
+    def setUp(self):
+        self.now = datetime.now()
     
     def testEnsureMessageTitleFormatIsCorrect(self):
         # arrange
@@ -282,13 +369,66 @@ class GeocamMemoUnitTest(TestCase):
         # assert
         self.assertEquals(19, len(title))
         self.assertEquals(message.content[:16] + "...", title)
+        
+    def testEnsureDateStringFormat(self):
+        #arrange
+        d = datetime.now()
+        message = GeocamMessage.objects.create(content="test", content_timestamp=d, author_id=1)
+        #act
+        datestring = message.get_date_string()
+        #assert
+        self.assertEqual(datestring, d.strftime("%m/%d %H:%M:%S"))
+        
+    def testEnsureAuthorStringFormat(self):
+        #arrange
+        userwithoutrealname = User.objects.create(username="userwithoutrealname", password="geocam")
+        userwithfirstname = User.objects.create(username="userwithfirstname", password="geocam", first_name="First")
+        userwithlastname = User.objects.create(username="userwithlastname", password="geocam", last_name="Last")
+        userwithfullname = User.objects.create(username="userwithfullname", password="geocam", first_name="First", last_name="Last")
+        
+        messagewithoutrealname = GeocamMessage.objects.create(content="userwithoutrealname", 
+                                                              author=userwithoutrealname,
+                                                              content_timestamp=self.now)
+        messagewithfirstname = GeocamMessage.objects.create(content="userwithfirstname", 
+                                                            author=userwithfirstname,
+                                                            content_timestamp=self.now)
+        messagewithlastname = GeocamMessage.objects.create(content="userwithlastname", 
+                                                           author=userwithlastname,
+                                                           content_timestamp=self.now)
+        messagewithfullname = GeocamMessage.objects.create(content="userwithfullname", 
+                                                           author=userwithfullname,
+                                                           content_timestamp=self.now)
+        
+        #act
+        #assert
+        self.assertEqual("userwithoutrealname", messagewithoutrealname.get_author_string())        
+        self.assertEqual("userwithfirstname", messagewithfirstname.get_author_string())        
+        self.assertEqual("userwithlastname", messagewithlastname.get_author_string())        
+        self.assertEqual("First Last", messagewithfullname.get_author_string()) 
+        
+    def testEnsureHasGeoLocation(self):
+        #arange
+        nogeomessage = GeocamMessage.objects.create(content="no geolocation here!", 
+                                                    author_id=1,
+                                                    content_timestamp=self.now) 
+        geomessage =   GeocamMessage.objects.create(content="geolocation here!", 
+                                                    author_id=1, 
+                                                    latitude=0.0, 
+                                                    longitude=1.0,
+                                                    content_timestamp=self.now) #one value is zero as 0 = false
+        
+        #act
+        #assert
+        assert(not nogeomessage.has_geolocation())
+        assert(geomessage.has_geolocation())
 
 class GeocamMemoSingleMessageViewTest(TestCase):
     fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
 
     def testEnsureProperFieldsAreDisplayed(self):
         # arrange
-        m = GeocamMessage.objects.get(pk = 3)
+        m = get_latest_message_revisions()[0]
+        
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
         
@@ -300,28 +440,4 @@ class GeocamMemoSingleMessageViewTest(TestCase):
         self.assertContains(response, str(m.longitude))
         self.assertContains(response, str(m.altitude))
         self.assertContains(response, str(m.accuracy))
-        
-    def testEnsureViewDoesNotExtendBaseWhenAjax(self):
-       # arrange
-       m = GeocamMessage.objects.get(pk = 3)
-       u = User.objects.all()[0]
-       self.client.login(username=u.username, password='geocam')
-       
-       # act
-       response = self.client.get('/memo/messages/details/' + str(m.pk), {},
-                  HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-       
-       # assert
-       self.assertTemplateNotUsed(response, 'geocamMemo/base.html')
-       
-    def testEnsureViewExtendsBaseWhenNotAjax(self):
-       # arrange
-       m = GeocamMessage.objects.get(pk = 3)
-       u = User.objects.all()[0]
-       self.client.login(username=u.username, password='geocam')
-       
-       # act
-       response = self.client.get('/memo/messages/details/' + str(m.pk))
-       
-       # assert
-       self.assertTemplateUsed(response, 'geocamMemo/base.html')
+
