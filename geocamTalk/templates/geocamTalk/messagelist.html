@@ -8,7 +8,7 @@
 {% for m in gc_msg %}
 	<dt id="message_{{m.pk}}">
 	  On {{ m.get_date_string }} {{ m.get_author_string}} said
-	  {% if m.has_geolocation %}<img src="/media/geocamTalk/geoloc.png" />{%endif%}
+	  {% if m.has_geolocation %}<img src="/resources/geoloc.png" />{%endif%}
 	</dt>
 	<dd id="message_{{m.pk}}_content">
     	<p>{{ m.content}}</p>
@@ -44,7 +44,7 @@
         		html_str += '<dt id="message_'+pk+'">';
         		html_str += 'On '+content_timestamp+' '+author+' said';
         		if (has_geolocation == true) {
-        			html_str += '<img src="/media/geocamTalk/geoloc.png" />';
+        			html_str += '<img src="/resources/geoloc.png" />';
         		}
         		html_str += '</dt>';
         		html_str += '<dd id="message_'+pk+'_content">';

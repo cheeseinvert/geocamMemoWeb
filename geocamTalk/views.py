@@ -8,7 +8,8 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from geocamMemo.models import GeocamMessage, get_latest_message_revisions
+from geocamTalk.models import TalkMessage
+from geocamMemo.models import get_latest_message_revisions, get_user_string
 from geocamTalk.forms import GeocamTalkForm
 from datetime import datetime
 import json
@@ -16,14 +17,14 @@ import json
 @login_required
 def message_list(request):
     
-    messages = get_latest_message_revisions()
+    messages = get_latest_message_revisions(TalkMessage)
 
     return render_to_response('geocamTalk/messagelist.html', 
                               {"gc_msg": messages}, context_instance=RequestContext(request))
 
 @login_required
 def feedMessages(request):
-    ordered_messages = get_latest_message_revisions()
+    ordered_messages = get_latest_message_revisions(TalkMessage)
     stringified_msg_list = [{'pk':msg.pk,
                              'author':msg.get_author_string(), 
                             'content':msg.content, 
