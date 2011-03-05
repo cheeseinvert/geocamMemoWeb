@@ -123,4 +123,3 @@ class GeocamTalkMessageSaveTest(TestCase):
         response = self.client.get('/talk/messages/')
         return response
     
-    
