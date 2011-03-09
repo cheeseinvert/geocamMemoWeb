@@ -73,8 +73,10 @@
           	<a href="{% url geocamMemo.views.edit_message m.pk %}" data-inline="true" data-role="button" data-icon="geoCam-edit" data-iconpos="notext">edit</a>
           	<a href="{% url geocamMemo.views.delete_message m.pk %}" data-inline="true" data-role="button" data-icon="delete" data-iconpos="notext">Delete</a>
           {% endif %}
+          <br />
+          <span id="message_{{m.pk}}_content">{{ m.content}}</span>
       </p>
-      <p id="message_{{m.pk}}_content">{{ m.content}}</p>
+      <!--<p id="message_{{m.pk}}_content">{{ m.content}}</p>-->
     </li>
 {% endfor %}
 </ul>
