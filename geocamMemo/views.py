@@ -49,8 +49,10 @@ def get_first_geolocation(messages):
 
 @login_required
 def index(request):
-    return render_to_response('geocamMemo/home.html',
-                              {}, context_instance=RequestContext(request))
+    return HttpResponseRedirect('/memo/messages/')
+    
+    #return render_to_response('geocamMemo/home.html',
+                              #{}, context_instance=RequestContext(request))
     
 @login_required
 def details(request, message_id):

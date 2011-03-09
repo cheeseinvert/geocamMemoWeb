@@ -18,7 +18,13 @@
 	        <header>
 	        	<div data-role="header">
 	        		<h1>{% block pagetitle %}GeoCam Memo{% endblock %}</h1>
-	        		<a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse" class="ui-btn-right jqm-home">Home</a> 
+	        		<a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse" class="ui-btn-right jqm-home">Home</a>
+	        		<div data-role="navbar">
+		        		<ul>
+		        			<li><a href="{% url geocamMemo.views.message_list %}">Memo List</a></li>
+		        			<li><a href="{% url geocamMemo.views.message_list %}">Memo Map</a></li>
+		        		</ul>
+	        		</div>
 	        	</div>
 	        </header>
 	        <content>
@@ -28,9 +34,9 @@
 	            </div>
 	        </content>
 	        <footer>
-	        	<div data-role="footer">
+	        	<div data-role="footer" class="ui-bar">
 	        		{% if user.is_authenticated %}
-	        	        <a href="/accounts/logout/" class="ui-btn-left">Logout {% firstof user.first_name user.username %}</a>
+	        	        <a href="/accounts/logout/" class="ui-btn-right">Logout {% firstof user.first_name user.username %}</a>
 	        	    {% else %}
 		                <a href="/accounts/login/">Login</a>
 		            {% endif %}
