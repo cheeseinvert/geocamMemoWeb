@@ -18,6 +18,14 @@ from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_r
 from geocamMemo.forms import MemoMessageForm
 from datetime import datetime
 
+def memo_map(request):
+    messages = get_latest_message_revisions(MemoMessage)
+    
+    return render_to_response('geocamMemo/map.html',
+                              {"gc_msg": messages,
+                               "first_geolocation":get_first_geolocation(messages)
+                               }, context_instance=RequestContext(request))
+
 @login_required
 def message_list(request):
     messages = get_latest_message_revisions(MemoMessage)

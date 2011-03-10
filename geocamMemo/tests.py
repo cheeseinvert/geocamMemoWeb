@@ -280,6 +280,22 @@ class GeocamMemoListViewTest(TestCase):
         response = self.client.get('/memo/messages/')
         return response
 
+class GeoCamMemoMemoMapTest(TestCase):
+    fixtures = ['teamUsers.json', 'msgs.json']
+    
+    def testEnsureCanGetMap(self):
+        # act
+        response = self.get_map_response()
+        
+        # assert
+        self.assertContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")
+    
+    def get_map_response(self):
+        u = User.objects.all()[0]
+        self.client.login(username=u.username, password='geocam')
+        response = self.client.get('/memo/map/')
+        return response
+    
 class GeocamMemoMessageEditAndDeleteTest(TestCase):
     fixtures = ['teamUsers.json', 'msgs.json']
     

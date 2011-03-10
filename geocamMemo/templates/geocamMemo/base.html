@@ -11,6 +11,13 @@
         <link rel="stylesheet" href="/resources/css/jquery.mobile.css" />
         <link rel="stylesheet" href="/resources/css/site.css" />
         <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
+		<script type="text/javascript">
+			$(document).bind("mobileinit", function () {
+
+				$.mobile.ajaxEnabled  = true;
+
+			});
+		</script>
         <script src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>
         <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
         {% block css %}{% endblock %}
@@ -24,7 +31,7 @@
 	        		<div data-role="navbar">
 		        		<ul>
 		        			<li><a href="{% url geocamMemo.views.message_list %}">Memo List</a></li>
-		        			<li><a href="{% url geocamMemo.views.message_list %}">Memo Map</a></li>
+		        			<li><a href="{% url geocamMemo.views.memo_map %}">Memo Map</a></li>
 		        		</ul>
 	        		</div>
 	        	</div>
