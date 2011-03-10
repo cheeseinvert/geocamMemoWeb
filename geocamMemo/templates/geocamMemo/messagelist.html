@@ -3,51 +3,7 @@
 {% block title%}GeoCam Memo Messages{% endblock %}
 
 {% block js %}
-	<script>
-	
-	$('#bodydiv').live('pageshow', function(event) {
-		{% if not userstring %}
-		if (navigator.geolocation) {
-		   navigator.geolocation.getCurrentPosition(success, failure);
-		} else
-		{% endif %}
-		   failure(null);
-	});	
-	
-	function success(position)
-	{
-		createMap(position.coords.latitude, position.coords.longitude);
-	}
-	
-	function failure(meh)
-	{
-		createMap({{ first_geolocation.0 }},{{ first_geolocation.1 }});
-	}
 
-    function createMap(latitude, longitude) {
-    	var latlng = new google.maps.LatLng( latitude,longitude );
-		var myOptions = {
-			    zoom: 12,
-			    center: latlng,
-			    mapTypeControl: false,
-			    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
-			    mapTypeId: google.maps.MapTypeId.ROADMAP
-			  };	
-		var map = new google.maps.Map(document.getElementById("map_canvas_user_{{userstring}}"), myOptions);
-		
-		{% for m in gc_msg %}
-		   {% if m.has_geolocation %}
-		   var latlng = new google.maps.LatLng({{m.latitude}},{{m.longitude}});
-		   var marker = new google.maps.Marker({
-	                                            position: latlng, 
-	                                            map: map, 
-	                                            title: '{{ m.content }}' });
-		   {% endif %}
-		{% endfor %}
-		
-		google.maps.event.trigger(map,'resize');
-	}
-	</script>
 {% endblock %}
 
 {% block content %}
@@ -81,8 +37,4 @@
 {% endfor %}
 </ul>
 </section>
-
-<section id="map_canvas_user_{{userstring}}" style="width: 560px; height: 400px">
-</section>
-
 {% endblock %}
