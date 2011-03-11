@@ -13,9 +13,10 @@
         <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
 		<script type="text/javascript">
 			$(document).bind("mobileinit", function () {
-
 				$.mobile.ajaxEnabled  = true;
-
+				$.extend($.mobile, {
+					ajaxFormsEnabled: false
+				});
 			});
 		</script>
         <script src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>
