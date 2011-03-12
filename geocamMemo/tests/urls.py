@@ -67,6 +67,14 @@ class GeocamMemoUrls(TestCase):
         #assert
         self.assertEqual(302, guestResponse.status_code, "should redirect if not logged in")
         self.assertEqual(302, memberResponse.status_code, "should redirect upon deletion")
+        
+    def testMapViewUrl(self):
+       #arrange
+        path = "/memo/map/"   
+        template = "geocamMemo/map.html"
+
+        #act
+        self.assertPathRequiresLoginAndUsesTemplate(path, template) 
 
    
 

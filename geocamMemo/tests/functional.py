@@ -74,7 +74,7 @@ class GeocamMemoListViewTest(TestCase):
               geocount = geocount+1
         
         # assert
-        self.assertContains(response, "geoloc.png", geocount)
+        self.assertContains(response, "data-icon=\"geoCam-map\"", geocount)
         self.assertContains(response, 'data-rel="dialog"', geocount)
         
     def testEnsureMessagesAreFilteredByUser(self):
@@ -150,51 +150,6 @@ class GeocamMemoListViewTest(TestCase):
         #assert
         self.assertEqual('johndoe', get_user_string(u))
 
-    def testEnsureMapDisplaysAndIsAtMostRecentMessageLocation(self):
-        #arrange
-        message = MemoMessage.objects.all().order_by("-content_timestamp")[0]
-        lat = message.latitude
-        lon = message.longitude
-
-        #act
-        response = self.get_messages_response()
-        
-        #assert
-        self.assertContains(response, "createMap("+str(lat)+","+str(lon)+")")
-        self.assertContains(response, "<section id=\"map_canvas\"")
-    
-    def testEnsureMapDisplaysAllMessagesWithGeolocationByAllUsers(self):
-        #arrange
-        messages = get_latest_message_revisions(MemoMessage)
-                                
-        #act
-        response = self.get_messages_response()
-        
-        #assert
-        for m in messages:
-            if m.has_geolocation():
-                self.assertContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
-                self.assertContains(response, "title: '"+m.content+"'")   
-            else:
-                self.assertNotContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
-
-    def testEnsureMapCentersOnLatestMessageWithGeolocation(self):
-        # arrange
-        MemoMessage.objects.create(content="testing", 
-                                     author = User.objects.all()[0],
-                                     content_timestamp=self.now) # newest timestamp
-
-        # act
-        response = self.get_messages_response()
-
-        # assert
-        self.assertNotContains(response, "createMap(None")
-
-    def testEnsureGeolocationDetectionExists(self):
-        response = self.get_messages_response()
-        self.assertContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")  
-        self.assertContains(response, "createMap(latitude, longitude)")
-
     def testEnsureGeolocationDetectionIsNotUsedOnFilteredList(self):
         #arrange
         u = User.objects.all()[1]
@@ -211,6 +166,46 @@ class GeocamMemoListViewTest(TestCase):
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/memo/messages/')
         return response
+
+class GeocamMemoMapViewTest(TestCase):
+    fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
+
+    def testEnsureMapCentersOnLatestMessageWithGeolocation(self):
+        # arrange
+        MemoMessage.objects.create(content="testing", 
+                                     author = User.objects.all()[0],
+                                     content_timestamp=datetime.now()) # newest timestamp
+
+        # act
+        response = self.get_map_response()
+
+        # assert
+        self.assertNotContains(response, "createMap(None")
+
+    def testEnsureMapDisplaysAllMessagesWithGeolocationByAllUsers(self):
+        #arrange
+        messages = get_latest_message_revisions(MemoMessage)
+        message = messages[0]
+        lat = message.latitude
+        lon = message.longitude
+
+        #act
+        response = self.get_map_response()
+        
+        #assert
+        self.assertContains(response, "createMap("+str(lat)+","+str(lon)+")")
+        self.assertContains(response, "<section id=\"map_canvas\"")
+        for m in messages:
+            if m.has_geolocation():
+                self.assertContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
+            else:
+                self.assertNotContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
+                
+    def get_map_response(self):
+        u = User.objects.all()[0]
+        self.client.login(username=u.username, password='geocam')
+        response = self.client.get('/memo/map/')
+        return response                
 
 class GeocamMemoSingleMessageViewTest(TestCase):
     fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
@@ -230,19 +225,3 @@ class GeocamMemoSingleMessageViewTest(TestCase):
         self.assertContains(response, str(m.longitude))
         self.assertContains(response, str(m.altitude))
         self.assertContains(response, str(m.accuracy))
-
-class GeoCamMemoMapViewTest(TestCase):
-    fixtures = ['teamUsers.json', 'msgs.json']
-    
-    def testEnsureCanGetMap(self):
-        # act
-        response = self.get_map_response()
-        
-        # assert
-        self.assertContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")
-    
-    def get_map_response(self):
-        u = User.objects.all()[0]
-        self.client.login(username=u.username, password='geocam')
-        response = self.client.get('/memo/map/')
-        return response

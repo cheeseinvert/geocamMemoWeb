@@ -18,6 +18,7 @@ from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_r
 from geocamMemo.forms import MemoMessageForm
 from datetime import datetime
 
+@login_required
 def memo_map(request):
     messages = get_latest_message_revisions(MemoMessage)
     
@@ -31,10 +32,17 @@ def message_list(request):
     messages = get_latest_message_revisions(MemoMessage)
     
     return render_to_response('geocamMemo/messagelist.html', 
-                               
-                              {"gc_msg": messages,
-                               "first_geolocation":get_first_geolocation(messages)
-                               }, context_instance=RequestContext(request))
+                              {"gc_msg": messages}, 
+                                context_instance=RequestContext(request))
+
+def get_first_geolocation(messages):
+    i = 0
+    if len(messages):
+        while (i < len(messages)-1) and not messages[i].has_geolocation():
+            i += 1
+        return [ messages[i].latitude, messages[i].longitude ]
+    else:
+        return []
 
 @login_required
 def message_list_filtered_username(request, username):
@@ -45,15 +53,6 @@ def message_list_filtered_username(request, username):
                               {"gc_msg": messages,
                                "first_geolocation":get_first_geolocation(messages),
                                "userstring": get_user_string(user)}, context_instance=RequestContext(request))
-
-def get_first_geolocation(messages):
-    i = 0
-    if len(messages):
-        while (i < len(messages)-1) and not messages[i].has_geolocation():
-            i += 1
-        return [ messages[i].latitude, messages[i].longitude ]
-    else:
-        return []
 
 @login_required
 def index(request):
