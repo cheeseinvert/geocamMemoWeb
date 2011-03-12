@@ -28,7 +28,7 @@ urlpatterns = patterns('',
     url(r'^resources/(?P<path>.*)$', 'django.views.static.serve',{'document_root': "../geocamMemo/media/geocamMemo/"}),
     url(r'^memo/', include('geocamMemo.urls')),
     url(r'^talk/', include('geocamTalk.urls')),
-    url(r'^$', 'geocamMemo.views.message_list'),
+    url(r'^$', 'geocamMemo.views.index'),
 )
 
 urlpatterns = urlpatterns + patterns('',

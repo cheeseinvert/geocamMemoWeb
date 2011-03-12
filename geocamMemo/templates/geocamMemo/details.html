@@ -1,18 +1,15 @@
-{% extends "geocamMemo/base.html" %}
-
-{% block title %}
-Message - {{ message.title }}
-{% endblock %}
-
-{% block content %}
+<div data-role="page">
+<img src="http://maps.google.com/maps/api/staticmap?markers={{ message.latitude }},{{ message.longitude }}&zoom=14&size=320x400&sensor=false" />
+<!--center={{ message.latitude }},{{ message.longitude }}-->
 <dl>
+	<dt>Latitude</dt>
+	<dd>{{ message.latitude }}</dd>
     <dt>Longitude</dt>
 	<dd>{{ message.longitude }}</dd>
-    <dt>Latitude</dt>
-	<dd>{{ message.latitude }}</dd>
     <dt>Altitude</dt>
 	<dd>{{ message.altitude }}</dd>
     <dt>Accuracy</dt>
 	<dd>{{ message.accuracy }}</dd>
 </dl>
-{% endblock %}
+<a href="docs-dialogs.html" data-role="button" data-inline="true" data-icon="check" data-rel="back" data-theme="c">Okay</a>   
+</div>

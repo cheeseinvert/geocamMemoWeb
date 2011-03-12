@@ -1,0 +1,9 @@
+.ui-icon-geoCam-map
+{
+    background: url("../map.png") 50% 50% no-repeat;
+}
+
+.ui-icon-geoCam-edit
+{
+    background: url("../edit_item.png") 50% 50% no-repeat;
+}

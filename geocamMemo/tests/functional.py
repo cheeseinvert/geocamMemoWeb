@@ -231,3 +231,18 @@ class GeocamMemoSingleMessageViewTest(TestCase):
         self.assertContains(response, str(m.altitude))
         self.assertContains(response, str(m.accuracy))
 
+class GeoCamMemoMapViewTest(TestCase):
+    fixtures = ['teamUsers.json', 'msgs.json']
+    
+    def testEnsureCanGetMap(self):
+        # act
+        response = self.get_map_response()
+        
+        # assert
+        self.assertContains(response, "navigator.geolocation.getCurrentPosition(success, failure)")
+    
+    def get_map_response(self):
+        u = User.objects.all()[0]
+        self.client.login(username=u.username, password='geocam')
+        response = self.client.get('/memo/map/')
+        return response

@@ -18,6 +18,14 @@ from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_r
 from geocamMemo.forms import MemoMessageForm
 from datetime import datetime
 
+def memo_map(request):
+    messages = get_latest_message_revisions(MemoMessage)
+    
+    return render_to_response('geocamMemo/map.html',
+                              {"gc_msg": messages,
+                               "first_geolocation":get_first_geolocation(messages)
+                               }, context_instance=RequestContext(request))
+
 @login_required
 def message_list(request):
     messages = get_latest_message_revisions(MemoMessage)
@@ -49,16 +57,14 @@ def get_first_geolocation(messages):
 
 @login_required
 def index(request):
-    return render_to_response('geocamMemo/home.html',
-                              {}, context_instance=RequestContext(request))
+    return HttpResponseRedirect('/memo/messages/')
+    
+    #return render_to_response('geocamMemo/home.html',
+                              #{}, context_instance=RequestContext(request))
     
 @login_required
 def details(request, message_id):
     message = get_object_or_404(MemoMessage, pk = message_id)
-    if request.is_ajax():
-        template_to_extend = 'geocamMemo/base_ajax.html'
-    else:
-        template_to_extend = 'geocamMemo/base.html'
             
     return render_to_response('geocamMemo/details.html',
                               {'message':message},

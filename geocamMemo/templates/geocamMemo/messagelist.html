@@ -3,50 +3,11 @@
 {% block title%}GeoCam Memo Messages{% endblock %}
 
 {% block js %}
-	<script>
-    {% if not userstring %}
-	if (navigator.geolocation) {
-	   navigator.geolocation.getCurrentPosition(success, failure);
-	} else
-	{% endif %}
-	   failure(null);
-	
-	function success(position)
-	{
-		createMap(position.coords.latitude, position.coords.longitude);
-	}
-	
-	function failure(meh)
-	{
-		createMap({{ first_geolocation.0 }},{{ first_geolocation.1 }});
-	}
 
-    function createMap(latitude, longitude) {
-		var latlng = new google.maps.LatLng( latitude,longitude );
-		var myOptions = {
-			    zoom: 12,
-			    center: latlng,
-			    mapTypeControl: false,
-			    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
-			    mapTypeId: google.maps.MapTypeId.ROADMAP
-			  };	
-		var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-		
-		{% for m in gc_msg %}
-		   {% if m.has_geolocation %}
-		   var latlng = new google.maps.LatLng({{m.latitude}},{{m.longitude}});
-		   var marker = new google.maps.Marker({
-	                                            position: latlng, 
-	                                            map: map, 
-	                                            title: '{{ m.content }}' });
-		   {% endif %}
-		{% endfor %}
-	}
-	</script>
 {% endblock %}
 
 {% block content %}
-
+<a href="/memo/messages/create/" data-role="button" data-inline="true">New Message</a>
 <section id="messages">
    {% if userstring %}
       <h1>Memos by {{ userstring }}</h1>
@@ -61,24 +22,19 @@
           On {{ m.get_date_string }} 
           <a href="{% url geocamMemo.views.message_list_filtered_username m.author.username %}"> 
           {{ m.get_author_string}}</a>
-          
           {% if m.has_geolocation %}
-          <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog">
-            <img src="/resources/geoloc.png" /></a>
+              <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>
           {%endif%}
           {% if m.author.pk == user.pk or user.is_superuser %} 
-          	<a href="{% url geocamMemo.views.edit_message m.pk %}">edit</a>
-          	<a href="{% url geocamMemo.views.delete_message m.pk %}">delete</a>
+          	<a href="{% url geocamMemo.views.edit_message m.pk %}" data-inline="true" data-role="button" data-icon="geoCam-edit" data-iconpos="notext">edit</a>
+          	<a href="{% url geocamMemo.views.delete_message m.pk %}" data-inline="true" data-role="button" data-icon="delete" data-iconpos="notext">Delete</a>
           {% endif %}
+          <br />
+          <span id="message_{{m.pk}}_content">{{ m.content}}</span>
       </p>
-      <p id="message_{{m.pk}}_content">{{ m.content}}</p>
+      <!--<p id="message_{{m.pk}}_content">{{ m.content}}</p>-->
     </li>
 {% endfor %}
 </ul>
-<a href="/memo/messages/create/">New Message</a>
 </section>
-
-<section id="map_canvas" style="width: 560px; height: 400px">
-</section>
-
 {% endblock %}
