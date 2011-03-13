@@ -15,7 +15,7 @@ class GeocamTalkMessageSaveTest(TestCase):
     """
     Tests for GeocamTalk saving messages
     """   
-    fixtures = ['teamUsers.json', 'msgs.json']
+    fixtures = ['demoUsers.json', 'demoTalkMessages.json']
 
     cmusv_lat = 37.41029
     cmusv_lon = -122.05944
@@ -33,7 +33,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         msgCnt = len(get_latest_message_revisions(TalkMessage))
         
         content = "This is a message"
-        author = User.objects.get(username="avagadia")
+        author = User.objects.get(username="rhornsby")
         
         TalkMessage.objects.create(content=content,
                                     latitude=GeocamTalkMessageSaveTest.cmusv_lat,
@@ -59,7 +59,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         
         msgCnt = len(get_latest_message_revisions(TalkMessage))
         content = "Whoa man, that burning building almost collapsed on me!"
-        author = User.objects.get(username="avagadia")
+        author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         
         response = self.client.post("/talk/messages/create/",
@@ -77,7 +77,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         """ submit the Talk Message without content through the form """
         
         msgCnt = len(get_latest_message_revisions(TalkMessage))
-        author = User.objects.get(username="avagadia")
+        author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         
         response = self.client.post("/talk/messages/create/",
@@ -104,7 +104,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
     
     def test_MessageJsonFeed(self):
-        author = User.objects.get(username="avagadia")
+        author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         ordered_messages = TalkMessage.objects.all().order_by('content_timestamp').reverse()
         stringified_msg_list = [{'pk':msg.pk,

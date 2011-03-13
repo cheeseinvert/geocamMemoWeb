@@ -12,7 +12,7 @@ from geocamMemo.models import get_latest_message_revisions
 import json
 
 class GeocamTestUrls(TestCase):
-    fixtures = ['teamUsers.json', 'msgs.json']
+    fixtures = ['demoUsers.json', 'demoTalkMessages.json']
     
     def testMessageListUrl(self):
         #arrange
@@ -57,4 +57,4 @@ class GeocamTestUrls(TestCase):
     def getResponse(self, path):
         return self.client.get(path)
     def login(self):
-        return self.client.login(username = "skarp", password = "geocam")
+        return self.client.login(username = "rhornsby", password = "geocam")
