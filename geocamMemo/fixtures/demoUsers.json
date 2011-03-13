@@ -1,0 +1,29 @@
+[
+{"pk": 1, "model": "auth.user", "fields": 
+   {"username": "root", "first_name": "", "last_name": "", "is_active": true, "is_superuser": true, "is_staff": true, "last_login": "2011-03-13 09:57:19", "groups": [], "user_permissions": [], "password": "sha1$05deb$9c38414873de562090e1a970cc17b8f5d458f6c2", "email": "geocam@geocam.org", "date_joined": "2011-03-13 09:55:44"}
+}
+, 
+{"pk": 2, "model": "auth.user", "fields": 
+   {"username": "rhornsby", "first_name": "Rufus", "last_name": "Hornsby", "is_active": true, "is_superuser": false, "is_staff": false, "last_login": "2011-03-13 09:59:17", "groups": [], "user_permissions": [], "password": "sha1$73ed9$46ef62242fee17cb5192121d024257cb341ff568", "email": "rhornsby@geocam.org", "date_joined": "2011-03-13 09:59:17"}
+}
+, 
+{"pk": 3, "model": "auth.user", "fields": 
+   {"username": "jmiller", "first_name": "Jackie", "last_name": "Miller", "is_active": true, "is_superuser": false, "is_staff": false, "last_login": "2011-03-13 10:00:11", "groups": [], "user_permissions": [], "password": "sha1$a884c$9a68fa804c3cdcd95b91689b6507afb7c551416a","email": "jmiller@geocam.org", "date_joined": "2011-03-13 10:00:11"}
+}
+, 
+{"pk": 4, "model": "auth.user", "fields": 
+   {"username": "rboethlisberger", "first_name": "Ryan", "last_name": "Boethlisberger", "is_active": true, "is_superuser": false, "is_staff": false, "last_login": "2011-03-13 10:00:27", "groups": [], "user_permissions": [], "password": "sha1$394d0$911d0636621e42fc75e27581a0feae7b0b96d00a", "email": "rboethlisberger@geocam.org", "date_joined": "2011-03-13 10:00:27"}
+}
+, 
+{"pk": 5, "model": "auth.user", "fields": 
+   {"username": "acurie", "first_name": "Alice", "last_name": "Curie", "is_active": true, "is_superuser": false, "is_staff": false, "last_login": "2011-03-13 10:00:40", "groups": [], "user_permissions": [], "password": "sha1$22026$cc17025d3602c56f8bb109026c1599cd899ee7f5", "email": "acurie@geocam.org", "date_joined": "2011-03-13 10:00:40"}
+}
+, 
+{"pk": 6, "model": "auth.user", "fields": 
+   {"username": "firstnameonly", "first_name": "Ken", "last_name": "", "is_active": true, "is_superuser": false, "is_staff": false, "last_login": "2011-03-13 10:04:29", "groups": [], "user_permissions": [], "password": "sha1$de231$02d06b008dc32beddafe19b494216817f2dadcdb", "email": "", "date_joined": "2011-03-13 10:04:29"}
+}
+, 
+{"pk": 7, "model": "auth.user", "fields": 
+   {"username": "lastnameonly", "first_name": "", "last_name": "Andersen", "is_active": true, "is_superuser": false, "is_staff": false, "last_login": "2011-03-13 10:05:14", "groups": [], "user_permissions": [], "password": "sha1$f9482$e14d1700da9b5f5b92569b8406111ba817d2f6cd", "email": "", "date_joined": "2011-03-13 10:05:14"}
+}
+]
