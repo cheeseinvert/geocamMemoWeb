@@ -12,7 +12,7 @@ from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_r
 
 
 class GeocamMemoListViewTest(TestCase):
-    fixtures = ['demoUsers.json', 'messagelist_GeocamMessage.json']
+    fixtures = ['demoUsers.json', 'demoMemoMessages.json']
     
     def setUp(self):
         self.now = datetime.now()
@@ -168,7 +168,8 @@ class GeocamMemoListViewTest(TestCase):
         return response
 
 class GeocamMemoMapViewTest(TestCase):
-    fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
+    fixtures = ['demoUsers.json', 'demoMemoMessages.json']
+
 
     def testEnsureMapCentersOnLatestMessageWithGeolocation(self):
         # arrange
@@ -185,7 +186,15 @@ class GeocamMemoMapViewTest(TestCase):
     def testEnsureMapDisplaysAllMessagesWithGeolocationByAllUsers(self):
         #arrange
         messages = get_latest_message_revisions(MemoMessage)
-        message = messages[0]
+        assert not messages[0].has_geolocation(), "Fixtures should have a non-geolocated message as latest"
+        
+        #let's find the first message that has a geoloction and ensure the map is centered on it 
+        message = None
+        for m in messages:
+            if m.has_geolocation():
+                message = m
+                break 
+            
         lat = message.latitude
         lon = message.longitude
 
@@ -205,10 +214,10 @@ class GeocamMemoMapViewTest(TestCase):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/memo/map/')
-        return response                
+        return response
 
 class GeocamMemoSingleMessageViewTest(TestCase):
-    fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
+    fixtures = ['demoUsers.json', 'demoMemoMessages.json']
 
     def testEnsureProperFieldsAreDisplayed(self):
         # arrange

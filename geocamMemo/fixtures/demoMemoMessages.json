@@ -58,4 +58,8 @@
 {"pk": 18, "model": "geocamMemo.memomessage", "fields": 
 {"author": 2, "altitude": null, "longitude": -122.060353, "heading": null, "content": "Initializing search from base camp. Clear skies should allow for thorough search today. Smoke, potentially fire, visible in the distance.", "content_timestamp": "2011-03-13 10:27:45", "position_timestamp": "2011-03-13 10:27:42", "latitude": 37.409409, "speed": null, "id": "bfeaaeecd86f44c8ab1acb510dc4c7dc", "accuracy": 60.0}
 }
+,
+{"pk": 19, "model": "geocamMemo.memomessage", "fields": 
+{"author": 2, "altitude": null, "longitude": null, "heading": null, "content": "Crap, my geolocation service crashed and I am not providing geoloc with this message. This message should be the latest to make sure we gracefully fall back to the next available geolocated message.", "content_timestamp": "2011-03-13 11:23:21", "position_timestamp": null, "latitude": null, "speed": null, "id": "e1945c241bde4238ac0c2869812a97be", "accuracy": null}
+}
 ]
