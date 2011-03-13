@@ -10,14 +10,15 @@ from datetime import datetime
 from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
 
 class GeocamMemoUnitTest(TestCase):
-    fixtures = ['geocamMessage.json']
+    fixtures = ['demoMemoMessages.json']
     
     def setUp(self):
         self.now = datetime.now()
     
     def testEnsureMessageTitleFormatIsCorrect(self):
         # arrange
-        message = MemoMessage.objects.get(pk = 777)
+        message = MemoMessage.objects.create(
+            content="012345678901234567890123456789", content_timestamp=d, author_id=1)
         
         # act
         title = message.title()
