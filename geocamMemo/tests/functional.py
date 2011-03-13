@@ -12,7 +12,7 @@ from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_r
 
 
 class GeocamMemoListViewTest(TestCase):
-    fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
+    fixtures = ['demoUsers.json', 'messagelist_GeocamMessage.json']
     
     def setUp(self):
         self.now = datetime.now()
