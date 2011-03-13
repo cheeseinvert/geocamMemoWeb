@@ -10,7 +10,7 @@ from datetime import datetime
 from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
 
 class GeocamMemoUrls(TestCase):
-    fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
+    fixtures = ['demoUsers.json', 'demoMemoMessages.json']
     
     def testMessageListUrl(self):
         #arrange

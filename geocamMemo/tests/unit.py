@@ -18,7 +18,7 @@ class GeocamMemoUnitTest(TestCase):
     def testEnsureMessageTitleFormatIsCorrect(self):
         # arrange
         message = MemoMessage.objects.create(
-            content="012345678901234567890123456789", content_timestamp=d, author_id=1)
+            content="012345678901234567890123456789", content_timestamp=self.now, author_id=1)
         
         # act
         title = message.title()

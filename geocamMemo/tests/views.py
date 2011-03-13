@@ -10,7 +10,7 @@ from datetime import datetime
 from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
 
 class GeocamMemoMessageSaveTest(TestCase):
-    fixtures = ['teamUsers.json', 'msgs.json']
+    fixtures = ['demoUsers.json', 'demoMemoMessages.json']
 
     cmusv_lat = 37.41029
     cmusv_lon = -122.05944
@@ -28,7 +28,7 @@ class GeocamMemoMessageSaveTest(TestCase):
         msgCnt = MemoMessage.objects.all().count()
         
         content = "This is a message"
-        author = User.objects.get(username="avagadia")
+        author = User.objects.get(username="rhornsby")
         
         MemoMessage.objects.create(content=content,
                                     latitude=GeocamMemoMessageSaveTest.cmusv_lat,
@@ -52,7 +52,7 @@ class GeocamMemoMessageSaveTest(TestCase):
     def test_submitFormToCreateMessage(self):
         
         content = "Whoa man, that burning building almost collapsed on me!"
-        author = User.objects.get(username="avagadia")
+        author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         
         response = self.client.post("/memo/messages/create/",
@@ -67,7 +67,7 @@ class GeocamMemoMessageSaveTest(TestCase):
         response = self.client.get('/')
         # expect redirect to the login page:
         self.assertEqual(response.status_code, 302, "We didnt have to login to see the index page")
-        self.assertTrue(self.client.login(username='adamg',
+        self.assertTrue(self.client.login(username='jmiller',
                                         password='geocam'))
         response = self.client.get('/')
         # expect success because we are logged in:
@@ -80,7 +80,7 @@ class GeocamMemoMessageSaveTest(TestCase):
             self.assertTrue(self.client.login(username=u.username, password='geocam'))
 
 class GeocamMemoMessageEditAndDeleteTest(TestCase):
-    fixtures = ['teamUsers.json', 'msgs.json']
+    fixtures = ['demoUsers.json', 'demoMemoMessages.json']
     
     def loginUser(self, author_pk):
         user = User.objects.get(pk=author_pk)
@@ -152,13 +152,3 @@ class GeocamMemoMessageEditAndDeleteTest(TestCase):
         newMsgCnt = MemoMessage.objects.all().count()
         self.assertEqual(msgCnt - numRevs, newMsgCnt, "deleteMessage Failed")
         
-class GeocamMemoListViewTest(TestCase):
-    fixtures = ['messagelist_User.json', 'messagelist_GeocamMessage.json']
-    
-    def setUp(self):
-        self.now = datetime.now()
-        pass
-    
-    def tearDown(self):
-        pass
-
