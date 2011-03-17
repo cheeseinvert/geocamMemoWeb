@@ -46,7 +46,8 @@ def create_message(request):
             # Since revisions are now saved to db, this timestamp
             # can't just be auto set since we want to preserve from creation time
             msg.content_timestamp = datetime.now()
-            msg.save()    
+            msg.save()
+            form.save_m2m()
             return HttpResponseRedirect('/talk/messages/')
         else:
             return render_to_response('geocamTalk/message_form.html',

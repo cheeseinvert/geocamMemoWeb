@@ -127,6 +127,29 @@ class GeocamTalkMessageSaveTest(TestCase):
         response_ordered_messages = response.context["gc_msg"]
         self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
     
+    def test_MyMessageList(self):
+        ''' This test is attempting to verify that we see messages for specified user or broadcast '''
+        me = User.objects.all()[0]
+        sender = User.objects.all()[1]
+        msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=sender)
+        msg.recipients.add(me)
+        msg.recipients.add(User.objects.all()[2])
+
+        # Dont save this message again since it will get a new revision and the join table is doesnt get a new entry
+ 
+        print "msg is %s" % msg
+        response = self._get_messages_response(u=me)
+        print "me is %s" % me
+        print "me's messages are %s" % me.received_messages.all()
+        expectedMessages = me.received_messages.all()
+        
+        print "expected Messages it %s\n" % len(expectedMessages)
+        #expectedMessages = TalkMessage.objects.filter(recipients__username=me.username).filter(recipients=None)
+        gotMessages = response.context["gc_msg"]
+        print "We are expecting %s messages!" % len(expectedMessages)
+        for i in range(len(expectedMessages)):
+            self.assertEqual(expectedMessages[i],gotMessages[i], "My messages doesn't contain an expected message: %s" % expectedMsg[i])
+        
     def test_MessageJsonFeed(self):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
@@ -140,9 +163,9 @@ class GeocamTalkMessageSaveTest(TestCase):
         response = self.client.get('/talk/messagefeed.json')
         self.assertContains(response, jsonSerializedString)
 
-    def _get_messages_response(self):
-        
-        u = User.objects.all()[0]
+    def _get_messages_response(self, u=None):
+        if u is None:
+            u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
         response = self.client.get('/talk/messages/')
         return response

@@ -21,6 +21,15 @@ class GeocamTestUrls(TestCase):
 
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
+        
+    def testMyMessageListUrl(self):
+        me = User.objects.all()[0]
+        #arrange
+        path = "/talk/messages/%s" % me.username   
+        template = "geocamTalk/messagelist.html"
+
+        #act
+        self.assertPathRequiresLoginAndUsesTemplate(path, template)
    
     def testMessageCreateUrl(self):
         #arrange

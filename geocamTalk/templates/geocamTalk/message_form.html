@@ -78,6 +78,10 @@
 	{% csrf_token %}
 	<table>
         <tr>
+        <td>{{ form.recipients.label_tag }}</td>
+        <td>{{ form.recipients }}</td>
+        </tr>
+        <tr>
         <td>{{ form.content.label_tag }}</td>
         <td>{{ form.content }}</td>
         </tr>
