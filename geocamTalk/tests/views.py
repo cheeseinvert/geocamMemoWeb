@@ -71,7 +71,31 @@ class GeocamTalkMessageSaveTest(TestCase):
         self.assertEqual(response.status_code, 302, "submitFormToCreateMessage Failed")
         newMsgCnt = len(get_latest_message_revisions(TalkMessage))
         self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message through view Failed.")
+ 
+    def test_submitFormToCreateMessageWithRecipients(self):
+        """ submit the Talk Message through the form """
         
+        msgCnt = len(get_latest_message_revisions(TalkMessage))
+        content = "Whoa man, that burning building almost collapsed on me!"
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')
+        
+        recipienta = User.objects.all()[1]
+        recipientb = User.objects.all()[2]
+
+        response = self.client.post("/talk/messages/create/",
+                                  data={"content":content,
+                                        "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
+                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon,
+                                        "author":author.pk,
+                                        "recipients":[recipienta.pk, recipientb.pk]})
+        
+        # should be redirected when form post is successful:
+        self.assertEqual(response.status_code, 302, "submitFormToCreateMessage Failed")
+        newMsgCnt = len(get_latest_message_revisions(TalkMessage))
+        self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message through view Failed.") 
+        newMsg = get_latest_message_revisions(TalkMessage)[0]
+        self.assertEqual(len(newMsg.recipients.all()), 2, "Different number of recipients than expected")
         
     def test_submitFormWithoutContentTalkMessage(self):
         """ submit the Talk Message without content through the form """
