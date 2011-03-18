@@ -149,7 +149,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         expectedMessages = sorted(expectedMessages, self.cmpMessageSortNewestFirst) 
         
         gotMessages = response.context["gc_msg"]
-
+        self.assertEqual(me.username, response.context["username"])
         self.assertEqual(len(gotMessages), len(expectedMessages), "My messages response is not the same size as expected")        
 
         for i in range(len(expectedMessages)):
@@ -201,7 +201,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         expectedMessages = sorted(expectedMessages, self.cmpMessageSortNewestFirst) 
 
         for i in range(len(expectedMessages)):
-            self.assertContains(response, expectedMessages[i], "My messages doesn't contain an expected message: %s" % expectedMessages[i])
+            self.assertContains(response, expectedMessages[i].content)
 
 
     def _get_messages_response(self, u=None):

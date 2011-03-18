@@ -41,7 +41,7 @@ class GeocamTestUrls(TestCase):
     
     def testMessageJSONFeedUrl(self):
         #arrange
-        path = "/memo/messagefeed"
+        path = "/talk/messagefeed"
         
         #act
         guestResponse = self.getResponse(path)
@@ -55,7 +55,7 @@ class GeocamTestUrls(TestCase):
     def testMyMessageJSONFeedUrl(self):
         #arrange
         me = User.objects.all()[0]
-        path = "/memo/messagefeed/%s" % me.username   
+        path = "/talk/messagefeed/%s" % me.username   
         
         #act
         guestResponse = self.getResponse(path)

@@ -35,7 +35,7 @@ def message_list(request, username=None):
         messages = sorted(messages, cmpMessageSortNewestFirst)
 
     return render_to_response('geocamTalk/messagelist.html', 
-                              {"gc_msg": messages}, context_instance=RequestContext(request))
+                              {"gc_msg": messages, "username": username}, context_instance=RequestContext(request))
 
 def cmpMessageSortNewestFirst(message1, message2):
     if(message1.content_timestamp > message2.content_timestamp):
@@ -46,8 +46,24 @@ def cmpMessageSortNewestFirst(message1, message2):
         return 1
 
 @login_required
-def feedMessages(request):
-    ordered_messages = get_latest_message_revisions(TalkMessage)
+def feedMessages(request, username=None):
+    
+    if(username == None):    
+        ordered_messages = get_latest_message_revisions(TalkMessage)
+    else:
+        user = get_object_or_404(User, username=username)
+        allOfMyMessages = set()        
+        for to_me in user.received_messages.all(): # messages to me
+            allOfMyMessages.add(to_me)
+        for from_me in  user.geocamtalk_talkmessage_set.all():# messages from me
+            allOfMyMessages.add(from_me)
+        for broadcast in TalkMessage.objects.all(): # broadcast messages
+            if(broadcast.recipients.count() == 0):            
+                allOfMyMessages.add(broadcast)
+        
+        ordered_messages = list(allOfMyMessages)
+        ordered_messages = sorted(ordered_messages, cmpMessageSortNewestFirst)
+
     stringified_msg_list = [{'pk':msg.pk,
                              'author':msg.get_author_string(), 
                             'content':msg.content, 
