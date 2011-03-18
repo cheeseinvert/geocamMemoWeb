@@ -1,7 +1,7 @@
 [
     {
-        "pk": 1, 
-        "model": "tests.story", 
+        "pk": "abc", 
+        "model": "tests.uuidstory", 
         "fields": {
             "body": "First revision.", 
             "slug": "this-is-a-little-story", 
@@ -10,8 +10,8 @@
         }
     }, 
     {
-        "pk": 2, 
-        "model": "tests.story", 
+        "pk": "def", 
+        "model": "tests.uuidstory", 
         "fields": {
             "body": "Second revision.", 
             "slug": "this-is-a-little-story", 
@@ -20,8 +20,8 @@
         }
     }, 
     {
-        "pk": 3, 
-        "model": "tests.story", 
+        "pk": "ghi", 
+        "model": "tests.uuidstory", 
         "fields": {
             "body": "Third and latest revision.", 
             "slug": "this-is-a-little-story-final", 
@@ -30,8 +30,8 @@
         }
     }, 
     {
-        "pk": 4, 
-        "model": "tests.story", 
+        "pk": "aaa", 
+        "model": "tests.uuidstory", 
         "fields": {
             "body": "First rev.", 
             "slug": "this-is-a-second-story", 
@@ -40,8 +40,8 @@
         }
     }, 
     {
-        "pk": 5, 
-        "model": "tests.story", 
+        "pk": "bbb", 
+        "model": "tests.uuidstory", 
         "fields": {
             "body": "Second rev.", 
             "slug": "this-is-a-second-story", 
