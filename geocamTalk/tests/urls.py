@@ -41,7 +41,21 @@ class GeocamTestUrls(TestCase):
     
     def testMessageJSONFeedUrl(self):
         #arrange
-        path = "/memo/messages.json"
+        path = "/memo/messagefeed"
+        
+        #act
+        guestResponse = self.getResponse(path)
+        self.login();
+        memberResponse = self.getResponse(path)
+        
+        #assert
+        self.assertEqual(302, guestResponse.status_code, "should redirect if not logged in")
+        self.assertEqual(200, memberResponse.status_code, "should display if logged in")
+
+    def testMyMessageJSONFeedUrl(self):
+        #arrange
+        me = User.objects.all()[0]
+        path = "/memo/messagefeed/%s" % me.username   
         
         #act
         guestResponse = self.getResponse(path)
