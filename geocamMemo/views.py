@@ -35,6 +35,15 @@ def message_list(request):
                               {"gc_msg": messages}, 
                                 context_instance=RequestContext(request))
 
+def message_list_json(request):
+    messages = get_latest_message_revisions(MemoMessage)
+    
+    return render_to_response('geocamMemo/messagelist.html', 
+                              {"gc_msg": messages}, 
+                                context_instance=RequestContext(request))
+
+
+
 def get_first_geolocation(messages):
     i = 0
     if len(messages):
