@@ -5,7 +5,7 @@
 # __END_LICENSE__
 
 from django.db import models
-from geocamMemo.models import GeocamMessage
+from geocamMemo.models import GeocamMessage,get_user_string
 from django.contrib.auth.models import User
 
 class TalkMessage(GeocamMessage):
@@ -30,3 +30,12 @@ class TalkMessage(GeocamMessage):
         return str
     
     recipients = models.ManyToManyField(User, null=True, blank=True, related_name="received_messages")
+    
+    def get_recipients_string(self):
+        recipient_string = ""
+        for r in self.recipients.all():
+            try:  
+                recipient_string += ',"%s"' % get_user_string(r)               
+            except:
+                recipient_string = '"%s"' % get_user_string(r)                       
+        return '[%s]' % recipient_string

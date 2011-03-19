@@ -7,7 +7,14 @@
 <dl id="message_list">
 {% for m in gc_msg %}
 	<dt id="message_{{m.pk}}">
-	  On {{ m.get_date_string }} {{ m.get_author_string}} said
+	  On {{ m.get_date_string }}
+	  {% if recipient %} 
+	  <a href="{% url geocamTalk.views.message_list recipient.username m.author.username %}"> 
+          {{ m.get_author_string}}</a>
+      {% else %}
+          {{ m.get_author_string}}
+      {% endif %}
+	 	said
 	  {% if m.has_geolocation %}<img src="/resources/geoloc.png" />{%endif%}
 	</dt>
 	<dd id="message_{{m.pk}}_content">
@@ -31,7 +38,16 @@
         // [{"content": "The hospital is full, no more beds...", "content_timestamp": "02/19 21:35:52", "has_geolocation": -122.4048743, "author": "Adam Grant"}, 
         //  {"content": "Casualties are littering the streets!", "content_timestamp": "02/19 21:35:29", "has_geolocation": -122.4048743, "author": "Adam Grant"}, 
         //  {"content": "Some crazy stuff is happening in this neighborhood.", "content_timestamp": "02/19 21:34:46", "has_geolocation": -122.4048743, "author": "Adam Grant"}]
-        $.getJSON('/talk/messagefeed/{{username}}', function(data) {
+        {% if author %}
+        	var url = '/talk/messagefeed/{{recipient.username}}/{{author.username}}'
+        {% else %}
+        	{% if recipient %}   
+        		var url = '/talk/messagefeed/{{recipient.username}}'
+        	{% else %}   
+        		var url = '/talk/messagefeed'
+        	{% endif %}
+        {% endif %}
+        $.getJSON(url, function(data) {
             var html_str = "";	
         	for (var i in data) {
         		var msg = data[i];
@@ -40,6 +56,9 @@
         		var content_timestamp = msg['content_timestamp'];
         		var has_geolocation = msg['has_geolocation'];
         		var author = msg['author'];
+        		{% if recipient %}
+        			author = '<a href="/talk/messages/{{ recipient.username }}/' +author+ '">' +author+ '</a>' ;
+        		{% endif %}
         		
         		html_str += '<dt id="message_'+pk+'">';
         		html_str += 'On '+content_timestamp+' '+author+' said';

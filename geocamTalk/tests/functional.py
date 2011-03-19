@@ -51,7 +51,7 @@ class GeocamTalkListViewTest(TestCase):
         
         #assert
         for m in recipient_messages:
-            link_to_recipient_messages_from_author = 'href="/talk/messages/%s/%s' % (recipient.username, author.username)            
+            link_to_recipient_messages_from_author = 'href="/talk/messages/%s/%s"' % (recipient.username, author.username)            
             self.assertContains(response, link_to_recipient_messages_from_author)
             
     def get_recipient_messages_response_filtered_by_author(self, recipient, author):

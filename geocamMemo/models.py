@@ -74,10 +74,10 @@ class MemoMessage(GeocamMessage):
     pass
 
 def get_user_string(user):
-    if user.first_name and user.last_name:
-        return (user.first_name + " " + user.last_name)
-    else:
-        return (user.username)
+    #if user.first_name and user.last_name:
+    #    return (user.first_name + " " + user.last_name)
+    #else:
+    return (user.username)
 
 
 def get_latest_message_revisions(classtype):
