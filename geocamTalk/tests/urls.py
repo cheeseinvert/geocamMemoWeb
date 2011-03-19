@@ -77,6 +77,18 @@ class GeocamTestUrls(TestCase):
         self.assertEqual(200, memberResponse.status_code, "should display if logged in")
         self.assertTemplateUsed(memberResponse, template)
         
+    def testMessageListFilteredByUserUrl(self):
+        author = User.objects.all()[1]
+        recipient = User.objects.all()[2]
+        
+        #arrange
+        # url design is /talk/messages/<recipient username>/<author username>
+        path = "/talk/messages/%s/%s" % (recipient.username, author.username)
+        template = "geocamTalk/messagelist.html"
+        
+        #act
+        self.assertPathRequiresLoginAndUsesTemplate(path, template)
+        
     def getResponse(self, path):
         return self.client.get(path)
     def login(self):
