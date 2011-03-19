@@ -8,6 +8,26 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
 from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
+import json
+
+class GeocamMemoMessageListJsonFeed(TestCase):
+    fixtures = ['demoUsers.json', 'demoMemoMessages.json']
+    
+    def test_getMessageListJsonFeed(self):
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')
+        ordered_messages = get_latest_message_revisions(MemoMessage);
+        stringified_msg_list = [{'pk':msg.pk,
+                                 'author':msg.get_author_string(), 
+                                 'content':msg.content, 
+                                 'content_timestamp':msg.get_date_string(),
+                                 'latitude':msg.latitude,
+                                 'longitude':msg.longitude,
+                                 'accuracy':msg.accuracy
+                                 } for msg in ordered_messages ]
+        jsonSerializedString = json.dumps(stringified_msg_list)
+        response = self.client.get('/memo/messages.json')
+        self.assertContains(response, jsonSerializedString)
 
 class GeocamMemoMessageSaveTest(TestCase):
     fixtures = ['demoUsers.json', 'demoMemoMessages.json']

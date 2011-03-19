@@ -4,8 +4,7 @@
 # All Rights Reserved.
 # __END_LICENSE__
 
-from django.shortcuts import render_to_response
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.template import RequestContext
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.auth import authenticate, login, logout
@@ -17,6 +16,7 @@ from django import forms
 from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
 from geocamMemo.forms import MemoMessageForm
 from datetime import datetime
+import json
 
 @login_required
 def memo_map(request):
@@ -36,11 +36,18 @@ def message_list(request):
                                 context_instance=RequestContext(request))
 
 def message_list_json(request):
-    messages = get_latest_message_revisions(MemoMessage)
+    ordered_messages = get_latest_message_revisions(MemoMessage);
+    stringified_msg_list = [{'pk':msg.pk,
+                             'author':msg.get_author_string(), 
+                             'content':msg.content, 
+                             'content_timestamp':msg.get_date_string(),
+                             'latitude':msg.latitude,
+                             'longitude':msg.longitude,
+                             'accuracy':msg.accuracy
+                             } for msg in ordered_messages ]
+    jsonSerializedString = json.dumps(stringified_msg_list)    
     
-    return render_to_response('geocamMemo/messagelist.html', 
-                              {"gc_msg": messages}, 
-                                context_instance=RequestContext(request))
+    return HttpResponse(json.dumps(stringified_msg_list))
 
 
 
