@@ -5,12 +5,55 @@ import difflib
 from datetime import date
 from django.db import models
 from django.utils.translation import ugettext as _
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.db import IntegrityError
 from django.contrib.contenttypes.models import ContentType
-from revisions import managers
+from revisions import managers, utils
 import inspect
 
-class VersionedModel(models.Model):        
+# the crux of all errors seems to be that, with VersionedBaseModel, 
+# doing setattr(self, self.pk_name, None) does _not_ lead to creating
+# a new object, and thus versioning as a whole doesn't work
+
+# the only thing lacking from the VersionedModelBase is a version id.
+# You may use VersionedModelBase if you need to specify your own 
+# AutoField (e.g. using UUIDs) or if you're trying to adapt an existing
+# model to ``django-revisions`` and have an AutoField not named
+# ``vid``.
+
+class VersionedModelBase(models.Model, utils.ClonableMixin):
+    @classmethod
+    def get_base_model(cls):
+        base = cls
+        while isinstance(base._meta.pk, models.OneToOneField):
+            base = base._meta.pk.rel.to
+        return base    
+
+    @property
+    def base_model(self):
+        return self.get_base_model()
+
+    @property
+    def pk_name(self):
+        return self.base_model._meta.pk.attname
+
+    # For UUIDs in particular, we need a way to know the order of revisions
+    # e.g. through a ``changed`` datetime field.
+    @classmethod
+    def get_comparator_name(cls):
+        if hasattr(cls.Versioning, 'comparator'):
+            return cls.Versioning.comparator
+        else:
+            return cls.get_base_model()._meta.pk.attname
+
+    @property
+    def comparator_name(self):
+        return self.get_comparator_name()
+
+    @property
+    def comparator(self):
+        return getattr(self, self.comparator_name)
+
     @classmethod
     def get_implementations(cls):
         models = [contenttype.model_class() for contenttype in ContentType.objects.all()]
@@ -27,41 +70,41 @@ class VersionedModel(models.Model):
     def _base_table(self):
         return self._base_model._meta.db_table
 
-    vid = models.AutoField(primary_key=True)
-    id = models.CharField(max_length=36, editable=False, null=True, db_index=True)
+    # content bundle id
+    cid = models.CharField(max_length=36, editable=False, null=True, db_index=True)
     
     # managers
     latest = managers.LatestManager()
     objects = models.Manager()
-    
+
     # all related revisions, plus easy shortcuts to the previous and next revision
     def get_revisions(self):
-        qs = self.__class__.objects.filter(id=self.id).order_by('vid')
+        qs = self.__class__.objects.filter(cid=self.cid).order_by(self.comparator_name)
         
         try:
-            qs.prev = qs.filter(vid__lt=self.vid).order_by('-vid')[0]
+            qs.prev = qs.filter(**{self.comparator_name + '__lt': self.comparator}).order_by('-' + self.comparator_name)[0]
         except IndexError:
             qs.prev = None
         try:
-            qs.next = qs.filter(vid__gt=self.vid)[0]
+            qs.next = qs.filter(**{self.comparator_name + '__gt': self.comparator})[0]
         except IndexError:
             qs.next = None
         
         return qs
     
     def check_if_latest_revision(self):
-        return self.vid >= max([version.vid for version in self.get_revisions()])
+        return self.comparator >= max([version.comparator for version in self.get_revisions()])
     
     @classmethod
     def fetch(cls, criterion):
-        if isinstance(criterion, int):
+        if isinstance(criterion, int) or isinstance(criterion, str):
             return cls.objects.get(pk=criterion)
         elif isinstance(criterion, models.Model):
             return criterion
         elif isinstance(criterion, date):
             pub_date = cls.Versioning.publication_date
             if pub_date:
-                return cls.objects.filter(**{pub_date + '__lte': criterion}).order('-vid')[0]
+                return cls.objects.filter(**{pub_date + '__lte': criterion}).order('-' + self.comparator_name)[0]
             else:
                 raise ImproperlyConfigured("""Please specify which field counts as the publication
                     date for this model. You can do so inside a Versioning class. Read the docs 
@@ -77,11 +120,10 @@ class VersionedModel(models.Model):
         if revert_to_obj.pk not in self.get_revisions().values_list('pk', flat=True):
             raise IndexError("Cannot revert to a primary key that is not part of the content bundle.")
         else:
-            revert_to_obj.save()
-            return revert_to_obj
+            return revert_to_obj.revise()
             
     def get_latest_revision(self):
-        return self.get_revisions().order_by('-vid')[0]
+        return self.get_revisions().order_by('-' + self.comparator)[0]
     
     def make_current_revision(self):
         if not self.check_if_latest_revision():
@@ -92,6 +134,26 @@ class VersionedModel(models.Model):
         to = unicode(getattr(to, field)).split()
         differ = difflib.HtmlDiff()
         return differ.make_table(frm, to)
+
+    def _get_unique_checks(self, exclude=[]):
+        # for parity with Django's unique_together notation shortcut
+        def parse_shortcut(unique_together):
+            unique_together = tuple(unique_together)
+            if len(unique_together) and isinstance(unique_together[0], basestring):
+                unique_together = (unique_together, )    
+            return unique_together
+        
+        # Django actually checks uniqueness for a single field in the very same way it
+        # does things for unique_together, something we happily take advantage of
+        unique = tuple([(field,) for field in getattr(self.Versioning, 'unique', ())])
+        unique_together = \
+            unique + \
+            parse_shortcut(getattr(self.Versioning, 'unique_together', ())) + \
+            parse_shortcut(getattr(self._meta, 'unique_together', ()))
+        
+        model = self.__class__()
+        model._meta.unique_together = unique_together
+        return models.Model._get_unique_checks(model, exclude)          
 
     def _get_attribute_history(self, name):
         if self.__dict__.get(name, False):
@@ -151,21 +213,23 @@ class VersionedModel(models.Model):
         specific to each revision, like a log message.
         """
         for field in self.Versioning.clear_each_revision:
-            super(VersionedModel, self).__setattr__(field, '')
-    
-    def save(self, new_revision=True, *vargs, **kwargs):
-        # If we set the primary key (vid) to None, Django is smart
-        # enough to save a new revision for us, instead of updating
-        # the existing one.
-        # 
-        # We don't make a new revision for small changes.
-        if new_revision and not getattr(self, 'is_small_change', False):
-            # little known Django implementation detail: 
-            # to clone a model in cases of concrete inheritance, you must
-            # set both the self.pk reference and the actual primary key
-            # to None
-            self.pk = self.vid = None
-        
+            super(VersionedModelBase, self).__setattr__(field, '')
+
+    def validate_bundle(self):
+        # uniqueness constraints per bundle can't be checked at the database level, 
+        # which means we'll have to do so in the save method
+        if getattr(self.Versioning, 'unique_together', None) or getattr(self.Versioning, 'unique', None):
+            # replace ValidationError with IntegrityError because this is what users will expect
+            try:
+                self.validate_unique()
+            except ValidationError, error:
+                raise IntegrityError(error)
+
+    def revise(self):
+        self.validate_bundle()
+        return self.clone()
+
+    def save(self, *vargs, **kwargs):       
         # The first revision of a piece of content won't have a bundle id yet, 
         # and because the object isn't persisted in the database, there's no 
         # primary key either, so we use a UUID as the bundle ID.
@@ -173,24 +237,32 @@ class VersionedModel(models.Model):
         # (Note for smart alecks: Django chokes on using super/save() more than
         # once in the save method, so doing a preliminary save to get the PK
         # and using that value for a bundle ID is rather hard.)
-        if not self.id:
-            self.id = uuid.uuid4().hex
-        
-        super(VersionedModel, self).save(*vargs, **kwargs)
+        if not self.cid:
+            self.cid = uuid.uuid4().hex
+
+        self.validate_bundle()
+        super(VersionedModelBase, self).save(*vargs, **kwargs)
         
     def delete_revision(self, *vargs, **kwargs):
-        super(VersionedModel, self).delete(*vargs, **kwargs)
+        super(VersionedModelBase, self).delete(*vargs, **kwargs)
     
     def delete(self, *vargs, **kwargs):
         for revision in self.get_revisions():
             revision.delete_revision(*vargs, **kwargs)
-    
+
     class Meta:
         abstract = True
     
     class Versioning:
         clear_each_revision = []
         publication_date = None
+        unique_together = ()
+
+class VersionedModel(VersionedModelBase):
+    vid = models.AutoField(primary_key=True)
+    
+    class Meta:
+        abstract = True
 
 class TrashableModel(models.Model):
     """ Users wanting a version history may also expect a trash bin
@@ -204,7 +276,7 @@ class TrashableModel(models.Model):
         return self._is_trash
     
     def get_content_bundle(self):
-        if isinstance(self, VersionedModel):
+        if isinstance(self, VersionedModelBase):
             return self.get_revisions()
         else:
             return [self]        
@@ -216,12 +288,9 @@ class TrashableModel(models.Model):
         """
         for obj in self.get_content_bundle():
             obj._is_trash = True
-            if isinstance(obj, VersionedModel):
-                obj.save(new_revision=False)
-            else:
-                obj.save()
+            obj.save()
     
-    def delete_permanently(self):
+    def delete_permanently(self):    
         for obj in self.get_content_bundle():
             super(TrashableModel, obj).delete()
     

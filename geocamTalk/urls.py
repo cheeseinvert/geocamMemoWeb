@@ -8,6 +8,8 @@ from django.conf.urls.defaults import *
 
 urlpatterns = patterns('geocamTalk.views',
     url(r'messages/create', 'create_message'),
+    url(r'messages/(?P<username>[^ ]+)',  'message_list'),
     url(r'messages',  'message_list'),
-    url(r'messagefeed.json', 'feedMessages')
+    url(r'messagefeed/(?P<username>[^ ]+)',  'feedMessages'),
+    url(r'messagefeed', 'feedMessages')
 )

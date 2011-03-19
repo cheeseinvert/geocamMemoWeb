@@ -71,7 +71,31 @@ class GeocamTalkMessageSaveTest(TestCase):
         self.assertEqual(response.status_code, 302, "submitFormToCreateMessage Failed")
         newMsgCnt = len(get_latest_message_revisions(TalkMessage))
         self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message through view Failed.")
+ 
+    def test_submitFormToCreateMessageWithRecipients(self):
+        """ submit the Talk Message through the form """
         
+        msgCnt = len(get_latest_message_revisions(TalkMessage))
+        content = "Whoa man, that burning building almost collapsed on me!"
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')
+        
+        recipienta = User.objects.all()[1]
+        recipientb = User.objects.all()[2]
+
+        response = self.client.post("/talk/messages/create/",
+                                  data={"content":content,
+                                        "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
+                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon,
+                                        "author":author.pk,
+                                        "recipients":[recipienta.pk, recipientb.pk]})
+        
+        # should be redirected when form post is successful:
+        self.assertEqual(response.status_code, 302, "submitFormToCreateMessage Failed")
+        newMsgCnt = len(get_latest_message_revisions(TalkMessage))
+        self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message through view Failed.") 
+        newMsg = get_latest_message_revisions(TalkMessage)[0]
+        self.assertEqual(len(newMsg.recipients.all()), 2, "Different number of recipients than expected")
         
     def test_submitFormWithoutContentTalkMessage(self):
         """ submit the Talk Message without content through the form """
@@ -103,6 +127,44 @@ class GeocamTalkMessageSaveTest(TestCase):
         response_ordered_messages = response.context["gc_msg"]
         self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
     
+    def test_MyMessageList(self):
+        ''' This test is attempting to verify that we see messages for specified user or broadcast '''
+        me = User.objects.get(username="acurie")
+        sender = User.objects.all()[1]
+        msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=sender)
+        msg.recipients.add(me)
+        msg.recipients.add(User.objects.all()[2])
+ 
+        response = self._get_messages_response(u=me)
+
+        allExpectedMessages = set()        
+        for m in me.received_messages.all(): # messages to me
+            allExpectedMessages.add(m)
+        for m in  me.geocamtalk_talkmessage_set.all():# messages from me
+            allExpectedMessages.add(m)
+        for m in TalkMessage.objects.all(): # broadcast messages
+            if(m.recipients.count() == 0):            
+                allExpectedMessages.add(m)
+        expectedMessages = list(allExpectedMessages)
+        expectedMessages = sorted(expectedMessages, self.cmpMessageSortNewestFirst) 
+        
+        gotMessages = response.context["gc_msg"]
+        self.assertEqual(me.username, response.context["username"])
+        self.assertEqual(len(gotMessages), len(expectedMessages), "My messages response is not the same size as expected")        
+
+        for i in range(len(expectedMessages)):
+            self.assertEqual(expectedMessages[i],gotMessages[i], "My messages doesn't contain an expected message: %s" % expectedMessages[i])
+        
+    @staticmethod
+    def cmpMessageSortNewestFirst(message1, message2):
+        if(message1.content_timestamp > message2.content_timestamp):
+            return -1
+        if(message1.content_timestamp == message2.content_timestamp):
+            return 0
+        else:
+            return 1
+        
+        
     def test_MessageJsonFeed(self):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
@@ -113,13 +175,42 @@ class GeocamTalkMessageSaveTest(TestCase):
                                  'content_timestamp':msg.get_date_string(),
                                  'has_geolocation':bool(msg.has_geolocation())} for msg in ordered_messages ]
         jsonSerializedString = json.dumps(stringified_msg_list)
-        response = self.client.get('/talk/messagefeed.json')
+        response = self.client.get('/talk/messagefeed')
         self.assertContains(response, jsonSerializedString)
 
-    def _get_messages_response(self):
-        
-        u = User.objects.all()[0]
+    def test_MyMessageJsonFeed(self):
+        ''' This test is attempting to verify that we see messages for specified user or broadcast '''
+        me = User.objects.get(username="acurie")
+        sender = User.objects.all()[1]
+        msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=sender)
+        msg.recipients.add(me)
+        msg.recipients.add(User.objects.all()[2])
+ 
+        self.client.login(username=me.username, password='geocam')
+        response = self.client.get('/talk/messagefeed/%s' % me.username)
+
+        allExpectedMessages = set()        
+        for m in me.received_messages.all(): # messages to me
+            allExpectedMessages.add(m)
+        for m in  me.geocamtalk_talkmessage_set.all():# messages from me
+            allExpectedMessages.add(m)
+        for m in TalkMessage.objects.all(): # broadcast messages
+            if(m.recipients.count() == 0):            
+                allExpectedMessages.add(m)
+        expectedMessages = list(allExpectedMessages)
+        expectedMessages = sorted(expectedMessages, self.cmpMessageSortNewestFirst) 
+
+        for i in range(len(expectedMessages)):
+            self.assertContains(response, expectedMessages[i].content)
+
+
+    def _get_messages_response(self, u=None):
+        username_path = ""
+        if u is None:
+            u = User.objects.all()[0]
+        else:
+            username_path = u.username
         self.client.login(username=u.username, password='geocam')
-        response = self.client.get('/talk/messages/')
+        response = self.client.get('/talk/messages/'+username_path)
         return response
     

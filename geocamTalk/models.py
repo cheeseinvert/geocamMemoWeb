@@ -6,6 +6,7 @@
 
 from django.db import models
 from geocamMemo.models import GeocamMessage
+from django.contrib.auth.models import User
 
 class TalkMessage(GeocamMessage):
     """ This is the data model for Memo application messages 
@@ -22,4 +23,10 @@ class TalkMessage(GeocamMessage):
 
     """
     def __unicode__(self):
-        return "Talk message from %s on %s: %s" % (self.author.username, self.content_timestamp, self.content)
+        try:
+            str = "Talk message from %s to %s on %s: %s" % (self.author.username, self.recipients.all(), self.content_timestamp, self.content)
+        except:
+            str = "Talk message from %s on %s: %s" % (self.author.username, self.content_timestamp, self.content)
+        return str
+    
+    recipients = models.ManyToManyField(User, null=True, blank=True, related_name="received_messages")

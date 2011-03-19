@@ -6,6 +6,8 @@
 
 from django.test import TestCase
 from django.contrib.auth.models import User
+from datetime import datetime
+from geocamTalk.models import TalkMessage
 
 class GeocamTalkUnitTest(TestCase):
     fixtures = ['demoTalkMessages.json', 'demoUsers.json']
@@ -20,11 +22,14 @@ class GeocamTalkUnitTest(TestCase):
         recipientb = User.objects.all()[2]
 
         # act
-        message = MemoMessage.objects.create(
+        message = TalkMessage.objects.create(
             content="012345678901234567890123456789", 
             content_timestamp=self.now, 
-            author=sender, 
-            recipients = [recipienta, recipientb])
+            author=sender)
+            
+        message.recipients.add(recipienta)
+        message.recipients.add(recipientb)
+        message.save
         
         # assert
-        self.assertEquals(2, len(message.recipients), "All recipients should be added to the message")
+        self.assertEquals(2, len(message.recipients.all()), "All recipients should be added to the message")

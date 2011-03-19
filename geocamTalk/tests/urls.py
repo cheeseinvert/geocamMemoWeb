@@ -21,6 +21,15 @@ class GeocamTestUrls(TestCase):
 
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
+        
+    def testMyMessageListUrl(self):
+        me = User.objects.all()[0]
+        #arrange
+        path = "/talk/messages/%s" % me.username   
+        template = "geocamTalk/messagelist.html"
+
+        #act
+        self.assertPathRequiresLoginAndUsesTemplate(path, template)
    
     def testMessageCreateUrl(self):
         #arrange
@@ -32,7 +41,21 @@ class GeocamTestUrls(TestCase):
     
     def testMessageJSONFeedUrl(self):
         #arrange
-        path = "/memo/messages.json"
+        path = "/talk/messagefeed"
+        
+        #act
+        guestResponse = self.getResponse(path)
+        self.login();
+        memberResponse = self.getResponse(path)
+        
+        #assert
+        self.assertEqual(302, guestResponse.status_code, "should redirect if not logged in")
+        self.assertEqual(200, memberResponse.status_code, "should display if logged in")
+
+    def testMyMessageJSONFeedUrl(self):
+        #arrange
+        me = User.objects.all()[0]
+        path = "/talk/messagefeed/%s" % me.username   
         
         #act
         guestResponse = self.getResponse(path)
