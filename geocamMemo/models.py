@@ -42,7 +42,7 @@ class GeocamMessage(revisions.models.VersionedModel):
     position_timestamp = models.DateTimeField(null=True, blank=True)
     
     def get_date_string(self):
-        return self.content_timestamp.strftime("%m/%d %H:%M:%S")
+        return self.content_timestamp.strftime("%m/%d/%y %H:%M:%S")
     
     def get_author_string(self):
         return get_user_string(self.author)
