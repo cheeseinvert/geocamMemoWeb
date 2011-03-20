@@ -17,10 +17,10 @@ class GeocamMemoMessageListJsonFeed(TestCase):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         ordered_messages = get_latest_message_revisions(MemoMessage);
-        stringified_msg_list = [{'pk':msg.pk,
-                                 'author':msg.get_author_string(), 
+        stringified_msg_list = [{'messageId':msg.pk,
+                                 'authorUsername':msg.get_author_string(), 
                                  'content':msg.content, 
-                                 'content_timestamp':msg.get_date_string(),
+                                 'contentTimestamp':msg.get_date_string(),
                                  'latitude':msg.latitude,
                                  'longitude':msg.longitude,
                                  'accuracy':msg.accuracy
