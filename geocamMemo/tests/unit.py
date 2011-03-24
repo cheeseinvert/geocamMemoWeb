@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
-from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
+from geocamMemo.models import MemoMessage, get_user_string
 
 class GeocamMemoUnitTest(TestCase):
     fixtures = ['demoMemoMessages.json']

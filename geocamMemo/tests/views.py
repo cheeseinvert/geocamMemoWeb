@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
-from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
+from geocamMemo.models import MemoMessage, get_user_string
 
 class GeocamMemoMessageSaveTest(TestCase):
     fixtures = ['demoUsers.json', 'demoMemoMessages.json']
@@ -25,7 +25,7 @@ class GeocamMemoMessageSaveTest(TestCase):
     def test_createMessage(self):
         """ Create Geocam Message """
         
-        msgCnt = MemoMessage.objects.all().count()
+        msgCnt = MemoMessage.latest.all().count()
         
         content = "This is a message"
         author = User.objects.get(username="rhornsby")
@@ -41,13 +41,12 @@ class GeocamMemoMessageSaveTest(TestCase):
     def test_deleteMessage(self):
         """ Delete Geocam Message """
         
-        msgCnt = MemoMessage.objects.all().count()
-        msg = MemoMessage.objects.all()[1]
-        numRevs = msg.get_revisions().count()
+        msgCnt = MemoMessage.latest.all().count()
+        msg = MemoMessage.latest.all()[1]
         # delete the first message and all it's revisions:
         msg.delete()
-        newMsgCnt = MemoMessage.objects.all().count() 
-        self.assertEqual(newMsgCnt + numRevs, msgCnt, "Deleting a Message Failed.")
+        newMsgCnt = MemoMessage.latest.all().count() 
+        self.assertEqual(newMsgCnt + 1, msgCnt, "Deleting a Message Failed.")
               
     def test_submitFormToCreateMessage(self):
         
@@ -64,12 +63,12 @@ class GeocamMemoMessageSaveTest(TestCase):
     def test_index(self):
         """ Test that we are forced to login to view webroot """
         
-        response = self.client.get('/')
+        response = self.client.get('/memo/messages')
         # expect redirect to the login page:
         self.assertEqual(response.status_code, 302, "We didnt have to login to see the index page")
         self.assertTrue(self.client.login(username='jmiller',
                                         password='geocam'))
-        response = self.client.get('/')
+        response = self.client.get('/memo/messages')
         # expect success because we are logged in:
         self.assertEqual(response.status_code, 200, "Logged in user cant see index page")   
         
@@ -87,10 +86,10 @@ class GeocamMemoMessageEditAndDeleteTest(TestCase):
         self.client.login(username=user.username, password='geocam')
 
     def test_ensureEditByNonAuthorForbidden(self):
-        original_msg = get_latest_message_revisions(MemoMessage)[0]
+        original_msg = MemoMessage.getMessages()[0]
         
         for user in User.objects.all():
-            if user.pk != original_msg.author.pk and not user.is_superuser:
+            if user.username != original_msg.author.username and not user.is_superuser:
                 self.loginUser(user.pk)
                 break                    
         modified_content = "The content has been modified"
@@ -99,9 +98,8 @@ class GeocamMemoMessageEditAndDeleteTest(TestCase):
                                         "author":original_msg.author.pk})
         self.assertEqual(response.status_code, 302, "ensureEditByNonAuthorForbidden Failed") 
         
-        new_msg = original_msg.get_latest_revision()
+        new_msg = MemoMessage.getMessages()[0]
 
-        
         # should be redirected when form post is successful:
         self.assertEquals(new_msg.content, original_msg.content, "ensureEditByNonAuthorForbidden Failed")
         self.assertNotEqual(modified_content, new_msg.content, "ensureEditByNonAuthorForbidden Failed")
@@ -111,7 +109,7 @@ class GeocamMemoMessageEditAndDeleteTest(TestCase):
     
     def test_submitFormToEditMessage(self):        
         """ submit the Memo Message through the form """
-        original_msg = get_latest_message_revisions(MemoMessage)[0]
+        original_msg = MemoMessage.getMessages()[0]
         original_content = original_msg.content    
         self.loginUser(original_msg.author.pk)
         modified_content = "The content has been modified"
@@ -120,7 +118,7 @@ class GeocamMemoMessageEditAndDeleteTest(TestCase):
                                         "author":original_msg.author.pk})
         self.assertEqual(response.status_code, 302, "submitFormToEditMessage Failed") 
         
-        new_msg = original_msg.get_latest_revision()
+        new_msg = MemoMessage.getMessages()[0]
         self.assertNotEquals(new_msg.content, original_content, "submitFormToEditMessage Failed")
         self.assertEqual(modified_content, new_msg.content, "submitFormToEditMessage Failed")
         self.assertEqual(new_msg.content_timestamp, original_msg.content_timestamp, "submitFormToEditMessage Failed")  
@@ -129,8 +127,8 @@ class GeocamMemoMessageEditAndDeleteTest(TestCase):
                                           
 
     def test_ensureDeleteByNonAuthorForbidden(self):
-        m = MemoMessage.objects.all()[0]
-        msgCnt = MemoMessage.objects.all().count()
+        m = MemoMessage.latest.all()[0]
+        msgCnt = MemoMessage.latest.all().count()
         
         for user in User.objects.all():
             if user.pk != m.author.pk and not user.is_superuser:
@@ -138,17 +136,16 @@ class GeocamMemoMessageEditAndDeleteTest(TestCase):
                 break                    
         response = self.client.post("/memo/messages/delete/%s"% m.pk)                            
         self.assertEqual(response.status_code, 302, "ensureDeleteByNonAuthorForbidden Failed") 
-        newMsgCnt = MemoMessage.objects.all().count()
+        newMsgCnt = MemoMessage.latest.all().count()
         self.assertEqual(msgCnt, newMsgCnt, "ensureDeleteByNonAuthorForbidden Failed")
 
     def test_deleteMessage(self):
         "Delete the Memo Message"
-        m = get_latest_message_revisions(MemoMessage)[0]
-        msgCnt = MemoMessage.objects.all().count()
-        numRevs = m.get_revisions().count()
+        m = MemoMessage.latest.all()[0]
+        msgCnt = MemoMessage.latest.all().count()
         self.loginUser(m.author.pk)
         response = self.client.post("/memo/messages/delete/%s"% m.pk)                                
         self.assertEqual(response.status_code, 302, "deleteMessage Failed")
-        newMsgCnt = MemoMessage.objects.all().count()
-        self.assertEqual(msgCnt - numRevs, newMsgCnt, "deleteMessage Failed")
+        newMsgCnt = MemoMessage.latest.all().count()
+        self.assertEqual(msgCnt - 1, newMsgCnt, "deleteMessage Failed")
         

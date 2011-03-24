@@ -8,7 +8,6 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
 from geocamTalk.models import TalkMessage
-from geocamMemo.models import get_latest_message_revisions
 import json
 
 class GeocamTestUrls(TestCase):
@@ -17,7 +16,7 @@ class GeocamTestUrls(TestCase):
     def testMessageListUrl(self):
         #arrange
         path = "/talk/messages/"   
-        template = "geocamTalk/messagelist.html"
+        template = "geocamTalk/message_list.html"
 
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
@@ -26,7 +25,7 @@ class GeocamTestUrls(TestCase):
         me = User.objects.all()[0]
         #arrange
         path = "/talk/messages/%s" % me.username   
-        template = "geocamTalk/messagelist.html"
+        template = "geocamTalk/message_list.html"
 
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
@@ -84,7 +83,7 @@ class GeocamTestUrls(TestCase):
         #arrange
         # url design is /talk/messages/<recipient username>/<author username>
         path = "/talk/messages/%s/%s" % (recipient.username, author.username)
-        template = "geocamTalk/messagelist.html"
+        template = "geocamTalk/message_list.html"
         
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)

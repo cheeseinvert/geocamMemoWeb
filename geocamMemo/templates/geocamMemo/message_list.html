@@ -9,8 +9,8 @@
 {% block content %}
 <a href="/memo/messages/create/" data-role="button" data-inline="true">New Message</a>
 <section id="messages">
-   {% if userstring %}
-      <h1>Memos by {{ userstring }}</h1>
+   {% if author %}
+      <h1>Memos by {% firstof author.get_full_name author.username %}</h1>
    {% else %}
       <h1>All Memos</h1>
    {% endif %}
@@ -20,12 +20,12 @@
     <li id="message_{{m.pk}}">
       <p id="message_{{m.pk}}_header">
           On {{ m.get_date_string }} 
-          <a href="{% url geocamMemo.views.message_list_filtered_username m.author.username %}"> 
+          <a href="{% url geocamMemo.views.message_list m.author.username %}"> 
           {{ m.get_author_string}}</a>
           {% if m.has_geolocation %}
               <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>
           {%endif%}
-          {% if m.author.pk == user.pk or user.is_superuser %} 
+          {% if m.author.username == user.username or user.is_superuser %} 
           	<a href="{% url geocamMemo.views.edit_message m.pk %}" data-inline="true" data-role="button" data-icon="geoCam-edit" data-iconpos="notext">edit</a>
           	<a href="{% url geocamMemo.views.delete_message m.pk %}" data-inline="true" data-role="button" data-icon="delete" data-iconpos="notext">Delete</a>
           {% endif %}

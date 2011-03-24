@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
 from geocamTalk.models import TalkMessage
-from geocamMemo.models import get_latest_message_revisions
 import json
+import re
 
 class GeocamTalkMessageSaveTest(TestCase):
     """
@@ -30,7 +30,7 @@ class GeocamTalkMessageSaveTest(TestCase):
     def test_createTalkMessage(self):
         """ Create Geocam Talk Message """
         
-        msgCnt = len(get_latest_message_revisions(TalkMessage))
+        msgCnt = TalkMessage.latest.all().count()
         
         content = "This is a message"
         author = User.objects.get(username="rhornsby")
@@ -40,24 +40,23 @@ class GeocamTalkMessageSaveTest(TestCase):
                                     longitude=GeocamTalkMessageSaveTest.cmusv_lon,
                                     author=author,
                                     content_timestamp=self.now)
-        newMsgCnt = len(get_latest_message_revisions(TalkMessage)) 
+        newMsgCnt = TalkMessage.latest.all().count()
         self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message Failed.")
   
     def test_deleteTalkMessage(self):
         """ Delete Geocam Talk Message """
         
-        msgCnt = len(get_latest_message_revisions(TalkMessage))
+        msgCnt = TalkMessage.latest.all().count()
         # delete the first message:
-        msg = get_latest_message_revisions(TalkMessage)[1]
-        numRevs = msg.get_revisions().count()
+        msg = TalkMessage.latest.all()[1]
         msg.delete()
-        newMsgCnt = len(get_latest_message_revisions(TalkMessage)) 
-        self.assertEqual(newMsgCnt + numRevs, msgCnt, "Deleting a Talk Message Failed.")
+        newMsgCnt = TalkMessage.latest.all().count() 
+        self.assertEqual(newMsgCnt + 1, msgCnt, "Deleting a Talk Message Failed.")
               
     def test_submitFormToCreateMessage(self):
         """ submit the Talk Message through the form """
         
-        msgCnt = len(get_latest_message_revisions(TalkMessage))
+        msgCnt = TalkMessage.latest.all().count()
         content = "Whoa man, that burning building almost collapsed on me!"
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
@@ -69,13 +68,13 @@ class GeocamTalkMessageSaveTest(TestCase):
                                         "author":author.pk})
         # should be redirected when form post is successful:
         self.assertEqual(response.status_code, 302, "submitFormToCreateMessage Failed")
-        newMsgCnt = len(get_latest_message_revisions(TalkMessage))
+        newMsgCnt = TalkMessage.latest.all().count()
         self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message through view Failed.")
  
     def test_submitFormToCreateMessageWithRecipients(self):
         """ submit the Talk Message through the form """
         
-        msgCnt = len(get_latest_message_revisions(TalkMessage))
+        msgCnt = TalkMessage.latest.all().count()
         content = "Whoa man, that burning building almost collapsed on me!"
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
@@ -92,15 +91,15 @@ class GeocamTalkMessageSaveTest(TestCase):
         
         # should be redirected when form post is successful:
         self.assertEqual(response.status_code, 302, "submitFormToCreateMessage Failed")
-        newMsgCnt = len(get_latest_message_revisions(TalkMessage))
+        newMsgCnt = TalkMessage.latest.all().count()
         self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message through view Failed.") 
-        newMsg = get_latest_message_revisions(TalkMessage)[0]
-        self.assertEqual(len(newMsg.recipients.all()), 2, "Different number of recipients than expected")
+        newMsg = TalkMessage.getMessages()[0]
+        self.assertEqual(newMsg.recipients.all().count(), 2, "Different number of recipients than expected")
         
     def test_submitFormWithoutContentTalkMessage(self):
         """ submit the Talk Message without content through the form """
         
-        msgCnt = len(get_latest_message_revisions(TalkMessage))
+        msgCnt = TalkMessage.latest.all().count()
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         
@@ -110,7 +109,7 @@ class GeocamTalkMessageSaveTest(TestCase):
                                         "author":author.pk})
         # should get 200 on render_to_response when is_valid fails (which should occur)
         self.assertEqual(response.status_code, 200, "test_submitFormWithoutContentTalkMessage Failed")
-        newMsgCnt = len(get_latest_message_revisions(TalkMessage))
+        newMsgCnt = TalkMessage.latest.all().count()
         self.assertEqual(msgCnt, newMsgCnt, "Creating a Talk Message through view Succeeded with no content.")
          
                
@@ -122,7 +121,7 @@ class GeocamTalkMessageSaveTest(TestCase):
            
     def test_MessageContentOrdering(self):
         
-        ordered_messages = get_latest_message_revisions(TalkMessage)
+        ordered_messages = TalkMessage.latest.all().order_by('-content_timestamp')
         response = self._get_messages_response()
         response_ordered_messages = response.context["gc_msg"]
         self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
@@ -130,27 +129,18 @@ class GeocamTalkMessageSaveTest(TestCase):
     def test_MyMessageList(self):
         ''' This test is attempting to verify that we see messages for specified user or broadcast '''
         recipient = User.objects.get(username="acurie")
-        sender = User.objects.all()[1]
-        msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=sender)
+        author = User.objects.all()[1]
+        msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=author)
         msg.recipients.add(recipient)
         msg.recipients.add(User.objects.all()[2])
  
         response = self._get_messages_response(recipient=recipient)
-
-        allExpectedMessages = set()        
-        for m in recipient.received_messages.all(): # messages to me
-            allExpectedMessages.add(m)
-        for m in  recipient.geocamtalk_talkmessage_set.all():# messages from me
-            allExpectedMessages.add(m)
-        for m in TalkMessage.objects.all(): # broadcast messages
-            if(m.recipients.count() == 0):            
-                allExpectedMessages.add(m)
-        expectedMessages = list(allExpectedMessages)
-        expectedMessages = sorted(expectedMessages, self.cmpMessageSortNewestFirst) 
+        # dont pass in author here:
+        expectedMessages = TalkMessage.getMessages(recipient,author=None)      
         
         gotMessages = response.context["gc_msg"]
         self.assertEqual(recipient, response.context["recipient"])
-        self.assertEqual(len(gotMessages), len(expectedMessages), "My messages response is not the same size as expected")        
+        self.assertEqual(len(gotMessages), expectedMessages.count(), "My messages response % is not the same size as expected %s" % (len(gotMessages), expectedMessages.count()))        
 
         for i in range(len(expectedMessages)):
             self.assertEqual(expectedMessages[i],gotMessages[i], "My messages doesn't contain an expected message: %s" % expectedMessages[i])
@@ -168,36 +158,26 @@ class GeocamTalkMessageSaveTest(TestCase):
     def test_MessageJsonFeed(self):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
-        ordered_messages = TalkMessage.objects.all().order_by('content_timestamp').reverse()
-        stringified_msg_list = [{'pk':msg.pk,
-                                 'author':msg.get_author_string(),
-                                 'recipients':msg.get_recipients_string(), 
-                                 'content':msg.content, 
-                                 'content_timestamp':msg.get_date_string(),
-                                 'has_geolocation':bool(msg.has_geolocation())} for msg in ordered_messages ]
-        jsonSerializedString = json.dumps(stringified_msg_list)
+        ordered_messages = TalkMessage.getMessages()
+        # yes the order of this dict does matter... unfortunately
+        stringified_msg_list = json.dumps([msg.getJson() for msg in ordered_messages ])
         response = self.client.get('/talk/messagefeed')
-        self.assertContains(response, jsonSerializedString)
+        
+        self.assertContains(response,stringified_msg_list)
+        
 
     def test_MyMessageJsonFeed(self):
         ''' This test is attempting to verify that we see messages for specified user or broadcast '''
         recipient = User.objects.get(username="acurie")
-        sender = User.objects.all()[1]
-        msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=sender)
+        author = User.objects.all()[1]
+        msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=author)
         msg.recipients.add(recipient)
         msg.recipients.add(User.objects.all()[2])
  
         self.client.login(username=recipient.username, password='geocam')
         response = self.client.get('/talk/messagefeed/%s' % recipient.username)
 
-        allExpectedMessages = set()        
-        for m in recipient.received_messages.all(): # messages to me
-            allExpectedMessages.add(m)
-        for m in  recipient.geocamtalk_talkmessage_set.all():# messages from me
-            allExpectedMessages.add(m)
-        for m in TalkMessage.objects.all(): # broadcast messages
-            if(m.recipients.count() == 0):            
-                allExpectedMessages.add(m)
+        allExpectedMessages = TalkMessage.getMessages(recipient,author)       
         expectedMessages = list(allExpectedMessages)
         expectedMessages = sorted(expectedMessages, self.cmpMessageSortNewestFirst) 
 

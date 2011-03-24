@@ -5,8 +5,9 @@
 # __END_LICENSE__
 
 from django.db import models
-from geocamMemo.models import GeocamMessage,get_user_string
+from geocamMemo.models import GeocamMessage, get_user_string
 from django.contrib.auth.models import User
+from django.db.models import Q, Count
 
 class TalkMessage(GeocamMessage):
     """ This is the data model for Memo application messages 
@@ -31,11 +32,40 @@ class TalkMessage(GeocamMessage):
     
     recipients = models.ManyToManyField(User, null=True, blank=True, related_name="received_messages")
     
-    def get_recipients_string(self):
-        recipient_string = ""
-        for r in self.recipients.all():
-            try:  
-                recipient_string += ',"%s"' % get_user_string(r)               
-            except:
-                recipient_string = '"%s"' % get_user_string(r)                       
-        return '[%s]' % recipient_string
+    def getJson(self):
+          return  dict(messageId=self.pk,
+                       authorUsername=self.author.username,
+                       authorFullname=self.get_author_string(),
+                       recipients=[r.username for r in self.recipients.all()],
+                       content=self.content, 
+                       content_timestamp=self.get_date_string(),
+                       latitude=self.latitude,
+                       longitude=self.longitude,
+                       accuracy=self.accuracy,
+                       has_geolocation=bool(self.has_geolocation()) )
+    
+    @staticmethod
+    def getMessages(recipient=None, author=None):
+        """ Message Listing Rules:
+        
+        If no users are specified: all messages are displayed (latest revisions)
+        If only author is specified: all messages are displayed from author
+        If only recipient is specified: messages displayed are broadcast + from OR to recipient
+        If both recipient AND author are specified: messages displayed are braodcast + from author AND to recipient
+        
+        Note: a broadcast message is a message with no recipients
+        """
+        if (recipient is None and author is None):
+            # all messages are displayed (latest revisions)    
+            messages = TalkMessage.latest.all()
+        elif (recipient is None and author is not None):
+            # messages displayed are from author:
+            messages = TalkMessage.latest.filter(author__username=author.username)   
+        elif (recipient is not None and author is None):
+            # messages displayed are broadcast + from OR to recipient:
+            messages = TalkMessage.latest.annotate(num_recipients=Count('recipients')).filter(Q(num_recipients=0) | Q(recipients__username=recipient.username) | Q(author__username=recipient.username)).distinct()       
+        else: 
+            # messages displayed are braodcast + from author AND to recipient
+            messages = TalkMessage.latest.annotate(num_recipients=Count('recipients')).filter(Q(num_recipients=0) | Q(recipients__username=recipient.username)).filter(author__username=author.username).distinct()         
+        return messages.order_by('-content_timestamp')
+          

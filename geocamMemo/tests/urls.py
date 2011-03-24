@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
-from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
+from geocamMemo.models import MemoMessage, get_user_string
 
 class GeocamMemoUrls(TestCase):
     fixtures = ['demoUsers.json', 'demoMemoMessages.json']
@@ -15,14 +15,14 @@ class GeocamMemoUrls(TestCase):
     def testMessageListUrl(self):
         #arrange
         path = "/memo/messages/"   
-        template = "geocamMemo/messagelist.html"
+        template = "geocamMemo/message_list.html"
 
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
         
     def testMessageDetailsUrl(self):
         #arrange
-        message = get_latest_message_revisions(MemoMessage)[0]
+        message = MemoMessage.latest.all()[0]
         path = "/memo/messages/details/" + str(message.pk)
         template = "geocamMemo/details.html"
 
@@ -31,7 +31,7 @@ class GeocamMemoUrls(TestCase):
 
     def testMessageEditUrl(self):
         #arrange
-        message = get_latest_message_revisions(MemoMessage)[0]
+        message = MemoMessage.latest.all()[0]
         path = "/memo/messages/edit/" + str(message.pk)
         template = "geocamMemo/edit_message_form.html"
 
@@ -49,14 +49,14 @@ class GeocamMemoUrls(TestCase):
     def testMessageListFilteredByUserUrl(self):
         #arrange
         path = "/memo/messages/root"
-        template = "geocamMemo/messagelist.html"
+        template = "geocamMemo/message_list.html"
         
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
     
     def testMessageDeleteUrl(self):
         #arrange
-        message = get_latest_message_revisions(MemoMessage)[0]
+        message = MemoMessage.latest.all()[0]
         path = "/memo/messages/delete/" + str(message.pk)
 
         #act
