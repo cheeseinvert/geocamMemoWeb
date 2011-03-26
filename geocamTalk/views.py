@@ -8,73 +8,51 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from geocamTalk.models import TalkMessage
-from geocamMemo.models import get_latest_message_revisions, get_user_string
 from geocamTalk.forms import GeocamTalkForm
 from datetime import datetime
 from django.contrib.auth.models import User
+from django.db.models import Q, Count
 import json
+    
+@login_required
+def message_list(request, recipient_username=None, author_username=None):    
+    if recipient_username is not None:
+        recipient = get_object_or_404(User, username=recipient_username)
+    else:
+        recipient = None
+        
+    if author_username is not None:
+        author = get_object_or_404(User, username=author_username)
+    else:
+        author = None                                                                                         
+    return render_to_response('geocamTalk/message_list.html', 
+                              dict(gc_msg=TalkMessage.getMessages(recipient,author), 
+                                   recipient=recipient, 
+                                   author=author), 
+                               context_instance=RequestContext(request))
 
 @login_required
-def message_list(request, username=None):
-    
-    if(username == None):    
-        messages = get_latest_message_revisions(TalkMessage)
+def feed_messages(request, recipient_username=None, author_username=None):
+    if recipient_username is not None:
+        recipient = get_object_or_404(User, username=recipient_username)
     else:
-        user = get_object_or_404(User, username=username)
-        allOfMyMessages = set()        
-        for to_me in user.received_messages.all(): # messages to me
-            allOfMyMessages.add(to_me)
-        for from_me in  user.geocamtalk_talkmessage_set.all():# messages from me
-            allOfMyMessages.add(from_me)
-        for broadcast in TalkMessage.objects.all(): # broadcast messages
-            if(broadcast.recipients.count() == 0):            
-                allOfMyMessages.add(broadcast)
+        recipient = None
         
-        messages = list(allOfMyMessages)
-        messages = sorted(messages, cmpMessageSortNewestFirst)
-
-    return render_to_response('geocamTalk/messagelist.html', 
-                              {"gc_msg": messages, "username": username}, context_instance=RequestContext(request))
-
-def cmpMessageSortNewestFirst(message1, message2):
-    if(message1.content_timestamp > message2.content_timestamp):
-        return -1
-    if(message1.content_timestamp == message2.content_timestamp):
-        return 0
+    if author_username is not None:
+        author = get_object_or_404(User, username=author_username)
     else:
-        return 1
-
-@login_required
-def feedMessages(request, username=None):
-    
-    if(username == None):    
-        ordered_messages = get_latest_message_revisions(TalkMessage)
-    else:
-        user = get_object_or_404(User, username=username)
-        allOfMyMessages = set()        
-        for to_me in user.received_messages.all(): # messages to me
-            allOfMyMessages.add(to_me)
-        for from_me in  user.geocamtalk_talkmessage_set.all():# messages from me
-            allOfMyMessages.add(from_me)
-        for broadcast in TalkMessage.objects.all(): # broadcast messages
-            if(broadcast.recipients.count() == 0):            
-                allOfMyMessages.add(broadcast)
+        author = None
         
-        ordered_messages = list(allOfMyMessages)
-        ordered_messages = sorted(ordered_messages, cmpMessageSortNewestFirst)
-
-    stringified_msg_list = [{'pk':msg.pk,
-                             'author':msg.get_author_string(), 
-                            'content':msg.content, 
-                            'content_timestamp':msg.get_date_string(),
-                            'has_geolocation':bool(msg.has_geolocation()) } for msg in ordered_messages ]
-    return HttpResponse(json.dumps(stringified_msg_list))
+    messages = TalkMessage.getMessages(recipient, author)
+    return HttpResponse(json.dumps([msg.getJson() for msg in messages]))
     
 @login_required
 def index(request):
     return render_to_response('geocamTalk/home.html',
-                              {}, context_instance=RequestContext(request))
+                              dict(), 
+                              context_instance=RequestContext(request))
 
 @login_required
 def create_message(request):
@@ -87,13 +65,13 @@ def create_message(request):
             msg.content_timestamp = datetime.now()
             msg.save()
             form.save_m2m()
-            return HttpResponseRedirect('/talk/messages/')
+            return HttpResponseRedirect('/talk/messages')
         else:
             return render_to_response('geocamTalk/message_form.html',
-                                  {'form':form},
+                                  dict(form=form),
                                   context_instance=RequestContext(request))
     else:
         form = GeocamTalkForm()
         return render_to_response('geocamTalk/message_form.html',
-                                  {'form':form },                                   
+                                  dict(form=form),                               
                                   context_instance=RequestContext(request))

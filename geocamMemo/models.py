@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from revisions.models import VersionedModel
 from revisions.shortcuts import VersionedModel as VersionedModelShortcuts
 import revisions
+import json
 
 class GeocamMessage(revisions.models.VersionedModel):
     """ This is the abstract data model for geocam messages 
@@ -71,7 +72,35 @@ class MemoMessage(GeocamMessage):
     """
     def __unicode__(self):
         return "Memo from %s on %s: %s" % (self.author.username, self.content_timestamp, self.content)
-    pass
+    
+    def getJson(self):
+        return  dict(
+                    messageId=self.pk,
+                    userId=self.author.pk,
+                    authorUsername=self.author.username,
+                    authorFullname=self.get_author_string(), 
+                    content=self.content,
+                    contentTimestamp=self.get_date_string(),
+                    latitude=self.latitude,
+                    longitude=self.longitude,
+                    accuracy=self.accuracy,
+                    hasGeolocation=bool(self.has_geolocation()) )
+        
+    @staticmethod
+    def getMessages(author=None):
+        """ Message Listing Rules:
+        
+        If no author is specified: all messages are displayed (latest revisions)
+        If author is specified: all messages are displayed from author
+        """
+        
+        if (author is None):
+            # all messages are displayed (latest revisions)    
+            messages = MemoMessage.latest.all()
+        else:
+            # messages displayed are from author:
+            messages = MemoMessage.latest.filter(author__username=author.username)   
+        return messages.order_by('-content_timestamp')
 
 def get_user_string(user):
     if user.first_name and user.last_name:
@@ -80,11 +109,3 @@ def get_user_string(user):
         return (user.username)
 
 
-def get_latest_message_revisions(classtype):
-    """ Returns a query set of the latest revisions of all message objects """
-    messages = []
-    allMsgs = classtype.objects.all().order_by('-content_timestamp')
-    for msg in allMsgs:
-        if msg.check_if_latest_revision():
-            messages.append(msg)
-    return messages

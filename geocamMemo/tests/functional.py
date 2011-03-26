@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
-from geocamMemo.models import MemoMessage, get_user_string, get_latest_message_revisions
+from geocamMemo.models import MemoMessage, get_user_string
 
 
 
@@ -28,25 +28,21 @@ class GeocamMemoListViewTest(TestCase):
         response = self.get_messages_response()
         
         displayedmessages = response.context['gc_msg'] # get the data object sent to the template
-        displayed_message_ids = []
-        for m in displayedmessages:
-            displayed_message_ids.append(m.pk)
+        displayed_message_ids = [m.pk for m in displayedmessages]
         
-        messages = get_latest_message_revisions(MemoMessage) #descending (newest at top)
-        message_ids = []        
-        for m in messages:
-            message_ids.append(m.pk)
+        messages = MemoMessage.getMessages() #descending (newest at top)
+        message_ids = [m.pk for m in messages] 
 
         self.assertEqual(displayed_message_ids, message_ids, "Order should be the same")
 
     def testMessageListDateFormat(self):
-        messages = get_latest_message_revisions(MemoMessage)
+        messages = MemoMessage.latest.all()
         response = self.get_messages_response()
         for m in messages:
-            self.assertContains(response, m.content_timestamp.strftime("%m/%d %H:%M:%S"), None, 200)
+            self.assertContains(response, m.content_timestamp.strftime("%m/%d/%y %H:%M:%S"), None, 200)
         
     def testMessageListAuthorFormat(self):
-        messages = MemoMessage.objects.all()
+        messages = MemoMessage.latest.all()
         response = self.get_messages_response()
         
         for m in messages:
@@ -57,21 +53,17 @@ class GeocamMemoListViewTest(TestCase):
         
     def testMessageListContentFormat(self):
         
-        messages = get_latest_message_revisions(MemoMessage)
+        messages = MemoMessage.latest.all()
         response = self.get_messages_response()
         for m in messages:
             self.assertContains(response, m.content)
     
     def testMessageListGeoLocationPresent(self):
         # arrange
-        messages = get_latest_message_revisions(MemoMessage)
         response = self.get_messages_response()
 
         # act
-        geocount = 0
-        for m in messages:
-            if m.latitude and m.longitude:
-              geocount = geocount+1
+        geocount = MemoMessage.latest.exclude(latitude=None, longitude=None).count()
         
         # assert
         self.assertContains(response, "data-icon=\"geoCam-map\"", geocount)
@@ -80,9 +72,9 @@ class GeocamMemoListViewTest(TestCase):
     def testEnsureMessagesAreFilteredByUser(self):
         # arrange
         user = User.objects.all()[1]
-        messages = MemoMessage.objects.filter(author = user.pk)
+        messages = MemoMessage.objects.filter(author=user.pk)
         
-        notUserMessages = MemoMessage.objects.exclude(author = user.pk)
+        notUserMessages = MemoMessage.objects.exclude(author=user.pk)
         
         # act
         response = self.get_messages_response_filtered(user)
@@ -99,26 +91,22 @@ class GeocamMemoListViewTest(TestCase):
         u = User.objects.all()[1]     
         
         #descending (newest at top)
-        messages = MemoMessage.objects.filter(author = u.pk).order_by("-content_timestamp") 
-        message_ids = []        
-        for m in messages:
-            message_ids.append(m.pk)   
+        messages = MemoMessage.getMessages(u) 
+        message_ids = [m.pk for m in messages]  
         
         #act
         response = self.get_messages_response_filtered(u)
-        
+
         #Looks at last parameter of context. Denoted by -1
         displayedmessages = response.context[-1]['gc_msg'] # get the data object sent to the template
-        displayed_message_ids = []
-        for m in displayedmessages:
-            displayed_message_ids.append(m.pk)
+        displayed_message_ids = [m.pk for m in displayedmessages] 
         
         #assert
         self.assertEqual(displayed_message_ids, message_ids, "Order should be the same")
  
     def testEnsureMessageListAuthorLinksPresent(self):
         #arrange        
-        messages = MemoMessage.objects.all()
+        messages = MemoMessage.latest.all()
         
         #act
         response = self.get_messages_response()
@@ -133,7 +121,6 @@ class GeocamMemoListViewTest(TestCase):
         
         #act
         response = self.get_messages_response_filtered(u)
-        
         #assert            
         self.assertContains(response, 'Memos by ' + get_user_string(u))
     
@@ -185,7 +172,7 @@ class GeocamMemoMapViewTest(TestCase):
 
     def testEnsureMapDisplaysAllMessagesWithGeolocationByAllUsers(self):
         #arrange
-        messages = get_latest_message_revisions(MemoMessage)
+        messages = MemoMessage.getMessages()
         assert not messages[0].has_geolocation(), "Fixtures should have a non-geolocated message as latest"
         
         #let's find the first message that has a geoloction and ensure the map is centered on it 
@@ -221,7 +208,7 @@ class GeocamMemoSingleMessageViewTest(TestCase):
 
     def testEnsureProperFieldsAreDisplayed(self):
         # arrange
-        m = get_latest_message_revisions(MemoMessage)[0]
+        m = MemoMessage.latest.all()[0]
         
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
