@@ -151,7 +151,6 @@ class GeocamTalkMessageSaveTest(TestCase):
         
         # assert
         self.assertTrue(time_stamp < recipient.profile.last_viewed_mymessages)
-        self.assertTrue(response.context["my_message_count"] is not None)
         
         self.assertEqual(recipient, response.context["recipient"])
         self.assertEqual(len(gotMessages), expectedMessages.count(), "My messages response % is not the same size as expected %s" % (len(gotMessages), expectedMessages.count()))        

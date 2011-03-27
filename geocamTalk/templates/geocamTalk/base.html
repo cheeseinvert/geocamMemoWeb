@@ -12,7 +12,7 @@
     <body>
         <header>
             {% if user.is_authenticated %}
-                <a href="/talk/messages/{{user.username}}">My Messages (<span id="new_message_count">0</span>)</a> | 
+                <a href="/talk/messages/{{user.username}}">My Messages (<span id="new_message_count">{{request.user.profile.getUnreadMessageCount}}</span>)</a> | 
                 <a href="/talk/messages/">All Messages</a> | Hello {% firstof user.first_name user.username %}  
                 <a href="/accounts/logout/">Logout</a>
             {% else %}
