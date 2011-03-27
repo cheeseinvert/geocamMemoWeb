@@ -163,8 +163,26 @@ class GeocamTalkMessageSaveTest(TestCase):
         if(message1.content_timestamp == message2.content_timestamp):
             return 0
         else:
-            return 1
+            return 1    
+    
+    def test_NewMessageJsonFeed(self):
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')
+        # need to cast the query set to a list here to avoid the dynamic update 
+        # when we create the new msg
+        #old_messages = list(TalkMessage.getMessages())
+        before_new_message = int(time.time() * 1000 * 1000)
+        time.sleep(1)
+        recipient = User.objects.get(username="acurie")
+        msg = TalkMessage.objects.create(content='This is a new message', content_timestamp=datetime.now(), author=author)
+        msg.recipients.add(recipient)
+        msg.recipients.add(User.objects.all()[2])
+        msg.save()
+        response = self.client.get('/talk/newmessagefeed/?since=%s' % before_new_message)
+        self.assertContains(response, '"messageCnt": 1')
         
+        #for oldmsg in old_messages:
+        #    self.assertNotContains(response, '"messageId": %s' % oldmsg.pk)
         
     def test_MessageJsonFeed(self):
         author = User.objects.get(username="rhornsby")
