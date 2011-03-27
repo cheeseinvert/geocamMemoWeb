@@ -31,6 +31,7 @@
 <script>
 	$(document).ready(function() {
 		var running_timestamp = {{ timestamp }};
+		var new_message_count = 0;
 		setInterval(function(){
 			// messagefeed.json looks like this:
 	        // [{"content": "The hospital is full, no more beds...", "content_timestamp": "02/19 21:35:52", "has_geolocation": -122.4048743, "author": "Adam Grant"}, 
@@ -72,6 +73,8 @@
 	        	}
         		$('#message_list').prepend(html_str);
 	        	running_timestamp = data['ts'];
+	        	new_message_count += data['msgCnt'];
+	        	$('#new_message_count').html(new_message_count);
 	        });
 		}, 3*1000);
 	});

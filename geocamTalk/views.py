@@ -52,24 +52,14 @@ def feed_messages(request, recipient_username=None, author_username=None):
     
     if since is not None:
         since_dt = datetime.fromtimestamp(float(since) / (1000 * 1000))
-        messages = TalkMessage.getMessages(recipient, author).filter(content_timestamp__gt=since_dt) 
+        messages = TalkMessage.getMessages(recipient, author).filter(content_timestamp__gt=since_dt)
+        message_count = TalkMessage.getMessages(request.user).filter(content_timestamp__gt=since_dt).count() 
     else:
         messages = TalkMessage.getMessages(recipient, author)
-    return HttpResponse(json.dumps({'ts': timestamp, 
+        message_count = TalkMessage.getMessages(request.user).count()
+    return HttpResponse(json.dumps({'ts': timestamp,
+                                    'msgCnt': message_count,
                                     'ms':[msg.getJson() for msg in messages]}))
-
-@login_required 
-def feed_messages_cnt(request):
-    timestamp = int(time.time() * 1000 * 1000)
-    since = request.GET.get('since', None)
-    recipient = request.user
-    
-    if since is not None:
-        since_dt = datetime.fromtimestamp(float(since) / (1000 * 1000))
-        messages = TalkMessage.getMessages(recipient).filter(content_timestamp__gt=since_dt) 
-    else:
-        messages = TalkMessage.getMessages(recipient)
-    return HttpResponse(json.dumps({'messageCnt': messages.count()}))
   
 @login_required
 def index(request):
