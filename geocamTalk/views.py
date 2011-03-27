@@ -29,6 +29,11 @@ def message_list(request, recipient_username=None, author_username=None):
         author = get_object_or_404(User, username=author_username)
     else:
         author = None
+    
+    current_user = request.user    
+    since_dt = request.user.profile.last_viewed_mymessages
+    new_message_count = TalkMessage.getMessages(current_user).filter(
+                                                             content_timestamp__gt=since_dt).count()
         
     if recipient is not None and recipient.pk == request.user.pk and author is None:
         profile = recipient.profile
@@ -39,7 +44,8 @@ def message_list(request, recipient_username=None, author_username=None):
                                dict(gc_msg=TalkMessage.getMessages(recipient,author), 
                                    recipient=recipient, 
                                    author=author,
-                                   timestamp=timestamp), 
+                                   timestamp=timestamp,
+                                   my_message_count=new_message_count), 
                                context_instance=RequestContext(request))
 
 @login_required

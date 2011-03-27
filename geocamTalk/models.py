@@ -7,11 +7,13 @@
 from django.db import models
 from geocamMemo.models import GeocamMessage, get_user_string
 from django.contrib.auth.models import User
+from datetime import datetime
+import time
 from django.db.models import Q, Count
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, related_name='profile')
-    last_viewed_mymessages = models.DateTimeField(null=True)
+    last_viewed_mymessages = models.DateTimeField(default=datetime.min)
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 
