@@ -34,11 +34,12 @@ function createMap(latitude, longitude) {
 			google.maps.event.addListener(msg.marker,"click", function() {
 				infoWindow.close();
 				$.getJSON("memo/messages/details/" + msg.pk + ".json", function(data) {
-					infoWindow.setContent(data['content']);
+					var messageHtml = "<strong>" + data['authorFullname'] + "</strong><br />"
+                                    + "<span>" + data['contentTimestamp'] + "</span>"
+					                + "<p>" + data['content'] + "</p>"
+					infoWindow.setContent(messageHtml);
 				});
-				
 				infoWindow.open(map, msg.marker);
-				//alert(marker.getLatLng());
 			});
 		});
 		
