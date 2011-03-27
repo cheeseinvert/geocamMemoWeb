@@ -30,6 +30,19 @@ class GeocamTestUrls(TestCase):
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
    
+    def testClearMyMessageCount(self):
+        #arrange
+        me = User.objects.all()[0]
+        path = "/talk/clearmessages/"
+        self.login()
+
+        #act
+        response = self.getResponse(path)
+        
+        # assert
+        self.assertEquals(200, response.status_code)
+    
+    
     def testMessageCreateUrl(self):
         #arrange
         path = "/talk/messages/create"

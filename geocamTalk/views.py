@@ -18,6 +18,14 @@ from django.db.models import Q, Count
 import json
     
 @login_required
+def clear_messages(request):
+    profile = request.user.profile
+    profile.last_viewed_mymessages = datetime.now()
+    profile.save()
+    
+    return HttpResponse(status=200)
+
+@login_required
 def message_list(request, recipient_username=None, author_username=None):   
     timestamp = int(time.time() * 1000 * 1000)
     if recipient_username is not None:
