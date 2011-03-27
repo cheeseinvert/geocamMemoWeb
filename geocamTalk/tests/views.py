@@ -178,10 +178,9 @@ class GeocamTalkMessageSaveTest(TestCase):
         msg.recipients.add(recipient)
         msg.recipients.add(User.objects.all()[2])
         msg.save()
-        response = self.client.get('/talk/messagefeedcnt/?since=%s' % before_new_message)
-        print "\nresponse: %s\n" % response
-        self.assertContains(response, '"messageCnt": 1')
-        
+        response = self.client.get('/talk/messagefeed/?since=%s' % before_new_message)
+        self.assertContains(response, '"msgCnt": 1')
+        # I dont want to delete this because I wasted a bunch of time on it:
         #for oldmsg in old_messages:
         #    self.assertNotContains(response, '"messageId": %s' % oldmsg.pk)
         
