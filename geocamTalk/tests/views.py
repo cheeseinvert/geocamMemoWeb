@@ -163,9 +163,9 @@ class GeocamTalkMessageSaveTest(TestCase):
         latest_msgs_dt = ordered_messages[0].content_timestamp - timedelta(seconds=5)
         ts = int(time.mktime(latest_msgs_dt.timetuple()))
         response = self.client.get('/talk/messagefeed/?since=%s' % ts)
-        self.assertContains(response, '"pk": %s' % ordered_messages[0].pk)
+        self.assertContains(response, '"messageId": %s' % ordered_messages[0].pk)
         for msg in ordered_messages[1:]:
-            self.assertNotContains(response, '"pk": %s' % msg.pk)
+            self.assertNotContains(response, '"messageId": %s' % msg.pk)
 
 
             
@@ -197,13 +197,13 @@ class GeocamTalkMessageSaveTest(TestCase):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         ordered_messages = TalkMessage.getMessages(recipient=author)
-        print "\nordered_messages: %s\n" % ordered_messages
+        
         latest_msgs_dt = ordered_messages[0].content_timestamp - timedelta(seconds=5)
         ts = int(time.mktime(latest_msgs_dt.timetuple()))
         response = self.client.get('/talk/messagefeed/rhornsby?since=%s' % ts)
-        self.assertContains(response, '"pk": %s' % ordered_messages[0].pk)
+        self.assertContains(response, '"messageId": %s' % ordered_messages[0].pk)
         for msg in ordered_messages[1:]:
-            self.assertNotContains(response, '"pk": %s' % msg.pk)
+            self.assertNotContains(response, '"messageId": %s' % msg.pk)
 
     def _get_messages_response(self, recipient=None):
         recipient_path = ""

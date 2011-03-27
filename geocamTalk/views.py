@@ -44,8 +44,13 @@ def feed_messages(request, recipient_username=None, author_username=None):
         author = get_object_or_404(User, username=author_username)
     else:
         author = None
-        
-    messages = TalkMessage.getMessages(recipient, author)
+    since = request.GET.get('since', None)
+    
+    if since is not None:
+        since_dt = datetime.fromtimestamp(float(since))
+        messages = TalkMessage.getMessages(recipient, author).filter(content_timestamp__gte=since_dt) 
+    else:
+        messages = TalkMessage.getMessages(recipient, author)
     return HttpResponse(json.dumps([msg.getJson() for msg in messages]))
     
 @login_required
