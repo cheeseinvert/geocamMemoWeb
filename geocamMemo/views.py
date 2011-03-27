@@ -10,6 +10,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response
 from django.views.generic.simple import redirect_to
 from django import forms
@@ -54,7 +55,7 @@ def get_first_geolocation(messages):
 
 @login_required
 def index(request):
-    return HttpResponseRedirect('memo/messages')
+    return HttpResponseRedirect(reverse('all_message_list'))
     
 @login_required
 def details(request, message_id):
@@ -74,7 +75,7 @@ def create_message(request):
             # can't just be auto set since we want to preserve from creation time
             msg.content_timestamp = datetime.now()
             msg.save()
-            return HttpResponseRedirect('memo/messages')
+            return HttpResponseRedirect(reverse('all_message_list'))
         else:
             return render_to_response('geocamMemo/message_form.html',
                                   dict(form=form),
@@ -89,13 +90,13 @@ def create_message(request):
 def edit_message(request, message_id):
     message = MemoMessage.objects.get(pk=message_id)
     if message.author.username != request.user.username and not request.user.is_superuser:
-        return HttpResponseRedirect('memo/messages') # you get the boot!
+        return HttpResponseRedirect(reverse('all_message_list')) # you get the boot!
     if request.method == 'POST':
         message.content = request.POST['content']
         form = MemoMessageForm(request.POST)   
         if form.is_valid():
             message.save()
-            return HttpResponseRedirect('memo/messages')
+            return HttpResponseRedirect(reverse('all_message_list'))
         else:
             return render_to_response('geocamMemo/edit_message_form.html',
                                   dict(form=form,
@@ -113,4 +114,4 @@ def delete_message(request, message_id):
     message = MemoMessage.objects.get(pk=message_id)
     if message.author.username == request.user.username or request.user.is_superuser:
         message.delete()
-    return HttpResponseRedirect('memo/messages')
+    return HttpResponseRedirect(reverse('all_message_list'))

@@ -17,6 +17,6 @@ urlpatterns = patterns('geocamMemo.views',
     url(r'messages/(?P<author_username>[a-zA-Z][a-zA-Z0-9@+.\-]*[a-zA-Z0-9])',
          'message_list'),
     url(r'messages.json','message_list_json'),
-    url(r'messages',  'message_list'),
+    url(r'messages',  'message_list', name="all_message_list"),
     url(r'map', 'memo_map'),
 )

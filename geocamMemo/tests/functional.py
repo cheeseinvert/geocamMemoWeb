@@ -193,7 +193,7 @@ class GeocamMemoMapViewTest(TestCase):
         self.assertContains(response, "<section id=\"map_canvas\"")
         for m in messages:
             if m.has_geolocation():
-                self.assertContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
+                self.assertContains(response, "latitude:"+str(m.latitude))
             else:
                 self.assertNotContains(response, "google.maps.LatLng("+str(m.latitude)+","+str(m.longitude)+")")
                 
