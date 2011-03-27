@@ -58,11 +58,11 @@
 	        		var authorUsername = msg['authorUsername'];
 	        		var authorFullname = msg['authorFullname']
 	        		{% if recipient %}
-	        		    authorUsername = '<a href="/talk/messages/{{ recipient.username }}/' +authorUsername+ '">' +authorFullname+ '</a>' ;
+	        		    authorFullname = '<a href="/talk/messages/{{ recipient.username }}/' +authorUsername+ '">' +authorFullname+ '</a>' ;
 	        		{% endif %}
 	        		
 	        		html_str += '<dt id="message_'+pk+'">';
-	        		html_str += 'On '+content_timestamp+' '+authorUsername+' said';
+	        		html_str += 'On '+content_timestamp+' '+authorFullname+' said';
 	        		if (has_geolocation == true) {
 	        			html_str += '<img src="/resources/map.png" />';
 	        		}
