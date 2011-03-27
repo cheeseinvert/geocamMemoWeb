@@ -28,7 +28,13 @@ def message_list(request, recipient_username=None, author_username=None):
     if author_username is not None:
         author = get_object_or_404(User, username=author_username)
     else:
-        author = None                                                                                         
+        author = None
+        
+    if recipient is not None and recipient.pk == request.user.pk and author is None:
+        profile = recipient.profile
+        profile.last_viewed_mymessages = datetime.now()
+        profile.save()
+    
     return render_to_response('geocamTalk/message_list.html', 
                                dict(gc_msg=TalkMessage.getMessages(recipient,author), 
                                    recipient=recipient, 

@@ -128,18 +128,30 @@ class GeocamTalkMessageSaveTest(TestCase):
         self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
     
     def test_MyMessageList(self):
+        # arrange
         ''' This test is attempting to verify that we see messages for specified user or broadcast '''
         recipient = User.objects.get(username="acurie")
         author = User.objects.all()[1]
         msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=author)
         msg.recipients.add(recipient)
         msg.recipients.add(User.objects.all()[2])
- 
-        response = self._get_messages_response(recipient=recipient)
-        # dont pass in author here:
-        expectedMessages = TalkMessage.getMessages(recipient,author=None)      
         
+        time_stamp = datetime.now() - timedelta(minutes=15)
+        profile = recipient.profile
+        profile.last_viewed_mymessages = time_stamp
+        profile.save()
+ 
+        #self.client.login(username=recipient.username, password='geocam')
+        #response = self.client.get('/talk/messages/'+recipient_path)
+        
+        # act
+        response = self._get_messages_response(recipient=recipient)
+        expectedMessages = TalkMessage.getMessages(recipient,author=None) # don't pass in author
         gotMessages = response.context["gc_msg"]
+        
+        # assert
+        self.assertTrue(time_stamp < recipient.profile.last_viewed_mymessages)
+        
         self.assertEqual(recipient, response.context["recipient"])
         self.assertEqual(len(gotMessages), expectedMessages.count(), "My messages response % is not the same size as expected %s" % (len(gotMessages), expectedMessages.count()))        
 
