@@ -29,7 +29,20 @@ class GeocamTalkUnitTest(TestCase):
             
         message.recipients.add(recipienta)
         message.recipients.add(recipientb)
-        message.save
         
         # assert
         self.assertEquals(2, len(message.recipients.all()), "All recipients should be added to the message")
+        
+    def testEnsureLastViewedMyMessages(self):
+        # arrange
+        user = User.objects.all()[0]
+        time_stamp = datetime.now()
+        profile = user.profile
+        
+        # act
+        profile.last_viewed_mymessages = time_stamp
+        profile.save()
+        
+        # assert
+        self.assertEquals(time_stamp,user.profile.last_viewed_mymessages)
+
