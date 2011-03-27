@@ -28,11 +28,11 @@
 	        <header>
 	        	<div data-role="header">
 	        		<h1>{% block pagetitle %}GeoCam Talk{% endblock %}</h1>
-	        		<a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse" class="ui-btn-right jqm-home">Home</a>
+	        		<a href="/talk/messages" data-icon="home" data-iconpos="notext" data-direction="reverse" class="ui-btn-right jqm-home">Home</a>
 	        		<div data-role="navbar">
 		        		<ul>
-		        			<li><a href="{% url geocamTalk.views.message_list %}">Messages</a></li>
-		        			<li><a href="{% url geocamTalk.views.message_list %}">All Messages</a></li>
+		        			<li><a href="/talk/messages/{{user.username}}">Messages</a></li> 
+                			<li><a href="/talk/messages/">All Messages</a></li>
 		        		</ul>
 	        		</div>
 	        	</div>
