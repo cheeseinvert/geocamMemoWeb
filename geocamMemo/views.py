@@ -36,11 +36,13 @@ def message_list(request, author_username=None):
                               dict(gc_msg=MemoMessage.getMessages(author),
                                    author=author), 
                               context_instance=RequestContext(request))
-
-
 def message_list_json(request):
     messages = MemoMessage.getMessages()
     return HttpResponse(json.dumps([msg.getJson() for msg in messages]))
+
+def details_json(request, message_id):
+    message = get_object_or_404(MemoMessage, pk=message_id)
+    return HttpResponse(json.dumps(message.getJson()))
 
 def get_first_geolocation(messages):
     """ return the first geotagged message lat and long as tuple """

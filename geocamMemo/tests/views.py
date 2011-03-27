@@ -61,13 +61,24 @@ class GeocamMemoMessageSaveTest(TestCase):
                                         "longitude":GeocamMemoMessageSaveTest.cmusv_lon})
         self.assertEqual(response.status_code, 200, "submitFormToCreateMessage Failed")
         
-    def test_MessageJsonFeed(self):
+    def test_MessagesJsonFeed(self):
         ordered_messages = MemoMessage.getMessages()
         # yes the order of this dict does matter... unfortunately
         stringified_msg_list = json.dumps([msg.getJson() for msg in ordered_messages ])
         response = self.client.get('/memo/messages.json')
         
-        self.assertContains(response,stringified_msg_list)        
+        self.assertContains(response,stringified_msg_list)
+        
+    def test_MessageJsonFeed(self):
+        # arrange
+        msg = MemoMessage.latest.all()[0]
+        stringified_msg = json.dumps(msg.getJson())
+        
+        # act
+        response = self.client.get('/memo/messages/details/' + str(msg.pk) + '.json')
+        
+        # assert
+        self.assertContains(response,stringified_msg)             
         
     def test_index(self):
         """ Test that we are forced to login to view webroot """
