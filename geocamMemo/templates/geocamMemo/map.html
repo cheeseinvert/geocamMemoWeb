@@ -33,7 +33,10 @@ function createMap(latitude, longitude) {
 		$(messages).each(function(i, msg) {
 			google.maps.event.addListener(msg.marker,"click", function() {
 				infoWindow.close();
-				infoWindow.setContent("yeah pyDev or do I mean the opposite");
+				$.getJSON("memo/messages/details/" + msg.pk + ".json", function(data) {
+					infoWindow.setContent(data['content']);
+				});
+				
 				infoWindow.open(map, msg.marker);
 				//alert(marker.getLatLng());
 			});
