@@ -32,7 +32,8 @@
 	$(document).ready(function() {
 		var running_timestamp = {{ timestamp }};
 		var new_message_count = {{ user.profile.getUnreadMessageCount }};
-		setInterval(function(){
+		
+		var updateFunction = function(){
 			// messagefeed.json looks like this:
 	        // [{"content": "The hospital is full, no more beds...", "content_timestamp": "02/19 21:35:52", "has_geolocation": -122.4048743, "author": "Adam Grant"}, 
 	        //  {"content": "Casualties are littering the streets!", "content_timestamp": "02/19 21:35:29", "has_geolocation": -122.4048743, "author": "Adam Grant"}, 
@@ -75,8 +76,25 @@
 	        	running_timestamp = data['ts'];
 	        	new_message_count += data['msgCnt'];
 	        	$('#new_message_count').html(new_message_count);
+	        	
+	        	if (new_message_count > 0 && $('#clear_link').length == 0)
+	        	{
+	        		var span = '<span id="stupidfix">&nbsp;</span>';
+	        		var link = $('<a id="clear_link" href="#">(Clear)</a>');
+	        		link.click(function() {
+	        			$.get('/talk/clearmessages/', function() {
+	        				new_message_count = 0;
+	        				$('#new_message_count').html(new_message_count);
+	        				$('#clear_link').remove();
+	        				$('#stupidfix').remove();
+	        			});
+	        		});
+	        		$('#my_messages_link').after(link).after(span);
+	        	}
 	        });
-		}, 3*1000);
+		}; 
+		updateFunction();
+		setInterval(updateFunction, 3*1000);
 	});
 </script>
 {% endblock %}
