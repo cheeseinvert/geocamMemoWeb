@@ -178,7 +178,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         msg.recipients.add(recipient)
         msg.recipients.add(User.objects.all()[2])
         msg.save()
-        response = self.client.get('/talk/newmessagefeed/?since=%s' % before_new_message)
+        response = self.client.get('/talk/messagefeedcnt/?since=%s' % before_new_message)
         self.assertContains(response, '"messageCnt": 1')
         
         #for oldmsg in old_messages:
