@@ -15,7 +15,9 @@
           {{ m.get_author_string}}
       {% endif %}
 	 	said
-	  {% if m.has_geolocation %}<img src="/resources/geoloc.png" />{%endif%}
+          {% if m.has_geolocation %}
+              <a data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>
+          {%endif%}
 	</dt>
 	<dd id="message_{{m.pk}}_content">
     	<p>{{ m.content}}</p>
@@ -64,7 +66,7 @@
         		html_str += '<dt id="message_'+pk+'">';
         		html_str += 'On '+content_timestamp+' '+authorUsername+' said';
         		if (has_geolocation == true) {
-        			html_str += '<img src="/resources/geoloc.png" />';
+        			html_str += '<a data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>';
         		}
         		html_str += '</dt>';
         		html_str += '<dd id="message_'+pk+'_content">';
