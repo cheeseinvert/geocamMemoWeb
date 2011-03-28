@@ -29,7 +29,38 @@ class GeocamTalkUnitTest(TestCase):
             
         message.recipients.add(recipienta)
         message.recipients.add(recipientb)
-        message.save
         
         # assert
         self.assertEquals(2, len(message.recipients.all()), "All recipients should be added to the message")
+
+class TalkUserProfileUnitTest(TestCase):
+    fixtures = ['demoTalkMessages.json', 'demoUsers.json']
+            
+    def testEnsureLastViewedMyMessages(self):
+        # arrange
+        user = User.objects.all()[0]
+        time_stamp = datetime.now()
+        profile = user.profile
+        
+        # act
+        profile.last_viewed_mymessages = time_stamp
+        profile.save()
+        
+        # assert
+        self.assertEquals(time_stamp,user.profile.last_viewed_mymessages)
+        
+    def testCanGetUnreadMessageCount(self):
+        # arrange
+        user = User.objects.all()[0]
+        profile = user.profile
+        
+        currentCount = profile.getUnreadMessageCount()
+        
+        # act
+        TalkMessage.objects.create(
+            content="012345678901234567890123456789", 
+            content_timestamp=datetime.now(), 
+            author=user)
+                
+        # assert
+        self.assertEquals(currentCount + 1, profile.getUnreadMessageCount())

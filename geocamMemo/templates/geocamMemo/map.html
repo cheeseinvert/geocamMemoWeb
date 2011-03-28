@@ -14,17 +14,34 @@ function createMap(latitude, longitude) {
 			    mapTypeControl: false,
 			    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
 			    mapTypeId: google.maps.MapTypeId.ROADMAP
-			  };	
+			  };
+		
 		var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 		
-		{% for m in gc_msg %}
-		   {% if m.has_geolocation %}
-		   var latlng = new google.maps.LatLng({{m.latitude}},{{m.longitude}});
-		   var marker = new google.maps.Marker({
-	                                            position: latlng, 
-	                                            map: map });
+		var messages =
+        [{% for m in gc_msg %}{% if m.has_geolocation %}
+		       	{marker:null,latitude:{{m.latitude}},longitude:{{m.longitude}},pk:{{m.pk}}},
 		   {% endif %}
-		{% endfor %}
+		{% endfor %}];
+		
+		$(messages).each(function(i,msg){
+			var pos = new google.maps.LatLng(msg.latitude,msg.longitude);
+			msg.marker = new google.maps.Marker({position:pos,map:map});
+		});
+		
+		var infoWindow = new google.maps.InfoWindow();
+		$(messages).each(function(i, msg) {
+			google.maps.event.addListener(msg.marker,"click", function() {
+				infoWindow.close();
+				$.getJSON("memo/messages/details/" + msg.pk + ".json", function(data) {
+					var messageHtml = "<strong>" + data['authorFullname'] + "</strong><br />"
+                                    + "<span>" + data['contentTimestamp'] + "</span>"
+					                + "<p>" + data['content'] + "</p>"
+					infoWindow.setContent(messageHtml);
+				});
+				infoWindow.open(map, msg.marker);
+			});
+		});
 		
 		google.maps.event.trigger(map,'resize');
 	}

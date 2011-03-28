@@ -20,7 +20,7 @@ class GeocamMemoUrls(TestCase):
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
         
-    def testMessageJsonListUrl(self):
+    def testMessagesJsonListUrl(self):
         #arrange
         path = "/memo/messages.json"
         
@@ -28,7 +28,18 @@ class GeocamMemoUrls(TestCase):
         guestResponse = self.getResponse(path)
         
         #assert
-        self.assertEqual(200, guestResponse.status_code, "should display list. period")  
+        self.assertEqual(200, guestResponse.status_code, "should display list. period")
+        
+    def testMessageJsonListUrl(self):
+        #arrange
+        pk = str(MemoMessage.latest.all()[0].pk)
+        path = "/memo/messages/details/" + pk + ".json"
+        
+        #act
+        guestResponse = self.getResponse(path)
+        
+        #assert
+        self.assertEqual(200, guestResponse.status_code, "should display single message")  
         
     def testMessageDetailsUrl(self):
         #arrange

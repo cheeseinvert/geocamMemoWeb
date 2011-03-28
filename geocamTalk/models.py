@@ -7,7 +7,19 @@
 from django.db import models
 from geocamMemo.models import GeocamMessage, get_user_string
 from django.contrib.auth.models import User
+from datetime import datetime
+import time
 from django.db.models import Q, Count
+
+class TalkUserProfile(models.Model):
+    user = models.ForeignKey(User, related_name='profile')
+    last_viewed_mymessages = models.DateTimeField(default=datetime.min)
+    
+    def getUnreadMessageCount(self):
+        return TalkMessage.getMessages(self.user).filter(
+                                        content_timestamp__gt=self.last_viewed_mymessages).count()
+
+User.profile = property(lambda u: TalkUserProfile.objects.get_or_create(user=u)[0])
 
 class TalkMessage(GeocamMessage):
     """ This is the data model for Memo application messages 

@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from django.contrib.auth.models import User
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
 from geocamTalk.models import TalkMessage
 import json
 import re
@@ -127,24 +128,46 @@ class GeocamTalkMessageSaveTest(TestCase):
         self.assertEqual(ordered_messages[0], response_ordered_messages[0], 'Ordering of the message in the message list is not right')
     
     def test_MyMessageList(self):
+        # arrange
         ''' This test is attempting to verify that we see messages for specified user or broadcast '''
         recipient = User.objects.get(username="acurie")
         author = User.objects.all()[1]
         msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=author)
         msg.recipients.add(recipient)
         msg.recipients.add(User.objects.all()[2])
- 
-        response = self._get_messages_response(recipient=recipient)
-        # dont pass in author here:
-        expectedMessages = TalkMessage.getMessages(recipient,author=None)      
         
+        time_stamp = datetime.now() - timedelta(minutes=15)
+        profile = recipient.profile
+        profile.last_viewed_mymessages = time_stamp
+        profile.save()
+ 
+        #self.client.login(username=recipient.username, password='geocam')
+        #response = self.client.get('/talk/messages/'+recipient_path)
+        
+        # act
+        response = self._get_messages_response(recipient=recipient)
+        expectedMessages = TalkMessage.getMessages(recipient,author=None) # don't pass in author
         gotMessages = response.context["gc_msg"]
+        
+        # assert
+        self.assertTrue(time_stamp < recipient.profile.last_viewed_mymessages)
+        
         self.assertEqual(recipient, response.context["recipient"])
         self.assertEqual(len(gotMessages), expectedMessages.count(), "My messages response % is not the same size as expected %s" % (len(gotMessages), expectedMessages.count()))        
 
         for i in range(len(expectedMessages)):
             self.assertEqual(expectedMessages[i],gotMessages[i], "My messages doesn't contain an expected message: %s" % expectedMessages[i])
-        
+       
+    def test_MessageListGetsServerTimestamp(self):
+        ''' This test is attempting to verify that we get the server timestamp in the passed context '''
+        timestamp = int(time.mktime(datetime.now().timetuple())) 
+        response = self._get_messages_response()     
+        try:
+            gotTimestamp = response.context["timestamp"]
+        except:
+            self.fail("we didn't get the timestamp in the passed context to list_messages template")
+        self.assertTrue(gotTimestamp >= timestamp, "The server timestamp was not accurate")
+         
     @staticmethod
     def cmpMessageSortNewestFirst(message1, message2):
         if(message1.content_timestamp > message2.content_timestamp):
@@ -152,71 +175,51 @@ class GeocamTalkMessageSaveTest(TestCase):
         if(message1.content_timestamp == message2.content_timestamp):
             return 0
         else:
-            return 1
-        
+            return 1    
+    
+    def test_NewMessageJsonFeed(self):
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')
+        # need to cast the query set to a list here to avoid the dynamic update 
+        # when we create the new msg
+        #old_messages = list(TalkMessage.getMessages())
+        before_new_message = int(time.time() * 1000 * 1000)
+        time.sleep(1)
+        recipient = User.objects.get(username="acurie")
+        msg = TalkMessage.objects.create(content='This is a new message', content_timestamp=datetime.now(), author=author)
+        msg.recipients.add(recipient)
+        msg.recipients.add(User.objects.all()[2])
+        msg.save()
+        response = self.client.get('/talk/messagefeed/?since=%s' % before_new_message)
+        self.assertContains(response, '"msgCnt": 1')
+        # I dont want to delete this because I wasted a bunch of time on it:
+        #for oldmsg in old_messages:
+        #    self.assertNotContains(response, '"messageId": %s' % oldmsg.pk)
         
     def test_MessageJsonFeed(self):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
-        ordered_messages = TalkMessage.getMessages()
-        # yes the order of this dict does matter... unfortunately
-        stringified_msg_list = json.dumps([msg.getJson() for msg in ordered_messages ])
-        response = self.client.get('/talk/messagefeed')
-        
-        self.assertContains(response,stringified_msg_list)
-        
-
+        ordered_messages = TalkMessage.objects.all().order_by('content_timestamp').reverse()
+        latest_msgs_dt = ordered_messages[0].content_timestamp - timedelta(seconds=5)
+        ts = int(time.mktime(latest_msgs_dt.timetuple()) * 1000 * 1000)
+        response = self.client.get('/talk/messagefeed/?since=%s' % ts)
+        self.assertContains(response, '"messageId": %s' % ordered_messages[0].pk)
+        for msg in ordered_messages[1:]:
+            self.assertNotContains(response, '"messageId": %s' % msg.pk)
+      
     def test_MyMessageJsonFeed(self):
         ''' This test is attempting to verify that we see messages for specified user or broadcast '''
-        recipient = User.objects.get(username="acurie")
-        author = User.objects.all()[1]
-        msg = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=author)
-        msg.recipients.add(recipient)
-        msg.recipients.add(User.objects.all()[2])
- 
-        self.client.login(username=recipient.username, password='geocam')
-        response = self.client.get('/talk/messagefeed/%s' % recipient.username)
-
-        allExpectedMessages = TalkMessage.getMessages(recipient,author)       
-        expectedMessages = list(allExpectedMessages)
-        expectedMessages = sorted(expectedMessages, self.cmpMessageSortNewestFirst) 
-
-        for i in range(len(expectedMessages)):
-            self.assertContains(response, expectedMessages[i].content)
-
-    def test_MyMessageJsonFeedFromAuthor(self):
-        ''' This test is attempting to verify that we see messages for specified user or broadcast '''
-        recipient = User.objects.get(username="acurie")
-        author = User.objects.all()[1]
-        not_author = User.objects.all()[1]
-        msg_from_author = TalkMessage.objects.create(content='yo dude', content_timestamp=self.now, author=author)
-        msg_from_author.recipients.add(recipient)
-        msg_from_author.recipients.add(User.objects.all()[2])
+            
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')
+        ordered_messages = TalkMessage.getMessages(recipient=author)
         
-        msg_not_from_author = TalkMessage.objects.create(content='I hope acurie does not see this', content_timestamp=self.now, author=not_author)
-        msg_not_from_author.recipients.add(recipient)
-        msg_not_from_author.recipients.add(User.objects.all()[2])
- 
-        self.client.login(username=recipient.username, password='geocam')
-        response = self.client.get('/talk/messagefeed/%s/%s' % (recipient.username, author.username))
-
-        allExpectedMessages = set()  
-        recipient_messages_from_author_or_broadcast = set()      
-        for m in recipient.received_messages.all(): # messages to me
-            allExpectedMessages.add(m)
-        for m in TalkMessage.objects.all(): # broadcast messages
-            if(m.recipients.count() == 0):            
-                allExpectedMessages.add(m)
-                
-        for m in allExpectedMessages:
-            if (m.author == author):
-                recipient_messages_from_author_or_broadcast.add(m)      
-                
-        expectedMessages = list(recipient_messages_from_author_or_broadcast)
-        expectedMessages = sorted(expectedMessages, self.cmpMessageSortNewestFirst) 
-
-        for i in range(len(expectedMessages)):
-            self.assertContains(response, expectedMessages[i].content)
+        latest_msgs_dt = ordered_messages[0].content_timestamp - timedelta(seconds=5)
+        ts = int(time.mktime(latest_msgs_dt.timetuple()) * 1000 * 1000)
+        response = self.client.get('/talk/messagefeed/rhornsby?since=%s' % ts)
+        self.assertContains(response, '"messageId": %s' % ordered_messages[0].pk)
+        for msg in ordered_messages[1:]:
+            self.assertNotContains(response, '"messageId": %s' % msg.pk)
 
     def _get_messages_response(self, recipient=None):
         recipient_path = ""

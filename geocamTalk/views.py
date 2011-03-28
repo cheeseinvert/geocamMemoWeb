@@ -12,29 +12,22 @@ from django.core.urlresolvers import reverse
 from geocamTalk.models import TalkMessage
 from geocamTalk.forms import GeocamTalkForm
 from datetime import datetime
+import time
 from django.contrib.auth.models import User
 from django.db.models import Q, Count
 import json
     
 @login_required
-def message_list(request, recipient_username=None, author_username=None):    
-    if recipient_username is not None:
-        recipient = get_object_or_404(User, username=recipient_username)
-    else:
-        recipient = None
-        
-    if author_username is not None:
-        author = get_object_or_404(User, username=author_username)
-    else:
-        author = None                                                                                         
-    return render_to_response('geocamTalk/message_list.html', 
-                              dict(gc_msg=TalkMessage.getMessages(recipient,author), 
-                                   recipient=recipient, 
-                                   author=author), 
-                               context_instance=RequestContext(request))
+def clear_messages(request):
+    profile = request.user.profile
+    profile.last_viewed_mymessages = datetime.now()
+    profile.save()
+    
+    return HttpResponse(status=200)
 
 @login_required
-def feed_messages(request, recipient_username=None, author_username=None):
+def message_list(request, recipient_username=None, author_username=None):   
+    timestamp = int(time.time() * 1000 * 1000)
     if recipient_username is not None:
         recipient = get_object_or_404(User, username=recipient_username)
     else:
@@ -44,10 +37,44 @@ def feed_messages(request, recipient_username=None, author_username=None):
         author = get_object_or_404(User, username=author_username)
     else:
         author = None
-        
-    messages = TalkMessage.getMessages(recipient, author)
-    return HttpResponse(json.dumps([msg.getJson() for msg in messages]))
     
+    if recipient is not None and recipient.pk == request.user.pk and author is None:
+        profile = recipient.profile
+        profile.last_viewed_mymessages = datetime.now()
+        profile.save()
+    
+    return render_to_response('geocamTalk/message_list.html', 
+                               dict(gc_msg=TalkMessage.getMessages(recipient,author), 
+                                   recipient=recipient, 
+                                   author=author,
+                                   timestamp=timestamp),
+                               context_instance=RequestContext(request))
+
+@login_required
+def feed_messages(request, recipient_username=None, author_username=None):
+    timestamp = int(time.time() * 1000 * 1000)
+    if recipient_username is not None:
+        recipient = get_object_or_404(User, username=recipient_username)
+    else:
+        recipient = None
+        
+    if author_username is not None:
+        author = get_object_or_404(User, username=author_username)
+    else:
+        author = None
+    since = request.GET.get('since', None)
+    
+    if since is not None:
+        since_dt = datetime.fromtimestamp(float(since) / (1000 * 1000))
+        messages = TalkMessage.getMessages(recipient, author).filter(content_timestamp__gt=since_dt)
+        message_count = TalkMessage.getMessages(request.user).filter(content_timestamp__gt=since_dt).count() 
+    else:
+        messages = TalkMessage.getMessages(recipient, author)
+        message_count = TalkMessage.getMessages(request.user).count()
+    return HttpResponse(json.dumps({'ts': timestamp,
+                                    'msgCnt': message_count,
+                                    'ms':[msg.getJson() for msg in messages]}))
+  
 @login_required
 def index(request):
     return render_to_response('geocamTalk/home.html',
