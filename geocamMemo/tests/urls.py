@@ -91,7 +91,7 @@ class GeocamMemoUrls(TestCase):
         
     def testMapViewUrl(self):
        #arrange
-        path = "/memo/map/"   
+        path = "/memo/map"   
         template = "geocamMemo/map.html"
 
         #act

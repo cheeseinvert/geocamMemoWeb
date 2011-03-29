@@ -3,6 +3,33 @@
 {% block title%}GeoCam Talk Messages{% endblock %}
 
 {% block content %}
+<h1>
+	{% if recipient != None and author != None %}
+		Messages to
+		{% if recipient == user %}
+			me
+		{% else %}
+			{{recipient.full_name}}
+		{% endif %}
+		from
+		{% if author == user %}
+			me
+		{% else %}
+			{{author.full_name}}
+		{% endif %}
+	{% else %}
+		{% if recipient != None %}
+			{% if recipient == user %}
+				My
+			{% else %}
+				{{recipient.full_name}}'s
+			{% endif %}
+			messages
+		{% else %}
+			All Messages
+		{% endif %}
+	{% endif %}
+</h1>
 <div id="messages">
 <dl id="message_list">
 {% for m in gc_msg %}
@@ -23,7 +50,7 @@
 {% endfor %}
 </dl>
 
-<a href="/talk/messages/create/">New Message</a>
+<a href="{% url geocamTalk.views.create_message %}">New Message</a>
 </div>
 {% endblock %}
 
@@ -39,12 +66,12 @@
 	        //  {"content": "Casualties are littering the streets!", "content_timestamp": "02/19 21:35:29", "has_geolocation": -122.4048743, "author": "Adam Grant"}, 
 	        //  {"content": "Some crazy stuff is happening in this neighborhood.", "content_timestamp": "02/19 21:34:46", "has_geolocation": -122.4048743, "author": "Adam Grant"}]
 	        {% if author %}
-	        	var url = '/talk/messagefeed/{{recipient.username}}/{{author.username}}'
+	        	var url = '{% url geocamTalk.views.feed_messages recipient.username author.username %}';
 	        {% else %}
 	        	{% if recipient %}   
-	        		var url = '/talk/messagefeed/{{recipient.username}}'
+	        		var url = '{% url geocamTalk.views.feed_messages recipient.username %}';
 	        	{% else %}   
-	        		var url = '/talk/messagefeed'
+	        		var url = '{% url geocamTalk.views.feed_messages %}';
 	        	{% endif %}
 	        {% endif %}
 	        url = url + '?since=' + running_timestamp;
@@ -59,7 +86,7 @@
 	        		var authorUsername = msg['authorUsername'];
 	        		var authorFullname = msg['authorFullname']
 	        		{% if recipient %}
-	        		    authorFullname = '<a href="/talk/messages/{{ recipient.username }}/' +authorUsername+ '">' +authorFullname+ '</a>' ;
+	        		    authorFullname = '{% url geocamTalk.views.message_list recipient.username %}/' +authorUsername+ '">' +authorFullname+ '</a>' ;
 	        		{% endif %}
 	        		
 	        		html_str += '<dt id="message_'+pk+'">';
@@ -82,7 +109,7 @@
 	        		var span = '<span id="stupidfix">&nbsp;</span>';
 	        		var link = $('<a id="clear_link" href="#">(Clear)</a>');
 	        		link.click(function() {
-	        			$.get('/talk/clearmessages/', function() {
+	        			$.get('{% url geocamTalk.views.clear_messages %}', function() {
 	        				new_message_count = 0;
 	        				$('#new_message_count').html(new_message_count);
 	        				$('#clear_link').remove();

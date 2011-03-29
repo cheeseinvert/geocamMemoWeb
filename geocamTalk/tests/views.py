@@ -11,6 +11,7 @@ import time
 from geocamTalk.models import TalkMessage
 import json
 import re
+from django.core.urlresolvers import reverse
 
 class GeocamTalkMessageSaveTest(TestCase):
     """
@@ -62,7 +63,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         
-        response = self.client.post("/talk/messages/create/",
+        response = self.client.post(reverse("talk_create_message"),
                                   data={"content":content,
                                         "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamTalkMessageSaveTest.cmusv_lon,
@@ -83,7 +84,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         recipienta = User.objects.all()[1]
         recipientb = User.objects.all()[2]
 
-        response = self.client.post("/talk/messages/create/",
+        response = self.client.post(reverse("talk_create_message"),
                                   data={"content":content,
                                         "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamTalkMessageSaveTest.cmusv_lon,
@@ -104,7 +105,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         
-        response = self.client.post("/talk/messages/create/",
+        response = self.client.post(reverse("talk_create_message"),
                                   data={"latitude":GeocamTalkMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamTalkMessageSaveTest.cmusv_lon,
                                         "author":author.pk})
@@ -177,20 +178,20 @@ class GeocamTalkMessageSaveTest(TestCase):
         else:
             return 1    
     
-    def test_NewMessageJsonFeed(self):
+    def test_NewMessageCountJsonFeed(self):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         # need to cast the query set to a list here to avoid the dynamic update 
         # when we create the new msg
         #old_messages = list(TalkMessage.getMessages())
-        before_new_message = int(time.time() * 1000 * 1000)
-        time.sleep(1)
+        before_new_message = int((time.time()-1) * 1000 * 1000)
         recipient = User.objects.get(username="acurie")
         msg = TalkMessage.objects.create(content='This is a new message', content_timestamp=datetime.now(), author=author)
         msg.recipients.add(recipient)
         msg.recipients.add(User.objects.all()[2])
         msg.save()
-        response = self.client.get('/talk/messagefeed/?since=%s' % before_new_message)
+        response = self.client.get(reverse("talk_message_list_author_json", args=[author.username])+
+                                   '?since=%s' % before_new_message)
         self.assertContains(response, '"msgCnt": 1')
         # I dont want to delete this because I wasted a bunch of time on it:
         #for oldmsg in old_messages:
@@ -202,7 +203,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         ordered_messages = TalkMessage.objects.all().order_by('content_timestamp').reverse()
         latest_msgs_dt = ordered_messages[0].content_timestamp - timedelta(seconds=5)
         ts = int(time.mktime(latest_msgs_dt.timetuple()) * 1000 * 1000)
-        response = self.client.get('/talk/messagefeed/?since=%s' % ts)
+        response = self.client.get(reverse("talk_message_list_all_json")+'?since=%s' % ts)
         self.assertContains(response, '"messageId": %s' % ordered_messages[0].pk)
         for msg in ordered_messages[1:]:
             self.assertNotContains(response, '"messageId": %s' % msg.pk)
@@ -216,7 +217,8 @@ class GeocamTalkMessageSaveTest(TestCase):
         
         latest_msgs_dt = ordered_messages[0].content_timestamp - timedelta(seconds=5)
         ts = int(time.mktime(latest_msgs_dt.timetuple()) * 1000 * 1000)
-        response = self.client.get('/talk/messagefeed/rhornsby?since=%s' % ts)
+        response = self.client.get(reverse("talk_message_list_author_json", args=[author.username])+
+                                   '?since=%s' % ts)
         self.assertContains(response, '"messageId": %s' % ordered_messages[0].pk)
         for msg in ordered_messages[1:]:
             self.assertNotContains(response, '"messageId": %s' % msg.pk)

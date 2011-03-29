@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-<a href="/memo/messages/create/" data-role="button" data-inline="true">New Message</a>
+<a href="{% url geocamMemo.views.create_message %}" data-role="button" data-inline="true">New Message</a>
 <section id="messages">
    {% if author %}
       <h1>Memos by {% firstof author.get_full_name author.username %}</h1>
@@ -23,7 +23,7 @@
           <a href="{% url geocamMemo.views.message_list m.author.username %}"> 
           {{ m.get_author_string}}</a>
           {% if m.has_geolocation %}
-              <a href="{% url geocamMemo.views.details m.pk %}" data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>
+              <a href="{% url geocamMemo.views.message_details m.pk %}" data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>
           {%endif%}
           {% if m.author.username == user.username or user.is_superuser %} 
           	<a href="{% url geocamMemo.views.edit_message m.pk %}" data-inline="true" data-role="button" data-icon="geoCam-edit" data-iconpos="notext">edit</a>

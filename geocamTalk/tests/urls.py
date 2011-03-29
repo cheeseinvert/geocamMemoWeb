@@ -33,7 +33,7 @@ class GeocamTestUrls(TestCase):
     def testClearMyMessageCount(self):
         #arrange
         me = User.objects.all()[0]
-        path = "/talk/clearmessages/"
+        path = "/talk/messages/clear"
         self.login()
 
         #act
@@ -53,7 +53,7 @@ class GeocamTestUrls(TestCase):
     
     def testMessageJSONFeedUrl(self):
         #arrange
-        path = "/talk/messagefeed"
+        path = "/talk/messages.json"
         
         #act
         guestResponse = self.getResponse(path)
@@ -67,7 +67,7 @@ class GeocamTestUrls(TestCase):
     def testMyMessageJSONFeedUrl(self):
         #arrange
         me = User.objects.all()[0]
-        path = "/talk/messagefeed/%s" % me.username   
+        path = "/talk/messages/%s.json" % me.username   
         
         #act
         guestResponse = self.getResponse(path)

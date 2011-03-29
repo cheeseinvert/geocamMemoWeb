@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
 from geocamMemo.models import MemoMessage, get_user_string
-
+from django.core.urlresolvers import reverse
 
 
 class GeocamMemoListViewTest(TestCase):
@@ -25,6 +25,7 @@ class GeocamMemoListViewTest(TestCase):
     def testMessageListSizeAndOrder(self):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
+        
         response = self.get_messages_response()
         
         displayedmessages = response.context['gc_msg'] # get the data object sent to the template
@@ -113,7 +114,7 @@ class GeocamMemoListViewTest(TestCase):
         
         #assert
         for m in messages:            
-            self.assertContains(response, 'href="/memo/messages/' + m.author.username)
+            self.assertContains(response, 'href="' + reverse("memo_message_list_user", args=[m.author.username]))
     
     def testEnsureListAuthorPresent(self):
         #arrange
@@ -145,13 +146,13 @@ class GeocamMemoListViewTest(TestCase):
         
     def get_messages_response_filtered(self, user):
         self.client.login(username=user.username, password='geocam')
-        response = self.client.get('/memo/messages/' + user.username)
+        response = self.client.get(reverse("memo_message_list_user", args=[user.username]))
         return response
     
     def get_messages_response(self):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
-        response = self.client.get('/memo/messages/')
+        response = self.client.get(reverse("memo_message_list_all"))
         return response
 
 class GeocamMemoMapViewTest(TestCase):
@@ -200,7 +201,7 @@ class GeocamMemoMapViewTest(TestCase):
     def get_map_response(self):
         u = User.objects.all()[0]
         self.client.login(username=u.username, password='geocam')
-        response = self.client.get('/memo/map/')
+        response = self.client.get(reverse("memo_message_map"))
         return response
 
 class GeocamMemoSingleMessageViewTest(TestCase):
@@ -214,7 +215,7 @@ class GeocamMemoSingleMessageViewTest(TestCase):
         self.client.login(username=u.username, password='geocam')
         
         # act
-        response = self.client.get('/memo/messages/details/' + str(m.pk))
+        response = self.client.get(reverse("memo_message_details", args=[m.pk]))
         
         # assert
         self.assertContains(response, str(m.latitude))
