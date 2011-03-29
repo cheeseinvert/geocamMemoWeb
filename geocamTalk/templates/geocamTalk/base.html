@@ -31,8 +31,8 @@
 	        		<a href="/talk/messages" data-icon="home" data-iconpos="notext" data-direction="reverse" class="ui-btn-right jqm-home">Home</a>
 	        		<div data-role="navbar">
 		        		<ul>
-		        			<li><a id="my_messages_link" href="/talk/messages/{{user.username}}">My Messages (<span id="new_message_count">{{user.profile.getUnreadMessageCount}}</span>)</a></li>
-                			<li><a href="/talk/messages/">All Messages</a></li>
+		        			<li><a id="my_messages_link" href="{% url geocamTalk.views.message_list user.username%}">My Messages (<span id="new_message_count">{{user.profile.getUnreadMessageCount}}</span>)</a></li>
+                			<li><a href="{% url geocamTalk.views.message_list%}">All Messages</a></li>
 		        		</ul>
 	        		</div>
 	        	</div>

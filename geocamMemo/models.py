@@ -108,4 +108,5 @@ def get_user_string(user):
     else:
         return (user.username)
 
+User.full_name = property(lambda u: get_user_string(u))
 
