@@ -86,7 +86,7 @@
 	        		var authorUsername = msg['authorUsername'];
 	        		var authorFullname = msg['authorFullname']
 	        		{% if recipient %}
-	        		    authorFullname = '{% url geocamTalk.views.message_list recipient.username %}/' +authorUsername+ '">' +authorFullname+ '</a>' ;
+	        		    authorFullname = '<a href="{% url geocamTalk.views.message_list recipient.username %}/' +authorUsername+ '">' +authorFullname+ '</a>' ;
 	        		{% endif %}
 	        		
 	        		html_str += '<dt id="message_'+pk+'">';
