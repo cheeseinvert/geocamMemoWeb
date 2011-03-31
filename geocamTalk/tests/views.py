@@ -205,6 +205,17 @@ class GeocamTalkMessageSaveTest(TestCase):
         ts = int(time.mktime(latest_msgs_dt.timetuple()) * 1000 * 1000)
         response = self.client.get(reverse("talk_message_list_all_json")+'?since=%s' % ts)
         self.assertContains(response, '"messageId": %s' % ordered_messages[0].pk)
+        self.assertContains(response, '"authorUsername": "%s"' % ordered_messages[0].author.username)
+        self.assertContains(response, '"authorFullname": "%s"' % ordered_messages[0].get_author_string())
+        self.assertContains(response, '"userId": %s' % ordered_messages[0].author.pk)
+        recipient_string = ", ".join('"%s"' % r.username for r in ordered_messages[0].recipients.all())
+        self.assertContains(response, '"recipients": [%s]' % recipient_string)
+        self.assertContains(response, '"content": "%s"' % ordered_messages[0].content)
+        self.assertContains(response, '"contentTimestamp": "%s"' % ordered_messages[0].get_date_string())
+        self.assertContains(response, '"hasGeolocation": %s' % str(ordered_messages[0].has_geolocation()).lower())
+        self.assertContains(response, '"latitude": %s' % ordered_messages[0].latitude)
+        self.assertContains(response, '"longitude": %s' % ordered_messages[0].longitude)
+        self.assertContains(response, '"accuracy": %s' % ordered_messages[0].accuracy)
         for msg in ordered_messages[1:]:
             self.assertNotContains(response, '"messageId": %s' % msg.pk)
       
