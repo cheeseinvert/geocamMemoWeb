@@ -50,7 +50,7 @@ def message_list(request, recipient_username=None, author_username=None):
                                    timestamp=timestamp),
                                context_instance=RequestContext(request))
 
-@login_required
+#@login_required
 def feed_messages(request, recipient_username=None, author_username=None):
     timestamp = int(time.time() * 1000 * 1000)
     if recipient_username is not None:
