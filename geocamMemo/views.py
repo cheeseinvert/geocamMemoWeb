@@ -4,12 +4,13 @@
 # All Rights Reserved.
 # __END_LICENSE__
 
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden, HttpResponseServerError
 from django.template import RequestContext
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.core import serializers
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response
 from django.views.generic.simple import redirect_to
@@ -46,10 +47,13 @@ def message_list(request, author_username=None):
                                    author=author), 
                               context_instance=RequestContext(request))
 
-# login not yet required
+# manual not logged in response
 def message_list_json(request):
-    messages = MemoMessage.getMessages()
-    return HttpResponse(json.dumps([msg.getJson() for msg in messages]))
+    if request.user.is_authenticated():        
+        messages = MemoMessage.getMessages()
+        return HttpResponse(json.dumps([msg.getJson() for msg in messages]))
+    else:
+        return HttpResponseForbidden()
 
 @login_required
 def index(request):
@@ -88,6 +92,23 @@ def create_message(request):
                                   dict(form=form),                                   
                                   context_instance=RequestContext(request))
 
+def create_message_json(request):    
+    if request.user.is_authenticated():
+        if request.method == 'POST':
+            jsonstring = request.POST["message"]
+            messageDict = json.loads(jsonstring)
+            messageDict["userId"] = request.user.pk
+            message = MemoMessage.fromJson(messageDict)
+            try:
+                message.save()
+                return HttpResponse("", 200) 
+            except:
+                return HttpResponseServerError()
+        else:
+               return HttpResponseServerError()
+    else:
+        return HttpResponseForbidden()
+  
 @login_required
 def edit_message(request, message_id):
     message = MemoMessage.objects.get(pk=message_id)

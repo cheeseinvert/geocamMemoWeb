@@ -61,12 +61,30 @@ class GeocamMemoMessageSaveTest(TestCase):
                                         "latitude":GeocamMemoMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamMemoMessageSaveTest.cmusv_lon})
         self.assertEqual(response.status_code, 200, "submitFormToCreateMessage Failed")
+
+    def test_submitFormToCreateMessageJSON(self):
+        msgCnt = MemoMessage.latest.all().count()
+        content = "Whoa man, that burning building almost collapsed on me!"
+        timestamp = self.now
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')        
+        response = self.client.post(reverse("memo_create_message_json"),
+                                  data={"message":json.dumps({
+                                        "content": content,
+                                        "contentTimestamp":timestamp.strftime("%m/%d/%y %H:%M:%S"),                                    
+                                        "latitude":GeocamMemoMessageSaveTest.cmusv_lat,
+                                        "longitude":GeocamMemoMessageSaveTest.cmusv_lon})})
+        newMsgCnt = MemoMessage.latest.all().count() 
+        self.assertEqual(response.status_code, 200, "submitFormToCreateMessageJSON Failed")
+        self.assertEqual(newMsgCnt, msgCnt+1)
         
     def test_MessagesJsonFeed(self):
         ordered_messages = MemoMessage.getMessages()
         # yes the order of this dict does matter... unfortunately
         stringified_msg_list = json.dumps([msg.getJson() for msg in ordered_messages ])
-        
+
+        self.client.login(username="rhornsby", password='geocam')
+
         response = self.client.get(reverse("memo_message_list_all_json"))
         
         self.assertContains(response,stringified_msg_list)
