@@ -33,17 +33,17 @@ Dependencies
   * Python 2.4 or higher (http://www.python.org/download/)
   * Django 1.2.5 or greater (http://www.djangoproject.com/)
 
-1. Once all dependencies have been installed, clone the GeoCamMemoWeb repository to the path of your choice ::
+1. Once all dependencies have been installed, clone the GeoCamMemoWeb repository to the path of your choice::
 
       git clone git@github.com:cheeseinvert/geocamMemoWeb.git
 
-2. CD into your ./geocamMemoWeb/example path and run syncdb, creating an admin user if prompted:
+2. CD into your ./geocamMemoWeb/example path and run syncdb, creating an admin user if prompted::
       
       python manage.py syncdb
       
 Running
 -------
-To run a development server, navigate to your ./geocamMemoWeb/example path and execute runserver:
+To run a development server, navigate to your ./geocamMemoWeb/example path and execute runserver::
       
       python manage.py runserver 0.0.0.0:8000
       
@@ -51,7 +51,7 @@ Pleast note that this must be done before the geocamTalkForAndroid and geocamTal
 
 Testing
 -------
-Testing can be initiated from your ./geocamMemoWeb/example path using the test command:
+Testing can be initiated from your ./geocamMemoWeb/example path using the test command::
       
       python manage.py test geocamMemo geocamTalk
 
