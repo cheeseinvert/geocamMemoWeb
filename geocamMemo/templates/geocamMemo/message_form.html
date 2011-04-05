@@ -21,17 +21,33 @@
 	function error(msg) {
    		$('#status').html(msg);
 	}
-
+   
 
 	function success(position) {
 		$('#status').html('Geolocation was successful.');
-  		$('input[name="latitude"]').val(position.coords.latitude).attr({readonly:true});
-  		$('input[name="longitude"]').val(position.coords.longitude).attr({readonly:true});
-  		$('input[name="altitude"]').val(position.coords.altitude).attr({readonly:true});
-  		$('input[name="accuracy"]').val(position.coords.accuracy).attr({readonly: true});
-  		$('input[name="heading"]').val(position.coords.heading).attr({readonly:true});
-  		$('input[name="speed"]').val(position.coords.speed).attr({readonly:true});
-  		$('input[name="position_timestamp"]').val(position.timestamp).attr({readonly:true});
+		var add_str = ""
+		if (position.coords.latitude != null) {
+			add_str += '<input type="hidden" name="latitude" value='+position.coords.latitude+' />';
+		}
+		if (position.coords.longitude != null) {
+			add_str += '<input type="hidden" name="longitude" value='+position.coords.longitude+' />';
+		}
+		if (position.coords.altitude != null) {
+			add_str += '<input type="hidden" name="altitude" value='+position.coords.altitude+' />';
+		}
+		if (position.coords.accuracy != null) {
+			add_str += '<input type="hidden" name="accuracy" value='+position.coords.accuracy+' />';
+		}
+		if (position.coords.heading != null) {
+			add_str += '<input type="hidden" name="heading" value='+position.coords.heading+' />';
+		}
+		if (position.coords.speed != null) {
+			add_str += '<input type="hidden" name="speed" value='+position.coords.speed+' />';
+		}
+		if (position.timestamp != null) {
+			add_str += '<input type="hidden" name="position_timestamp" value="'+position.timestamp+'" />';
+		}
+		$('#add_field').html(add_str);
 	} 
     
 	$(document).ready(function() {
@@ -57,14 +73,16 @@
 {% endif %}
 
 <p><div id='status'></div></p>
-<p>Current time: <div id='time'></div></p>
+<p>Current time: <span id='time'></span></p>
 <form action="/memo/messages/create/" method="post">
 	{% csrf_token %}
-	<table>
-		{{ form.as_table }}
-	</table>
+	<dl>
+        <dt>{{ form.content.label_tag }}</dt>
+        <dd>{{ form.content }}</dd>
+	</dl>
 	<input type="hidden" name="author" value="{{ user.pk }}" />
-	<input type="submit" value="Send Message" />
+    <span id="add_field"></span>
+    <input type="submit" value="Send Message" />
 </form>
 
 {% endblock %}
