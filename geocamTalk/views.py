@@ -11,8 +11,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from geocamTalk.models import TalkMessage
 from geocamTalk.forms import GeocamTalkForm
+from django.core.files.base import ContentFile
 from datetime import datetime
 import time
+import os
 from django.contrib.auth.models import User
 from django.db.models import Q, Count
 import json
@@ -113,6 +115,13 @@ def create_message_json(request):
             messageDict = json.loads(jsonstring)
             messageDict["userId"] = request.user.pk
             message = TalkMessage.fromJson(messageDict)
+
+            if "audio" in request.FILES:
+                filename = request.FILES['audio'].name
+                file_content = ContentFile(request.FILES['audio'].read())
+                file_format = os.path.splitext( request.FILES['audio'].name)[-1]
+                message.audio_file.save(filename, file_content)
+                
             try:
                 message.save()
                 return HttpResponse("", 200) 

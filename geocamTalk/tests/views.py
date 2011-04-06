@@ -11,6 +11,9 @@ import time
 from geocamTalk.models import TalkMessage
 import json
 import re
+import array
+import random
+import os
 from django.core.urlresolvers import reverse
 
 class GeocamTalkMessageSaveTest(TestCase):
@@ -98,23 +101,59 @@ class GeocamTalkMessageSaveTest(TestCase):
         newMsg = TalkMessage.getMessages()[0]
         self.assertEqual(newMsg.recipients.all().count(), 2, "Different number of recipients than expected")
     
-#     def test_submitFormToCreateMessageJSON(self):
-#        msgCnt = TalkMessage.latest.all().count()
-#        content = "Whoa man, that burning building almost collapsed on me!"
-#        timestamp = self.now
-#        author = User.objects.get(username="rhornsby")
-#        self.client.login(username=author.username, password='geocam')        
-#        response = self.client.post(reverse("talk_create_message_json"),
-#                                  data={"message":json.dumps({
-#                                        "content": content,
-#                                        "audio":,
-#                                        "contentTimestamp":timestamp.strftime("%m/%d/%y %H:%M:%S"),                                    
-#                                        "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
-#                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon})})
-#        newMsgCnt = TalkMessage.latest.all().count() 
-#        self.assertEqual(response.status_code, 200, "submitFormToCreateMessageJSON Failed")
-#        self.assertEqual(newMsgCnt, msgCnt+1)
+    def test_submitFormToCreateMessageJSON(self):
+        msgCnt = TalkMessage.latest.all().count()
+        content = "Whoa man, that burning building almost collapsed on me!"
+        timestamp = self.now
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')        
+        response = self.client.post(reverse("talk_create_message_json"),
+                                  data={"message":json.dumps({
+                                        "content": content,
+                                        "contentTimestamp":timestamp.strftime("%m/%d/%y %H:%M:%S"),                                    
+                                        "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
+                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon})})
+        newMsgCnt = TalkMessage.latest.all().count() 
+        self.assertEqual(response.status_code, 200, "submitFormToCreateMessageJSON Failed")
+        self.assertEqual(newMsgCnt, msgCnt+1)
         
+    def testAudioMsgCreate(self):
+        msgCnt = TalkMessage.latest.all().count()
+        content = "Whoa man, that burning building almost collapsed on me!"
+        timestamp = self.now
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')   
+        audioFile = 'test.mp4'
+        self._createFile(filename=audioFile, filesize=100*1024)
+        f = open(audioFile, "rb")
+        response = self.client.post(reverse("talk_create_message_json"),
+                                    data={'audio':f,
+                                          "message":json.dumps({
+                                        "content": content,
+                                        "contentTimestamp":timestamp.strftime("%m/%d/%y %H:%M:%S"),                                    
+                                        "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
+                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon})})
+        f.close() 
+        self.assertEqual(response.status_code, 200, "Failed to move message from phone to web app")
+    
+    def _createFile(self, filename, filesize=5*1024*1024):
+        """Create and fill a file with random data"""
+        blocksize = 4096 # 4k
+        datablock = array.array('I')
+        written = 0
+        # Create a datablock:
+        while written < blocksize:
+            datablock.append(random.getrandbits(32))
+            written = written + 4
+            
+        with open(filename, 'w') as f:
+            written = 0
+            while written < filesize:
+                datablock.tofile(f)
+                written += blocksize
+            f.flush()
+            os.fsync(f.fileno())
+  
     def test_submitFormWithoutContentTalkMessage(self):
         """ submit the Talk Message without content through the form """
         

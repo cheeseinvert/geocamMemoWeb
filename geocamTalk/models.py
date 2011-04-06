@@ -8,13 +8,13 @@ from django.db import models
 from geocamMemo.models import GeocamMessage, get_user_string
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from datetime import datetime
+import datetime
 import time
 from django.db.models import Q, Count
 
 class TalkUserProfile(models.Model):
     user = models.ForeignKey(User, related_name='profile')
-    last_viewed_mymessages = models.DateTimeField(default=datetime.min)
+    last_viewed_mymessages = models.DateTimeField(default=datetime.datetime.min)
     
     def getUnreadMessageCount(self):
         return TalkMessage.getMessages(self.user).filter(
@@ -36,7 +36,8 @@ class TalkMessage(GeocamMessage):
     http://stdbrouw.github.com/django-revisions/
 
     """
-    audio_file = models.FileField(null=True, blank=True, upload_to='/tmp')
+    #TODO - add time to filename location
+    audio_file = models.FileField(null=True, blank=True, upload_to='audio') #"%s-audio" % (GeocamMessage.author))
     
     def __unicode__(self):
         try:
@@ -59,6 +60,24 @@ class TalkMessage(GeocamMessage):
                        longitude=self.longitude,
                        accuracy=self.accuracy,
                        hasGeolocation=bool(self.has_geolocation()) )
+    
+    @staticmethod
+    def fromJson(messageDict):
+        message = TalkMessage()    
+        if "content" in messageDict:
+            message.content = messageDict["content"]   
+        if "contentTimestamp" in messageDict:
+            time_format = "%m/%d/%y %H:%M:%S"
+            message.content_timestamp = datetime.datetime.fromtimestamp(time.mktime(time.strptime(messageDict["contentTimestamp"], time_format)))             
+        if "latitude" in messageDict:
+            message.latitude = messageDict["latitude"]
+        if "longitude" in messageDict:
+            message.longitude = messageDict["longitude"]
+        if "accuracy" in messageDict:
+            message.accuracy = messageDict["accuracy"]                               
+        if "userId" in messageDict:
+            message.author_id = messageDict["userId"]            
+        return message  
     
     @staticmethod
     def getMessages(recipient=None, author=None):
