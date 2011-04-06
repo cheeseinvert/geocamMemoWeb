@@ -32,6 +32,28 @@ class GeocamTalkUnitTest(TestCase):
         
         # assert
         self.assertEquals(2, len(message.recipients.all()), "All recipients should be added to the message")
+    
+    def testCanStoreAudioMessage(self):
+        #arrange
+        sender = User.objects.all()[0]
+        
+        #act
+        message1 = TalkMessage.objects.create(
+            content="012345678901234567890123456789", 
+            content_timestamp=self.now, 
+            author=sender)
+        
+        
+        
+        message2 = TalkMessage.objects.create(
+            audio_file="audiofile.mp4",
+            content_timestamp=self.now, 
+            author=sender)
+                    
+        #assert
+        self.assertFalse(message1.has_audio())
+        self.assertTrue(message2.has_audio())
+        
 
 class TalkUserProfileUnitTest(TestCase):
     fixtures = ['demoTalkMessages.json', 'demoUsers.json']

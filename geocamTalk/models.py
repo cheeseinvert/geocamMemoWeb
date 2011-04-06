@@ -7,6 +7,7 @@
 from django.db import models
 from geocamMemo.models import GeocamMessage, get_user_string
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from datetime import datetime
 import time
 from django.db.models import Q, Count
@@ -35,6 +36,8 @@ class TalkMessage(GeocamMessage):
     http://stdbrouw.github.com/django-revisions/
 
     """
+    audio_file = models.FileField(null=True, blank=True, upload_to='/tmp')
+    
     def __unicode__(self):
         try:
             str = "Talk message from %s to %s on %s: %s" % (self.author.username, self.recipients.all(), self.content_timestamp, self.content)
@@ -81,4 +84,6 @@ class TalkMessage(GeocamMessage):
             # messages displayed are braodcast + from author AND to recipient
             messages = TalkMessage.latest.annotate(num_recipients=Count('recipients')).filter(Q(num_recipients=0) | Q(recipients__username=recipient.username)).filter(author__username=author.username).distinct()         
         return messages.order_by('-content_timestamp')
-          
+    
+    def has_audio(self):
+        return bool(self.audio_file != None)   
