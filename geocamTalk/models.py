@@ -46,15 +46,16 @@ class TalkMessage(GeocamMessage):
     
     def getJson(self):
           return  dict(messageId=self.pk,
+                       userId=self.author.pk,
                        authorUsername=self.author.username,
                        authorFullname=self.get_author_string(),
                        recipients=[r.username for r in self.recipients.all()],
                        content=self.content, 
-                       content_timestamp=self.get_date_string(),
+                       contentTimestamp=self.get_date_string(),
                        latitude=self.latitude,
                        longitude=self.longitude,
                        accuracy=self.accuracy,
-                       has_geolocation=bool(self.has_geolocation()) )
+                       hasGeolocation=bool(self.has_geolocation()) )
     
     @staticmethod
     def getMessages(recipient=None, author=None):
