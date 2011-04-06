@@ -10,6 +10,7 @@ from revisions.models import VersionedModel
 from revisions.shortcuts import VersionedModel as VersionedModelShortcuts
 import revisions
 import json
+import time, datetime
 
 class GeocamMessage(revisions.models.VersionedModel):
     """ This is the abstract data model for geocam messages 
@@ -85,6 +86,24 @@ class MemoMessage(GeocamMessage):
                     longitude=self.longitude,
                     accuracy=self.accuracy,
                     hasGeolocation=bool(self.has_geolocation()) )
+    
+    @staticmethod
+    def fromJson(messageDict):
+        message = MemoMessage()    
+        if "content" in messageDict:
+            message.content = messageDict["content"]   
+        if "contentTimestamp" in messageDict:
+            time_format = "%m/%d/%y %H:%M:%S"
+            message.content_timestamp = datetime.datetime.fromtimestamp(time.mktime(time.strptime(messageDict["contentTimestamp"], time_format)))             
+        if "latitude" in messageDict:
+            message.latitude = messageDict["latitude"]
+        if "longitude" in messageDict:
+            message.longitude = messageDict["longitude"]
+        if "accuracy" in messageDict:
+            message.accuracy = messageDict["accuracy"]                               
+        if "userId" in messageDict:
+            message.author_id = messageDict["userId"]            
+        return message            
         
     @staticmethod
     def getMessages(author=None):
