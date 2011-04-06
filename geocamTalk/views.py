@@ -105,3 +105,20 @@ def create_message(request):
         return render_to_response('geocamTalk/message_form.html',
                                   dict(form=form),                               
                                   context_instance=RequestContext(request))
+        
+def create_message_json(request):    
+    if request.user.is_authenticated():
+        if request.method == 'POST':
+            jsonstring = request.POST["message"]
+            messageDict = json.loads(jsonstring)
+            messageDict["userId"] = request.user.pk
+            message = TalkMessage.fromJson(messageDict)
+            try:
+                message.save()
+                return HttpResponse("", 200) 
+            except:
+                return HttpResponseServerError()
+        else:
+               return HttpResponseServerError()
+    else:
+        return HttpResponseForbidden()

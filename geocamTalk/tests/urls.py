@@ -29,7 +29,17 @@ class GeocamTestUrls(TestCase):
 
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
-   
+        
+    def testMessageCreateJSONFeed(self):
+        #arrange
+        path = "/talk/messages/create.json"
+
+        #act
+        guestResponse = self.client.post(path, {})
+                 
+        #assert    
+        self.assertEqual(403, guestResponse.status_code, "Unauthorized access if not logged in")
+  
     def testClearMyMessageCount(self):
         #arrange
         me = User.objects.all()[0]

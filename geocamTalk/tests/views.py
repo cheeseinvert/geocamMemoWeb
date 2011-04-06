@@ -97,6 +97,23 @@ class GeocamTalkMessageSaveTest(TestCase):
         self.assertEqual(msgCnt + 1, newMsgCnt, "Creating a Talk Message through view Failed.") 
         newMsg = TalkMessage.getMessages()[0]
         self.assertEqual(newMsg.recipients.all().count(), 2, "Different number of recipients than expected")
+    
+#     def test_submitFormToCreateMessageJSON(self):
+#        msgCnt = TalkMessage.latest.all().count()
+#        content = "Whoa man, that burning building almost collapsed on me!"
+#        timestamp = self.now
+#        author = User.objects.get(username="rhornsby")
+#        self.client.login(username=author.username, password='geocam')        
+#        response = self.client.post(reverse("talk_create_message_json"),
+#                                  data={"message":json.dumps({
+#                                        "content": content,
+#                                        "audio":,
+#                                        "contentTimestamp":timestamp.strftime("%m/%d/%y %H:%M:%S"),                                    
+#                                        "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
+#                                        "longitude":GeocamTalkMessageSaveTest.cmusv_lon})})
+#        newMsgCnt = TalkMessage.latest.all().count() 
+#        self.assertEqual(response.status_code, 200, "submitFormToCreateMessageJSON Failed")
+#        self.assertEqual(newMsgCnt, msgCnt+1)
         
     def test_submitFormWithoutContentTalkMessage(self):
         """ submit the Talk Message without content through the form """

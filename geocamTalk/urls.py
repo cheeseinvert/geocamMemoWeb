@@ -7,6 +7,8 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('geocamTalk.views',
+    url(r'messages/create.json', 'create_message_json',
+         name='talk_create_message_json'),
     url(r'messages/create', 'create_message',
          name='talk_create_message'),
     url(r'messages/clear', 'clear_messages',
