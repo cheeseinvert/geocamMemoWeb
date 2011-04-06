@@ -50,30 +50,33 @@ def message_list(request, recipient_username=None, author_username=None):
                                    timestamp=timestamp),
                                context_instance=RequestContext(request))
 
-#@login_required
+
 def feed_messages(request, recipient_username=None, author_username=None):
-    timestamp = int(time.time() * 1000 * 1000)
-    if recipient_username is not None:
-        recipient = get_object_or_404(User, username=recipient_username)
-    else:
-        recipient = None
+    if not request.user.is_authenticated():
+        return HttpResponseForbidden()
+    else:        
+        timestamp = int(time.time() * 1000 * 1000)
+        if recipient_username is not None:
+            recipient = get_object_or_404(User, username=recipient_username)
+        else:
+            recipient = None
+            
+        if author_username is not None:
+            author = get_object_or_404(User, username=author_username)
+        else:
+            author = None
+        since = request.GET.get('since', None)
         
-    if author_username is not None:
-        author = get_object_or_404(User, username=author_username)
-    else:
-        author = None
-    since = request.GET.get('since', None)
-    
-    if since is not None:
-        since_dt = datetime.fromtimestamp(float(since) / (1000 * 1000))
-        messages = TalkMessage.getMessages(recipient, author).filter(content_timestamp__gt=since_dt)
-        message_count = TalkMessage.getMessages(request.user).filter(content_timestamp__gt=since_dt).count() 
-    else:
-        messages = TalkMessage.getMessages(recipient, author)
-        message_count = TalkMessage.getMessages(request.user).count()
-    return HttpResponse(json.dumps({'ts': timestamp,
-                                    'msgCnt': message_count,
-                                    'ms':[msg.getJson() for msg in messages]}))
+        if since is not None:
+            since_dt = datetime.fromtimestamp(float(since) / (1000 * 1000))
+            messages = TalkMessage.getMessages(recipient, author).filter(content_timestamp__gt=since_dt)
+            message_count = TalkMessage.getMessages(request.user).filter(content_timestamp__gt=since_dt).count() 
+        else:
+            messages = TalkMessage.getMessages(recipient, author)
+            message_count = TalkMessage.getMessages(request.user).count()
+        return HttpResponse(json.dumps({'ts': timestamp,
+                                        'msgCnt': message_count,
+                                        'ms':[msg.getJson() for msg in messages]}))
   
 @login_required
 def index(request):

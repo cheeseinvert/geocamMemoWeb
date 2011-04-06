@@ -61,7 +61,7 @@ class GeocamTestUrls(TestCase):
         memberResponse = self.getResponse(path)
         
         #assert
-        self.assertEqual(302, guestResponse.status_code, "should redirect if not logged in")
+        self.assertEqual(403, guestResponse.status_code, "should redirect if not logged in")
         self.assertEqual(200, memberResponse.status_code, "should display if logged in")
 
     def testMyMessageJSONFeedUrl(self):
@@ -75,7 +75,7 @@ class GeocamTestUrls(TestCase):
         memberResponse = self.getResponse(path)
         
         #assert
-        self.assertEqual(302, guestResponse.status_code, "should redirect if not logged in")
+        self.assertEqual(403, guestResponse.status_code, "should redirect if not logged in")
         self.assertEqual(200, memberResponse.status_code, "should display if logged in")
     
     def assertPathRequiresLoginAndUsesTemplate(self, path, template):
