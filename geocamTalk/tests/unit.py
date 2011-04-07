@@ -41,21 +41,22 @@ class GeocamTalkUnitTest(TestCase):
         sender = User.objects.all()[0]
         
         #act
-        message1 = TalkMessage.objects.create(
+        no_audio_message = TalkMessage.objects.create(
             content="012345678901234567890123456789", 
-            content_timestamp=self.now, 
+            content_timestamp=self.now,
+            audio_file='', 
             author=sender)
         
         
         
-        message2 = TalkMessage.objects.create(
+        audio_message = TalkMessage.objects.create(
             audio_file="audiofile.mp4",
             content_timestamp=self.now, 
             author=sender)
                     
         #assert
-        self.assertFalse(message1.has_audio())
-        self.assertTrue(message2.has_audio())
+        self.assertFalse(no_audio_message.has_audio())
+        self.assertTrue(audio_message.has_audio())
         
 
 class TalkUserProfileUnitTest(TestCase):
