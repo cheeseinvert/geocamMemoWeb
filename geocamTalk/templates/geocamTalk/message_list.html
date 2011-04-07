@@ -43,6 +43,9 @@
       {% endif %}
 	 	said
 	  {% if m.has_geolocation %}<img src="/resources/map.png" />{%endif%}
+	  {% if m.has_audio %}
+      	I HAVE AUDIO
+      {%endif%}
 	</dt>
 	<dd id="message_{{m.pk}}_content">
     	<p>{{ m.content}}</p>

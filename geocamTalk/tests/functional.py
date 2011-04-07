@@ -49,3 +49,17 @@ class GeocamTalkListViewTest(TestCase):
         self.client.login(username=recipient.username, password='geocam')
         response = self.client.get('/talk/messages/' + recipient.username)
         return response
+    
+    def testMessageListAudioPresent(self):
+        # arrange
+        author = User.objects.all()[2]
+        recipient = User.objects.all()[1]
+        response = self.get_recipient_messages_response(recipient)
+        recipient_messages = TalkMessage.getMessages(recipient)
+        print recipient_messages
+        # act
+        geocount = recipient_messages.exclude(audio_file=None).count()
+        print geocount
+        # assert
+        self.assertContains(response, "data-icon=\"geoCam-audio\"", geocount)
+        self.assertContains(response, 'data-rel="dialog"', geocount)

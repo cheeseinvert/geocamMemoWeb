@@ -105,4 +105,4 @@ class TalkMessage(GeocamMessage):
         return messages.order_by('-content_timestamp')
     
     def has_audio(self):
-        return bool(self.audio_file != None)   
+        return bool(self.audio_file != '')   
