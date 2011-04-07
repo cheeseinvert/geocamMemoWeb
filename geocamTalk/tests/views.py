@@ -123,7 +123,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         timestamp = self.now
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')   
-        audioFile = 'test.mp4'
+        audioFile = 'media/geocamTalk/test/test.mp4'
         self._createFile(filename=audioFile, filesize=100*1024)
         f = open(audioFile, "rb")
         response = self.client.post(reverse("talk_create_message_json"),
@@ -134,6 +134,7 @@ class GeocamTalkMessageSaveTest(TestCase):
                                         "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamTalkMessageSaveTest.cmusv_lon})})
         f.close() 
+        self._clean_test_files('test.mp4')
         self.assertEqual(response.status_code, 200, "Failed to move message from phone to web app")
     
     def _createFile(self, filename, filesize=5*1024*1024):
@@ -153,7 +154,19 @@ class GeocamTalkMessageSaveTest(TestCase):
                 written += blocksize
             f.flush()
             os.fsync(f.fileno())
-  
+    
+    def _clean_test_files(self, filename):
+        folder = 'media/geocamTalk/test'
+        post_folder = 'media/geocamTalk/audio'
+        post_file_path = os.path.join(post_folder, filename)
+        os.unlink(post_file_path)
+        for the_file in os.listdir(folder):
+            file_path = os.path.join(folder, the_file)
+            try:
+                os.unlink(file_path)
+            except Exception, e:
+                print e
+                
     def test_submitFormWithoutContentTalkMessage(self):
         """ submit the Talk Message without content through the form """
         

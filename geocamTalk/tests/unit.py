@@ -102,7 +102,7 @@ class TalkUserProfileUnitTest(TestCase):
                     latitude=1.1,
                     longitude=222.2,
                     accuracy=60 )
-        audioFile = 'test_ensure_from_json.mp4'
+        audioFile = 'media/geocamTalk/test/test_ensure_from_json.mp4'
         self._createFile(filename=audioFile, filesize=100*1024)
         f = open(audioFile, "rb")
         #act
@@ -118,9 +118,10 @@ class TalkUserProfileUnitTest(TestCase):
         self.assertEqual(talkMessage.longitude, 222.2)
         self.assertEqual(talkMessage.accuracy, 60)
         self.assertTrue(talkMessage.has_audio())
-        self.assertEqual(os.path.basename(talkMessage.audio_file.name), f.name)
-        f.close() 
-        os.remove(os.path._getfullpathname(talkMessage.audio_file.name))
+        self.assertEqual(os.path.basename(talkMessage.audio_file.name), os.path.basename(f.name))
+        f.close()
+        self._clean_test_files('test_ensure_from_json.mp4')
+         
         
     def _createFile(self, filename, filesize=5*1024*1024):
         """Create and fill a file with random data"""
@@ -139,3 +140,15 @@ class TalkUserProfileUnitTest(TestCase):
                 written += blocksize
             f.flush()
             os.fsync(f.fileno())
+            
+    def _clean_test_files(self, filename):
+        folder = 'media/geocamTalk/test'
+        post_folder = 'media/geocamTalk/audio'
+        post_file_path = os.path.join(post_folder, filename)
+        os.unlink(post_file_path)
+        for the_file in os.listdir(folder):
+            file_path = os.path.join(folder, the_file)
+            try:
+                os.unlink(file_path)
+            except Exception, e:
+                print e
