@@ -117,7 +117,7 @@ def create_message_json(request):
             message = TalkMessage.fromJson(messageDict)
 
             if "audio" in request.FILES:
-                filename = request.FILES['audio'].name
+                filename =  "%s%s.mp4" % (message.author,   message.content_timestamp.strftime("%H%M%S"))
                 file_content = ContentFile(request.FILES['audio'].read())
                 file_format = os.path.splitext( request.FILES['audio'].name)[-1]
                 message.audio_file.save(filename, file_content)

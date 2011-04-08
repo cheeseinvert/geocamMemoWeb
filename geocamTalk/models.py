@@ -37,7 +37,7 @@ class TalkMessage(GeocamMessage):
 
     """
     #TODO - add time to filename location
-    audio_file = models.FileField(null=True, blank=True, upload_to='geocamTalk/audio') #"%s-audio" % (GeocamMessage.author))
+    audio_file = models.FileField(null=True, blank=True, upload_to='geocamTalk/audio/%Y/%m/%d') #"%s-audio" % (GeocamMessage.author))
     
     def __unicode__(self):
         try:
