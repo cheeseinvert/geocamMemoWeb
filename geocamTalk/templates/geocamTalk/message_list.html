@@ -45,7 +45,7 @@
 	  {% if m.has_geolocation %}<img src="/resources/map.png" />{%endif%}
 	  {% if m.has_audio %}
       	<audio controls="controls">
-      		<source src={{ m.audio_file.filename }}   >
+      		<source src={{ m.audio_file.url }}   >
       	</audio>
       {%endif%}
 	</dt>
