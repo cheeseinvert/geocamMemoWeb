@@ -44,10 +44,8 @@
 	 	said
 	  {% if m.has_geolocation %}<img src="/resources/map.png" />{%endif%}
 	  {% if m.has_audio %}
-      	<audio controls="controls">
-      		<source src={{ m.audio_file.url }}   >
-      	</audio>
-      {%endif%}
+          <a class="media" href="{{m.audio_file.url}}"></a>
+          {%endif%}
 	</dt>
 	<dd id="message_{{m.pk}}_content">
     	<p>{{ m.content}}</p>
@@ -62,6 +60,7 @@
 {% block js %}
 <script>
 	$(document).ready(function() {
+                $('a.media').media( { width: 300, height: 20 } );
 		var running_timestamp = {{ timestamp }};
 		var new_message_count = {{ user.profile.getUnreadMessageCount }};
 		
