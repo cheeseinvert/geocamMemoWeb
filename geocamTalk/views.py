@@ -114,7 +114,6 @@ def create_message_json(request):
             jsonstring = request.POST["message"]
             messageDict = json.loads(jsonstring)
             messageDict["userId"] = request.user.pk
-            messageDict["contentTimestamp"] = datetime.now()
             message = TalkMessage.fromJson(messageDict)
 
             if "audio" in request.FILES:
@@ -122,13 +121,12 @@ def create_message_json(request):
                 file_content = ContentFile(request.FILES['audio'].read())
                 file_format = os.path.splitext( request.FILES['audio'].name)[-1]
                 message.audio_file.save(filename, file_content)
-                
             try:
                 message.save()
                 return HttpResponse("", 200) 
             except:
                 return HttpResponseServerError()
         else:
-               return HttpResponseServerError()
+            return HttpResponseServerError()
     else:
         return HttpResponseForbidden()

@@ -9,7 +9,7 @@ from geocamMemo.models import GeocamMessage, get_user_string
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 import datetime
-import time
+import time, sys
 from django.db.models import Q, Count
 
 class TalkUserProfile(models.Model):
