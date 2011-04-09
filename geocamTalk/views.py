@@ -114,6 +114,7 @@ def create_message_json(request):
             jsonstring = request.POST["message"]
             messageDict = json.loads(jsonstring)
             messageDict["userId"] = request.user.pk
+            messageDict["contentTimestamp"] = datetime.now()
             message = TalkMessage.fromJson(messageDict)
 
             if "audio" in request.FILES:
