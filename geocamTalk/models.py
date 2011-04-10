@@ -17,12 +17,12 @@ from geocamMemo.authentication import GOOGLE_TOKEN
 
 class TalkUserProfile(models.Model):
     user = models.ForeignKey(User, related_name='profile')
-    last_viewed_mymessages = models.DateTimeField(default=datetime.datetime.min)
+    last_viewed_mymessages = models.IntegerField(default=0)
     registration_id = models.CharField(max_length=128)
     
     def getUnreadMessageCount(self):
         return TalkMessage.getMessages(self.user).filter(
-                                        content_timestamp__gt=self.last_viewed_mymessages).count()
+                                        pk__gt=self.last_viewed_mymessages).count()
 
 User.profile = property(lambda u: TalkUserProfile.objects.get_or_create(user=u)[0])
 
@@ -107,6 +107,10 @@ class TalkMessage(GeocamMessage):
             # messages displayed are braodcast + from author AND to recipient
             messages = TalkMessage.latest.annotate(num_recipients=Count('recipients')).filter(Q(num_recipients=0) | Q(recipients__username=recipient.username)).filter(author__username=author.username).distinct()         
         return messages.order_by('-content_timestamp')
+    
+    @staticmethod
+    def getLargestMessageId():
+        return TalkMessage.objects.all().order_by('-pk')[0].pk
     
     def has_audio(self):
         return bool(self.audio_file != '')

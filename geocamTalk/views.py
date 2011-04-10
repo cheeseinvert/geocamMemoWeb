@@ -24,14 +24,14 @@ import json
 @login_required
 def clear_messages(request):
     profile = request.user.profile
-    profile.last_viewed_mymessages = datetime.now()
+    profile.last_viewed_mymessages = TalkMessage.getLargestMessageId()
     profile.save()
     
     return HttpResponse(status=200)
 
 @login_required
 def message_list(request, recipient_username=None, author_username=None):   
-    timestamp = int(time.time() * 1000 * 1000)
+    timestamp = TalkMessage.getLargestMessageId()
     if recipient_username is not None:
         recipient = get_object_or_404(User, username=recipient_username)
     else:
@@ -44,7 +44,7 @@ def message_list(request, recipient_username=None, author_username=None):
     
     if recipient is not None and recipient.pk == request.user.pk and author is None:
         profile = recipient.profile
-        profile.last_viewed_mymessages = datetime.now()
+        profile.last_viewed_mymessages = timestamp
         profile.save()
     
     return render_to_response('geocamTalk/message_list.html', 
@@ -59,7 +59,7 @@ def feed_messages(request, recipient_username=None, author_username=None):
     if not request.user.is_authenticated():
         return HttpResponseForbidden()
     else:        
-        timestamp = int(time.time() * 1000 * 1000)
+        timestamp = TalkMessage.getLargestMessageId()
         if recipient_username is not None:
             recipient = get_object_or_404(User, username=recipient_username)
         else:
@@ -72,9 +72,9 @@ def feed_messages(request, recipient_username=None, author_username=None):
         since = request.GET.get('since', None)
         
         if since is not None:
-            since_dt = datetime.fromtimestamp(float(since) / (1000 * 1000))
-            messages = TalkMessage.getMessages(recipient, author).filter(server_timestamp__gt=since_dt)
-            message_count = TalkMessage.getMessages(request.user).filter(server_timestamp__gt=since_dt).count() 
+            since_dt = since
+            messages = TalkMessage.getMessages(recipient, author).filter(pk__gt=since_dt)
+            message_count = TalkMessage.getMessages(request.user).filter(pk__gt=since_dt).count() 
         else:
             messages = TalkMessage.getMessages(recipient, author)
             message_count = TalkMessage.getMessages(request.user).count()

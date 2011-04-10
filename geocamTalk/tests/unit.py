@@ -65,15 +65,15 @@ class TalkUserProfileUnitTest(TestCase):
     def testEnsureLastViewedMyMessages(self):
         # arrange
         user = User.objects.all()[0]
-        time_stamp = datetime.now()
+        latestmsgId = TalkMessage.getLargestMessageId()
         profile = user.profile
         
         # act
-        profile.last_viewed_mymessages = time_stamp
+        profile.last_viewed_mymessages = latestmsgId
         profile.save()
         
         # assert
-        self.assertEquals(time_stamp,user.profile.last_viewed_mymessages)
+        self.assertEquals(latestmsgId,user.profile.last_viewed_mymessages)
         
     def testCanGetUnreadMessageCount(self):
         # arrange

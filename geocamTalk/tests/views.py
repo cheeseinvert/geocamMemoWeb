@@ -221,7 +221,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         msg.recipients.add(recipient)
         msg.recipients.add(User.objects.all()[2])
         
-        time_stamp = datetime.now() - timedelta(minutes=15)
+        time_stamp = TalkMessage.objects.all().order_by('-pk')[0].pk - 2
         profile = recipient.profile
         profile.last_viewed_mymessages = time_stamp
         profile.save()
@@ -243,16 +243,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         for i in range(len(expectedMessages)):
             self.assertEqual(expectedMessages[i],gotMessages[i], "My messages doesn't contain an expected message: %s" % expectedMessages[i])
        
-    def test_MessageListGetsServerTimestamp(self):
-        ''' This test is attempting to verify that we get the server timestamp in the passed context '''
-        timestamp = int(time.mktime(datetime.now().timetuple())) 
-        response = self._get_messages_response()     
-        try:
-            gotTimestamp = response.context["timestamp"]
-        except:
-            self.fail("we didn't get the timestamp in the passed context to list_messages template")
-        self.assertTrue(gotTimestamp >= timestamp, "The server timestamp was not accurate")
-         
+        
     @staticmethod
     def cmpMessageSortNewestFirst(message1, message2):
         if(message1.content_timestamp > message2.content_timestamp):
@@ -268,7 +259,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         # need to cast the query set to a list here to avoid the dynamic update 
         # when we create the new msg
         #old_messages = list(TalkMessage.getMessages())
-        before_new_message = int((time.time()-1) * 1000 * 1000)
+        before_new_message = TalkMessage.getLargestMessageId()
         recipient = User.objects.get(username="acurie")
         msg = TalkMessage.objects.create(content='This is a new message', content_timestamp=datetime.now(), author=author)
         msg.recipients.add(recipient)
@@ -284,10 +275,9 @@ class GeocamTalkMessageSaveTest(TestCase):
     def test_MessageJsonFeed(self):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
-        ordered_messages = TalkMessage.objects.all().order_by('content_timestamp').reverse()
-        latest_msgs_dt = ordered_messages[0].content_timestamp - timedelta(seconds=5)
-        ts = int(time.mktime(latest_msgs_dt.timetuple()) * 1000 * 1000)
-        response = self.client.get(reverse("talk_message_list_all_json")+'?since=%s' % ts)
+        ordered_messages = TalkMessage.objects.all().order_by('-pk')
+        messageid = ordered_messages[0].pk - 1
+        response = self.client.get(reverse("talk_message_list_all_json")+'?since=%s' % messageid)
         self.assertContains(response, '"messageId": %s' % ordered_messages[0].pk)
         self.assertContains(response, '"authorUsername": "%s"' % ordered_messages[0].author.username)
         self.assertContains(response, '"authorFullname": "%s"' % ordered_messages[0].get_author_string())
@@ -308,12 +298,11 @@ class GeocamTalkMessageSaveTest(TestCase):
             
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
-        ordered_messages = TalkMessage.getMessages(recipient=author)
+        ordered_messages = TalkMessage.getMessages(recipient=author).order_by("-pk")
         
-        latest_msgs_dt = ordered_messages[0].content_timestamp - timedelta(seconds=5)
-        ts = int(time.mktime(latest_msgs_dt.timetuple()) * 1000 * 1000)
+        messageid = ordered_messages[0].pk - 1
         response = self.client.get(reverse("talk_message_list_author_json", args=[author.username])+
-                                   '?since=%s' % ts)
+                                   '?since=%s' % messageid)
         self.assertContains(response, '"messageId": %s' % ordered_messages[0].pk)
         for msg in ordered_messages[1:]:
             self.assertNotContains(response, '"messageId": %s' % msg.pk)
