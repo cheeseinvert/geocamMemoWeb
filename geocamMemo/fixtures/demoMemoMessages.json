@@ -1,65 +1,65 @@
 [
 {"pk": 2, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.06008, "heading": null, "content": "CMUSV building inspection completed,structure is sound. Search commencing shortly.", "content_timestamp": "2011-03-13 10:32:40", "position_timestamp": "2011-03-13 10:32:35", "latitude": 37.410433, "speed": null, "cid": "7dcfed1377864954875731ef5e78b5eb", "accuracy": 80.0}
+{"author": 2, "altitude": null, "longitude": -122.06008, "heading": null, "content": "CMUSV building inspection completed,structure is sound. Search commencing shortly.", "content_timestamp": "2011-03-13 10:32:40", "server_timestamp": "2011-03-13 10:32:40", "position_timestamp": "2011-03-13 10:32:35", "latitude": 37.410433, "speed": null, "cid": "7dcfed1377864954875731ef5e78b5eb", "accuracy": 80.0}
 }
 , 
 {"pk": 3, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.059811, "heading": null, "content": "Entering CMUSV building. Minimal damage. Victims visible and in good conditions / spirits.", "content_timestamp": "2011-03-13 10:33:43", "position_timestamp": "2011-03-13 10:33:41", "latitude": 37.410565, "speed": null, "cid": "accb13e490be4aa48a352a4028034afb", "accuracy": 60.0}
+{"author": 2, "altitude": null, "longitude": -122.059811, "heading": null, "content": "Entering CMUSV building. Minimal damage. Victims visible and in good conditions / spirits.", "content_timestamp": "2011-03-13 10:33:43", "server_timestamp": "2011-03-13 10:33:43", "position_timestamp": "2011-03-13 10:33:41", "latitude": 37.410565, "speed": null, "cid": "accb13e490be4aa48a352a4028034afb", "accuracy": 60.0}
 }
 , 
 {"pk": 4, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.059735, "heading": null, "content": "2 people found inCMUSV building and safely removed.", "content_timestamp": "2011-03-13 10:35:34", "position_timestamp": "2011-03-13 10:35:31", "latitude": 37.41049, "speed": null, "cid": "c527b009a4694b78afe21b6c5f068d06", "accuracy": 250.0}
+{"author": 2, "altitude": null, "longitude": -122.059735, "heading": null, "content": "2 people found inCMUSV building and safely removed.", "content_timestamp": "2011-03-13 10:35:34", "server_timestamp": "2011-03-13 10:35:34", "position_timestamp": "2011-03-13 10:35:31", "latitude": 37.41049, "speed": null, "cid": "c527b009a4694b78afe21b6c5f068d06", "accuracy": 250.0}
 }
 , 
 {"pk": 5, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.059913, "heading": null, "content": "Exiting CMUSV building. Total of 2 people found.", "content_timestamp": "2011-03-13 10:37:04", "position_timestamp": "2011-03-13 10:36:59", "latitude": 37.4103, "speed": null, "cid": "89a9fb8eb7c74d53be7fd8aa799727b0", "accuracy": 100.0}
+{"author": 2, "altitude": null, "longitude": -122.059913, "heading": null, "content": "Exiting CMUSV building. Total of 2 people found.", "content_timestamp": "2011-03-13 10:37:04", "server_timestamp": "2011-03-13 10:37:04", "position_timestamp": "2011-03-13 10:36:59", "latitude": 37.4103, "speed": null, "cid": "89a9fb8eb7c74d53be7fd8aa799727b0", "accuracy": 100.0}
 }
 , 
 {"pk": 6, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.059455, "heading": null, "content": "Victim hiding behind bushes.Not physically injured. Directed to basecamp.", "content_timestamp": "2011-03-13 10:37:33", "position_timestamp": "2011-03-13 10:37:29", "latitude": 37.410373, "speed": null, "cid": "359d2470736a4d998ff9150d0d8ece88", "accuracy": 60.0}
+{"author": 2, "altitude": null, "longitude": -122.059455, "heading": null, "content": "Victim hiding behind bushes.Not physically injured. Directed to basecamp.", "content_timestamp": "2011-03-13 10:37:33", "server_timestamp": "2011-03-13 10:37:33", "position_timestamp": "2011-03-13 10:37:29", "latitude": 37.410373, "speed": null, "cid": "359d2470736a4d998ff9150d0d8ece88", "accuracy": 60.0}
 }
 , 
 {"pk": 7, "model": "geocamMemo.memomessage", "fields": 
-{"author": 3, "altitude": null, "longitude": -122.060458, "heading": null, "content": "Victim approaching basecamp from north-eastcorner of CMUSV building.", "content_timestamp": "2011-03-13 10:39:17", "position_timestamp": "2011-03-13 10:39:15", "latitude": 37.409502, "speed": null, "cid": "bdd444d39d8d42e9ad0e4ba5b6e443f3", "accuracy": 60.0}
+{"author": 3, "altitude": null, "longitude": -122.060458, "heading": null, "content": "Victim approaching basecamp from north-eastcorner of CMUSV building.", "content_timestamp": "2011-03-13 10:39:17", "server_timestamp": "2011-03-13 10:39:17", "position_timestamp": "2011-03-13 10:39:15", "latitude": 37.409502, "speed": null, "cid": "bdd444d39d8d42e9ad0e4ba5b6e443f3", "accuracy": 60.0}
 }
 , 
 {"pk": 8, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.059465, "heading": null, "content": "CMUSV campus cleared. Moving on to next structure.", "content_timestamp": "2011-03-13 10:40:49", "position_timestamp": "2011-03-13 10:40:44", "latitude": 37.409975, "speed": null, "cid": "de22bfcf740b405298df5d15fece6c3f", "accuracy": 60.0}
+{"author": 2, "altitude": null, "longitude": -122.059465, "heading": null, "content": "CMUSV campus cleared. Moving on to next structure.", "content_timestamp": "2011-03-13 10:40:49", "server_timestamp": "2011-03-13 10:40:49", "position_timestamp": "2011-03-13 10:40:44", "latitude": 37.409975, "speed": null, "cid": "de22bfcf740b405298df5d15fece6c3f", "accuracy": 60.0}
 }
 , 
 {"pk": 9, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.058602, "heading": null, "content": "Arrived at 2nd structure. Integrity of building in question. Southwest corner has collapsed. Structural engineer assessment in progress.", "content_timestamp": "2011-03-13 10:41:31", "position_timestamp": "2011-03-13 10:41:28", "latitude": 37.410379, "speed": null, "cid": "d3d6e7a010494b578cacb8d9c414f6e8", "accuracy": 60.0}
+{"author": 2, "altitude": null, "longitude": -122.058602, "heading": null, "content": "Arrived at 2nd structure. Integrity of building in question. Southwest corner has collapsed. Structural engineer assessment in progress.", "content_timestamp": "2011-03-13 10:41:31", "server_timestamp": "2011-03-13 10:41:31", "position_timestamp": "2011-03-13 10:41:28", "latitude": 37.410379, "speed": null, "cid": "d3d6e7a010494b578cacb8d9c414f6e8", "accuracy": 60.0}
 }
 , 
 {"pk": 10, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.058384, "heading": null, "content": "Structural assessment complete. Building is too dangerous to complete full search. Proceeding through north-east half of structure.", "content_timestamp": "2011-03-13 10:44:16", "position_timestamp": "2011-03-13 10:43:04", "latitude": 37.410737, "speed": null, "cid": "66de91e469df4543a91cf1732e22627a", "accuracy": 90.0}
+{"author": 2, "altitude": null, "longitude": -122.058384, "heading": null, "content": "Structural assessment complete. Building is too dangerous to complete full search. Proceeding through north-east half of structure.", "content_timestamp": "2011-03-13 10:44:16", "server_timestamp": "2011-03-13 10:44:16", "position_timestamp": "2011-03-13 10:43:04", "latitude": 37.410737, "speed": null, "cid": "66de91e469df4543a91cf1732e22627a", "accuracy": 90.0}
 }
 , 
 {"pk": 11, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.0584, "heading": null, "content": "Structure search complete. No victims found.", "content_timestamp": "2011-03-13 10:45:15", "position_timestamp": "2011-03-13 10:44:59", "latitude": 37.410532, "speed": null, "cid": "20a0d558c9ea4d2ba372310200ffe641", "accuracy": 150.0}
+{"author": 2, "altitude": null, "longitude": -122.0584, "heading": null, "content": "Structure search complete. No victims found.", "content_timestamp": "2011-03-13 10:45:15", "server_timestamp": "2011-03-13 10:45:15", "position_timestamp": "2011-03-13 10:44:59", "latitude": 37.410532, "speed": null, "cid": "20a0d558c9ea4d2ba372310200ffe641", "accuracy": 150.0}
 }
 , 
 {"pk": 14, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.057961, "heading": null, "content": "Blazing fire visible in building to immediate north.", "content_timestamp": "2011-03-13 10:48:12", "position_timestamp": "2011-03-13 10:48:11", "latitude": 37.411098, "speed": null, "cid": "5da27492966f47d087cc5a0bf851e8c7", "accuracy": 60.0}
+{"author": 2, "altitude": null, "longitude": -122.057961, "heading": null, "content": "Blazing fire visible in building to immediate north.", "content_timestamp": "2011-03-13 10:48:12", "server_timestamp": "2011-03-13 10:48:12", "position_timestamp": "2011-03-13 10:48:11", "latitude": 37.411098, "speed": null, "cid": "5da27492966f47d087cc5a0bf851e8c7", "accuracy": 60.0}
 }
 , 
 {"pk": 15, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.057954, "heading": null, "content": "Structural engineer not allowing access to building. Fire is too out of control. Fire squad alerted.", "content_timestamp": "2011-03-13 10:48:44", "position_timestamp": "2011-03-13 10:48:45", "latitude": 37.411629, "speed": null, "cid": "75152aefde2c47a489083007a848c1e2", "accuracy": 60.0}
+{"author": 2, "altitude": null, "longitude": -122.057954, "heading": null, "content": "Structural engineer not allowing access to building. Fire is too out of control. Fire squad alerted.", "content_timestamp": "2011-03-13 10:48:44", "server_timestamp": "2011-03-13 10:48:44", "position_timestamp": "2011-03-13 10:48:45", "latitude": 37.411629, "speed": null, "cid": "75152aefde2c47a489083007a848c1e2", "accuracy": 60.0}
 }
 , 
 {"pk": 16, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.057987, "heading": null, "content": "Five people found hiding in empty pool. Directed back to base camp.", "content_timestamp": "2011-03-13 10:46:20", "position_timestamp": "2011-03-13 10:46:18", "latitude": 37.410376, "speed": null, "cid": "1d58e95413354379a112a63fc5683500", "accuracy": 60.0}
+{"author": 2, "altitude": null, "longitude": -122.057987, "heading": null, "content": "Five people found hiding in empty pool. Directed back to base camp.", "content_timestamp": "2011-03-13 10:46:20", "server_timestamp": "2011-03-13 10:46:20", "position_timestamp": "2011-03-13 10:46:18", "latitude": 37.410376, "speed": null, "cid": "1d58e95413354379a112a63fc5683500", "accuracy": 60.0}
 }
 , 
 {"pk": 17, "model": "geocamMemo.memomessage", "fields": 
-{"author": 3, "altitude": null, "longitude": -122.0603532, "heading": null, "content": "Five victims arrived at base camp.", "content_timestamp": "2011-03-13 10:47:26", "position_timestamp": "2011-03-13 10:47:25", "latitude": 37.4093296, "speed": null, "cid": "b7fab28925c145d996ecda1d539d0ec9", "accuracy": 60.0}
+{"author": 3, "altitude": null, "longitude": -122.0603532, "heading": null, "content": "Five victims arrived at base camp.", "content_timestamp": "2011-03-13 10:47:26", "server_timestamp": "2011-03-13 10:47:26", "position_timestamp": "2011-03-13 10:47:25", "latitude": 37.4093296, "speed": null, "cid": "b7fab28925c145d996ecda1d539d0ec9", "accuracy": 60.0}
 }
 , 
 {"pk": 18, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": -122.060353, "heading": null, "content": "Initializing search from base camp. Clear skies should allow for thorough search today. Smoke, potentially fire, visible in the distance.", "content_timestamp": "2011-03-13 10:27:45", "position_timestamp": "2011-03-13 10:27:42", "latitude": 37.409409, "speed": null, "cid": "bfeaaeecd86f44c8ab1acb510dc4c7dc", "accuracy": 60.0}
+{"author": 2, "altitude": null, "longitude": -122.060353, "heading": null, "content": "Initializing search from base camp. Clear skies should allow for thorough search today. Smoke, potentially fire, visible in the distance.", "content_timestamp": "2011-03-13 10:27:45", "server_timestamp": "2011-03-13 10:27:45", "position_timestamp": "2011-03-13 10:27:42", "latitude": 37.409409, "speed": null, "cid": "bfeaaeecd86f44c8ab1acb510dc4c7dc", "accuracy": 60.0}
 }
 ,
 {"pk": 19, "model": "geocamMemo.memomessage", "fields": 
-{"author": 2, "altitude": null, "longitude": null, "heading": null, "content": "Crap, my geolocation service crashed and I am not providing geoloc with this message. This message should be the latest to make sure we gracefully fall back to the next available geolocated message.", "content_timestamp": "2011-03-13 11:23:21", "position_timestamp": null, "latitude": null, "speed": null, "cid": "e1945c241bde4238ac0c2869812a97be", "accuracy": null}
+{"author": 2, "altitude": null, "longitude": null, "heading": null, "content": "Crap, my geolocation service crashed and I am not providing geoloc with this message. This message should be the latest to make sure we gracefully fall back to the next available geolocated message.", "content_timestamp": "2011-03-13 11:23:21", "server_timestamp": "2011-03-13 11:23:21", "position_timestamp": null, "latitude": null, "speed": null, "cid": "e1945c241bde4238ac0c2869812a97be", "accuracy": null}
 }
 ]

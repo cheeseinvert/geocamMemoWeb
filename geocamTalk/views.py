@@ -71,8 +71,8 @@ def feed_messages(request, recipient_username=None, author_username=None):
         
         if since is not None:
             since_dt = datetime.fromtimestamp(float(since) / (1000 * 1000))
-            messages = TalkMessage.getMessages(recipient, author).filter(content_timestamp__gt=since_dt)
-            message_count = TalkMessage.getMessages(request.user).filter(content_timestamp__gt=since_dt).count() 
+            messages = TalkMessage.getMessages(recipient, author).filter(server_timestamp__gt=since_dt)
+            message_count = TalkMessage.getMessages(request.user).filter(server_timestamp__gt=since_dt).count() 
         else:
             messages = TalkMessage.getMessages(recipient, author)
             message_count = TalkMessage.getMessages(request.user).count()

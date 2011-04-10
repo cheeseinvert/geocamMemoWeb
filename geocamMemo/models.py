@@ -30,6 +30,7 @@ class GeocamMessage(revisions.models.VersionedModel):
     class Meta:
         abstract = True
     
+    server_timestamp = models.DateTimeField(auto_now_add = True)
     author = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_set")
     content = models.TextField(max_length=1024)
     # removed auto_add_now from content_timestamp since revisions are also instances in the 
