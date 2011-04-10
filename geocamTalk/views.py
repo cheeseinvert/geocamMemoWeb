@@ -116,7 +116,7 @@ def register(request):
     else:  
         if request.method == 'POST':
             try: #to access the POST object via a potentially nonexistant key
-                regid = request.POST["registrationid"]
+                regid = request.POST["registration_id"]
             except KeyError:
                 return HttpResponseBadRequest()
     

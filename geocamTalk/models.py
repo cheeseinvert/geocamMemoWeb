@@ -126,7 +126,7 @@ class TalkMessage(GeocamMessage):
                 params = urllib.urlencode({
                          'registration_id': user.profile.registration_id,
                          'collapse_key': "message"+str(message.pk),
-                         'data.message': str(message.pk),
+                         'data.message_id': str(message.pk),
                          'delay_when_idle':'TRUE',
                          })
         
