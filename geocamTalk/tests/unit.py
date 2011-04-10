@@ -10,6 +10,7 @@ from datetime import datetime
 from geocamTalk.models import TalkMessage
 from django.core.files.base import ContentFile
 import array, os, random
+import string
 
 
 class GeocamTalkUnitTest(TestCase):
@@ -93,8 +94,16 @@ class TalkUserProfileUnitTest(TestCase):
 
     def testEnsureFromJsonCreatesMessage(self):        
         #arrange
-        timestamp = datetime(2011, 04, 03, 14, 30, 00)
+        now = datetime.now()
+        year = now.strftime("%Y")
+        month = now.strftime("%m")
+        day = now.strftime("%d")
+        hour = now.strftime("%H")
+        min = now.strftime("%H")
+        sec = now.strftime("%H")
         
+        timestamp = datetime(int(year), int(month), int(day), int(hour), int(min), int(sec))
+
         message = dict(                    
                     userId=User.objects.all()[0].pk,
                     content="Sting!!!",
@@ -102,7 +111,8 @@ class TalkUserProfileUnitTest(TestCase):
                     latitude=1.1,
                     longitude=222.2,
                     accuracy=60 )
-        audioFile = 'media/geocamTalk/test/test_ensure_from_json.mp4'
+        
+        audioFile = 'media/geocamTalk/test/%s/%s/%s/test_ensure_from_json.mp4' % (year,month,day)
         self._createFile(filename=audioFile, filesize=100*1024)
         f = open(audioFile, "rb")
         #act
@@ -120,7 +130,7 @@ class TalkUserProfileUnitTest(TestCase):
         self.assertTrue(talkMessage.has_audio())
         self.assertEqual(os.path.basename(talkMessage.audio_file.name), os.path.basename(f.name))
         f.close()
-        self._clean_test_files('test_ensure_from_json.mp4')
+        self._clean_test_files(audioFile)
          
         
     def _createFile(self, filename, filesize=5*1024*1024):
@@ -132,7 +142,17 @@ class TalkUserProfileUnitTest(TestCase):
         while written < blocksize:
             datablock.append(random.getrandbits(32))
             written = written + 4
-            
+        
+        test_folder = os.path.dirname(filename)
+        post_folder = string.replace(test_folder, "test", "audio", 1)
+        try:
+            os.makedirs(test_folder)
+        except:
+            pass
+        try:
+            os.makedirs(post_folder)
+        except:
+            pass
         with open(filename, 'w') as f:
             written = 0
             while written < filesize:
@@ -141,13 +161,15 @@ class TalkUserProfileUnitTest(TestCase):
             f.flush()
             os.fsync(f.fileno())
             
-    def _clean_test_files(self, filename):
-        folder = 'media/geocamTalk/test'
-        post_folder = 'media/geocamTalk/audio'
+    def _clean_test_files(self, test_file_path):
+        filename = os.path.basename(test_file_path)
+        test_folder = os.path.dirname(test_file_path)
+        post_folder = string.replace(test_folder,"test", "audio", 1)
+        
         post_file_path = os.path.join(post_folder, filename)
         os.unlink(post_file_path)
-        for the_file in os.listdir(folder):
-            file_path = os.path.join(folder, the_file)
+        for the_file in os.listdir(test_folder):
+            file_path = os.path.join(test_folder, the_file)
             try:
                 os.unlink(file_path)
             except Exception, e:

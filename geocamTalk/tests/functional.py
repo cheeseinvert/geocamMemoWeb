@@ -56,10 +56,11 @@ class GeocamTalkListViewTest(TestCase):
         recipient = User.objects.all()[1]
         response = self.get_recipient_messages_response(recipient)
         recipient_messages = TalkMessage.getMessages(recipient)
-        print recipient_messages
         # act
-        geocount = recipient_messages.exclude(audio_file=None).count()
-        print geocount
+        geocount = 0
+        for m in recipient_messages.all():
+            if m.audio_file:
+                geocount += 1
         # assert
-        self.assertContains(response, "data-icon=\"geoCam-audio\"", geocount)
-        self.assertContains(response, 'data-rel="dialog"', geocount)
+        self.assertContains(response, 'class="media"', geocount)
+        #self.assertContains(response, 'data-rel="dialog"', geocount)

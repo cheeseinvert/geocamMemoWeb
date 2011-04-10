@@ -59,6 +59,7 @@ class TalkMessage(GeocamMessage):
                        latitude=self.latitude,
                        longitude=self.longitude,
                        accuracy=self.accuracy,
+                       audioUrl=self.get_audio_url(),
                        hasGeolocation=bool(self.has_geolocation()) )
     
     @staticmethod
@@ -106,3 +107,9 @@ class TalkMessage(GeocamMessage):
     
     def has_audio(self):
         return bool(self.audio_file != '')   
+    
+    def get_audio_url(self):
+        if self.audio_file:
+            return self.audio_file.url
+        else:
+            return ""
