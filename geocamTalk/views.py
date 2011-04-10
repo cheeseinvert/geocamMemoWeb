@@ -19,6 +19,7 @@ import os
 from django.contrib.auth.models import User
 from django.db.models import Q, Count
 import json
+
     
 @login_required
 def clear_messages(request):
@@ -98,6 +99,7 @@ def create_message(request):
             msg.content_timestamp = datetime.now()
             msg.save()
             form.save_m2m()
+            msg.push_to_phone()
             return HttpResponseRedirect(reverse("talk_message_list_all"))
         else:
             return render_to_response('geocamTalk/message_form.html',
@@ -142,6 +144,7 @@ def create_message_json(request):
                 message.audio_file.save(filename, file_content)
             try:
                 message.save()
+                message.push_to_phone()
                 return HttpResponse("", 200) 
             except:
                 return HttpResponseServerError() # TODO: change the tests and here to respond with HttpResponseBadRequest

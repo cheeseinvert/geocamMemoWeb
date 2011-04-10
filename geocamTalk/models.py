@@ -11,11 +11,14 @@ from django.core.files.base import ContentFile
 import datetime
 import time, sys
 from django.db.models import Q, Count
+import httplib
+import urllib
+from geocamMemo.authentication import GOOGLE_TOKEN
 
 class TalkUserProfile(models.Model):
     user = models.ForeignKey(User, related_name='profile')
     last_viewed_mymessages = models.DateTimeField(default=datetime.datetime.min)
-    registration_id = models.CharField()
+    registration_id = models.CharField(max_length=128)
     
     def getUnreadMessageCount(self):
         return TalkMessage.getMessages(self.user).filter(
@@ -121,7 +124,6 @@ class TalkMessage(GeocamMessage):
         
         for user in push_recipients:
             if(user.profile.registration_id):
-
                 # we need the following params set per http://code.google.com/android/c2dm/index.html#push
                 params = urllib.urlencode({
                          'registration_id': user.profile.registration_id,
