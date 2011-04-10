@@ -5,7 +5,8 @@
 # __END_LICENSE__
 
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404,\
+    HttpResponseBadRequest
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -107,6 +108,24 @@ def create_message(request):
         return render_to_response('geocamTalk/message_form.html',
                                   dict(form=form),                               
                                   context_instance=RequestContext(request))
+
+  
+def register(request):
+    if not request.user.is_authenticated():
+        return HttpResponseForbidden()
+    else:  
+        if request.method == 'POST':
+            try: #to access the POST object via a potentially nonexistant key
+                regid = request.POST["registrationid"]
+            except KeyError:
+                return HttpResponseBadRequest()
+    
+            profile = request.user.profile
+            profile.registration_id = regid
+            profile.save()
+            return HttpResponse("", 200)
+        else:
+            return HttpResponseBadRequest()        
         
 def create_message_json(request):    
     if request.user.is_authenticated():
@@ -125,7 +144,7 @@ def create_message_json(request):
                 message.save()
                 return HttpResponse("", 200) 
             except:
-                return HttpResponseServerError()
+                return HttpResponseServerError() # TODO: change the tests and here to respond with HttpResponseBadRequest
         else:
             return HttpResponseServerError()
     else:

@@ -11,6 +11,7 @@ from revisions.shortcuts import VersionedModel as VersionedModelShortcuts
 import revisions
 import json
 import time, datetime
+from geocamMemo import authentication
 
 class GeocamMessage(revisions.models.VersionedModel):
     """ This is the abstract data model for geocam messages 
@@ -55,34 +56,6 @@ class GeocamMessage(revisions.models.VersionedModel):
           
     def has_geolocation(self):
         return bool(self.latitude != None and self.longitude != None)
-
-    def push_to_phone(self):
-        message = self
-    
-        # NOW SEND THE REQUEST TO GOOGLE SERVERS
-        # first we need an https connection that ignores the certificate (for now)
-        httpsconnection = httplib.HTTPSConnection("android.apis.google.com", 443)
-    
-        # we need the following params set per http://code.google.com/android/c2dm/index.html#push
-        params = urllib.urlencode({
-                 'registration_id': message.device.registrationid,
-                 'collapse_key': "message"+str(message.id),
-                 'data.message': str(message.id),
-                 'delay_when_idle':'TRUE',
-                 })
-        # need the following headers set per http://code.google.com/android/c2dm/index.html#push
-        headers = { "Content-Type":"application/x-www-form-urlencoded",
-                    "Content-Length":len(params),
-                    "Authorization":"GoogleLogin auth=" + GOOGLE_TOKEN # TOKEN set manually in authentication.py
-                    }
-    
-        httpsconnection.request("POST", "/c2dm/send", params, headers)
-    
-        # assuming success, let's return the user to the device list for now
-        return redirect_to(request, "/", False)        
-        
-        
-        
 
     pass
 

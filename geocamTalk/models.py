@@ -15,6 +15,7 @@ from django.db.models import Q, Count
 class TalkUserProfile(models.Model):
     user = models.ForeignKey(User, related_name='profile')
     last_viewed_mymessages = models.DateTimeField(default=datetime.datetime.min)
+    registration_id = models.CharField()
     
     def getUnreadMessageCount(self):
         return TalkMessage.getMessages(self.user).filter(
@@ -105,4 +106,34 @@ class TalkMessage(GeocamMessage):
         return messages.order_by('-content_timestamp')
     
     def has_audio(self):
-        return bool(self.audio_file != '')   
+        return bool(self.audio_file != '')
+            
+    def push_to_phone(self):
+        message = self
+    
+        # NOW SEND THE REQUEST TO GOOGLE SERVERS
+        # first we need an https connection that ignores the certificate (for now)
+        httpsconnection = httplib.HTTPSConnection("android.apis.google.com", 443)
+    
+        push_recipients = self.recipients.all()
+        if(push_recipients.count() == 0):
+            push_recipients = User.objects.all();
+        
+        for user in push_recipients:
+            if(user.profile.registration_id):
+
+                # we need the following params set per http://code.google.com/android/c2dm/index.html#push
+                params = urllib.urlencode({
+                         'registration_id': user.profile.registration_id,
+                         'collapse_key': "message"+str(message.pk),
+                         'data.message': str(message.pk),
+                         'delay_when_idle':'TRUE',
+                         })
+        
+                # need the following headers set per http://code.google.com/android/c2dm/index.html#push
+                headers = { "Content-Type":"application/x-www-form-urlencoded",
+                            "Content-Length":len(params),
+                            "Authorization":"GoogleLogin auth=" + GOOGLE_TOKEN # TOKEN set manually in authentication.py
+                            }
+                
+                httpsconnection.request("POST", "/c2dm/send", params, headers)
