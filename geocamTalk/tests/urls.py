@@ -39,6 +39,18 @@ class GeocamTestUrls(TestCase):
                  
         #assert    
         self.assertEqual(403, guestResponse.status_code, "Unauthorized access if not logged in")
+
+    def testMessageJsonUrl(self):
+        #arrange
+        pk = str(TalkMessage.latest.all()[0].pk)
+        path = "/talk/messages/details/" + pk + ".json"
+        self.login()
+        
+        #act
+        memberResponse = self.getResponse(path)
+        
+        #assert
+        self.assertEqual(200, memberResponse.status_code, "should display single message")  
   
     def testClearMyMessageCount(self):
         #arrange

@@ -183,6 +183,19 @@ class GeocamTalkMessageSaveTest(TestCase):
         newMsgCnt = TalkMessage.latest.all().count()
         self.assertEqual(msgCnt, newMsgCnt, "Creating a Talk Message through view Succeeded with no content.")
          
+              
+    def test_MessageJsonFeed(self):
+        # arrange
+        msg = TalkMessage.latest.all()[0]
+        stringified_msg = json.dumps(msg.getJson())
+        
+        self.client.login(username=msg.author.username, password='geocam')
+        
+        # act
+        response = self.client.get(reverse("talk_message_details_json", args=[msg.pk]))
+        
+        # assert
+        self.assertContains(response,stringified_msg)                    
                
     def test_login(self):
         """ Make sure all users can login """

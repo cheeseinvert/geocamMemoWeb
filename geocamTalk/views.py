@@ -81,6 +81,14 @@ def feed_messages(request, recipient_username=None, author_username=None):
         return HttpResponse(json.dumps({'ts': timestamp,
                                         'msgCnt': message_count,
                                         'ms':[msg.getJson() for msg in messages]}))
+
+
+def message_details_json(request, message_id):
+    if not request.user.is_authenticated():
+        return HttpResponseForbidden()
+    else:
+        message = get_object_or_404(TalkMessage, pk=message_id)
+        return HttpResponse(json.dumps(message.getJson()))
   
 @login_required
 def index(request):
