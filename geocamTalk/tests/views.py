@@ -115,6 +115,8 @@ class GeocamTalkMessageSaveTest(TestCase):
                                         "longitude":GeocamTalkMessageSaveTest.cmusv_lon})})
         newMsgCnt = TalkMessage.latest.all().count() 
         self.assertEqual(response.status_code, 200, "submitFormToCreateMessageJSON Failed")
+        self.assertContains(response, "messageId")
+        self.assertContains(response, "authorFullname")
         self.assertEqual(newMsgCnt, msgCnt+1)
         
     def testAudioMsgCreate(self):

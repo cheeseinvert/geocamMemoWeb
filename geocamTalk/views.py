@@ -153,7 +153,7 @@ def create_message_json(request):
             try:
                 message.save()
                 message.push_to_phone()
-                return HttpResponse("", 200) 
+                return HttpResponse(json.dumps({"messageId":"%s" % message.pk, "authorFullname":message.get_author_string()}), 200) 
             except:
                 return HttpResponseServerError() # TODO: change the tests and here to respond with HttpResponseBadRequest
         else:
