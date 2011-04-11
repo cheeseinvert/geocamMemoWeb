@@ -150,4 +150,4 @@ class TalkMessage(GeocamMessage):
         if self.audio_file:
             return self.audio_file.url
         else:
-            return ""
+            return None
