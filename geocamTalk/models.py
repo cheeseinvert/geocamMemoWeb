@@ -115,7 +115,7 @@ class TalkMessage(GeocamMessage):
     def has_audio(self):
         return bool(self.audio_file != '')
             
-    def push_to_phone(self):
+    def push_to_phone(self, pushToSender = True):
         message = self
     
         # NOW SEND THE REQUEST TO GOOGLE SERVERS
@@ -128,18 +128,19 @@ class TalkMessage(GeocamMessage):
         
         for user in push_recipients:
             if(user.profile.registration_id):
-                # we need the following params set per http://code.google.com/android/c2dm/index.html#push
-                params = urllib.urlencode({
-                         'registration_id': user.profile.registration_id,
-                         'collapse_key': "message"+str(message.pk),
-                         'data.message_id': str(message.pk),
-                         'delay_when_idle':'TRUE',
-                         })
-        
-                # need the following headers set per http://code.google.com/android/c2dm/index.html#push
-                headers = { "Content-Type":"application/x-www-form-urlencoded",
-                            "Content-Length":len(params),
-                            "Authorization":"GoogleLogin auth=" + GOOGLE_TOKEN # TOKEN set manually in authentication.py
-                            }
-                
-                httpsconnection.request("POST", "/c2dm/send", params, headers)
+                if(pushToSender or user.pk != message.author.pk):
+                    # we need the following params set per http://code.google.com/android/c2dm/index.html#push
+                    params = urllib.urlencode({
+                             'registration_id': user.profile.registration_id,
+                             'collapse_key': "message"+str(message.pk),
+                             'data.message_id': str(message.pk),
+                             'delay_when_idle':'TRUE',
+                             })
+            
+                    # need the following headers set per http://code.google.com/android/c2dm/index.html#push
+                    headers = { "Content-Type":"application/x-www-form-urlencoded",
+                                "Content-Length":len(params),
+                                "Authorization":"GoogleLogin auth=" + GOOGLE_TOKEN # TOKEN set manually in authentication.py
+                                }
+                    
+                    httpsconnection.request("POST", "/c2dm/send", params, headers)

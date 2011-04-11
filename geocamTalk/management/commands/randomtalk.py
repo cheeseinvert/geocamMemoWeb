@@ -57,7 +57,7 @@ class Command(BaseCommand):
 
         msg.recipients = recipients
         
-        msg.push_to_phone()
+        msg.push_to_phone(True)
         
         print msg
         
