@@ -10,7 +10,7 @@ from datetime import datetime
 from geocamMemo.models import MemoMessage, get_user_string
 
 class GeocamMemoUnitTest(TestCase):
-    fixtures = ['demoMemoMessages.json']
+    fixtures = ['demoMemoMessages.json', "demoUsers.json"]
     
     def setUp(self):
         self.now = datetime.now()
@@ -79,3 +79,26 @@ class GeocamMemoUnitTest(TestCase):
         assert(not nogeomessage.has_geolocation())
         assert(geomessage.has_geolocation())
 
+    def testEnsureFromJsonCreatesMessag(self):        
+        #arrange
+        timestamp = datetime(2011, 04, 03, 14, 30, 00)
+        
+        message = dict(                    
+                    userId=User.objects.all()[0].pk,
+                    content="Sting!!!",
+                    contentTimestamp=timestamp.strftime("%m/%d/%y %H:%M:%S"),
+                    latitude=1.1,
+                    longitude=222.2,
+                    accuracy=60 )
+        
+        #act
+        memoMessage = MemoMessage.fromJson(message)
+        memoMessage.save()
+            
+        #assert
+        self.assertEqual(memoMessage.author.pk, User.objects.all()[0].pk)
+        self.assertEqual(memoMessage.content, "Sting!!!")
+        self.assertEqual(memoMessage.content_timestamp, timestamp)
+        self.assertEqual(memoMessage.latitude, 1.1)
+        self.assertEqual(memoMessage.longitude, 222.2)
+        self.assertEqual(memoMessage.accuracy, 60)

@@ -6,6 +6,7 @@
 
 from django.contrib import admin
 from geocamTalk.models import TalkMessage
+from geocamTalk.models import TalkUserProfile
 from django.contrib import admin
 
 class TalkMessageAdmin(admin.ModelAdmin):
@@ -22,4 +23,5 @@ class TalkMessageAdmin(admin.ModelAdmin):
     list_filter = ['author']
 
 admin.site.register(TalkMessage, TalkMessageAdmin)
+admin.site.register(TalkUserProfile)
 

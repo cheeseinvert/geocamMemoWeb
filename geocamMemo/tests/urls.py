@@ -28,7 +28,7 @@ class GeocamMemoUrls(TestCase):
         guestResponse = self.getResponse(path)
         
         #assert
-        self.assertEqual(200, guestResponse.status_code, "should display list. period")
+        self.assertEqual(403, guestResponse.status_code, "should display list. period")
         
     def testMessageJsonListUrl(self):
         #arrange
@@ -66,6 +66,16 @@ class GeocamMemoUrls(TestCase):
 
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
+
+    def testMessageCreateJSONFeed(self):
+        #arrange
+        path = "/memo/messages/create.json"
+
+        #act
+        guestResponse = self.client.post(path, {})
+                 
+        #assert    
+        self.assertEqual(403, guestResponse.status_code, "Unauthorized access if not logged in")
     
     def testMessageListFilteredByUserUrl(self):
         #arrange
@@ -91,7 +101,7 @@ class GeocamMemoUrls(TestCase):
         
     def testMapViewUrl(self):
        #arrange
-        path = "/memo/map/"   
+        path = "/memo/map"   
         template = "geocamMemo/map.html"
 
         #act

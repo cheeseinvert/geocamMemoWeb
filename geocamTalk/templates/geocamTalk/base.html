@@ -7,13 +7,14 @@
             {% endblock %}
         </title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        <script src="http://jquery.malsup.com/media/jquery.media.js?v.92"></script>
         {% block css %}{% endblock %}
     </head>
     <body>
         <header>
             {% if user.is_authenticated %}
-                <a id="my_messages_link" href="/talk/messages/{{user.username}}">My Messages (<span id="new_message_count">{{user.profile.getUnreadMessageCount}}</span>)</a> | 
-                <a href="/talk/messages/">All Messages</a> | Hello {% firstof user.first_name user.username %}  
+                <a id="my_messages_link" href="{% url geocamTalk.views.message_list user.username%}">My Messages (<span id="new_message_count">{{user.profile.getUnreadMessageCount}}</span>)</a> | 
+                <a href="{% url geocamTalk.views.message_list%}">All Messages</a> | Hello {% firstof user.first_name user.username %}  
                 <a href="/accounts/logout/">Logout</a>
             {% else %}
                 <a href="/accounts/login/">Login</a>

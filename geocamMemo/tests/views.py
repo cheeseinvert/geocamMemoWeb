@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from geocamMemo.models import MemoMessage, get_user_string
 import json
+from django.core.urlresolvers import reverse
 
 class GeocamMemoMessageSaveTest(TestCase):
     fixtures = ['demoUsers.json', 'demoMemoMessages.json']
@@ -55,17 +56,36 @@ class GeocamMemoMessageSaveTest(TestCase):
         author = User.objects.get(username="rhornsby")
         self.client.login(username=author.username, password='geocam')
         
-        response = self.client.post("/memo/messages/create/",
+        response = self.client.post(reverse("memo_create_message"),
                                   data={"content":content,
                                         "latitude":GeocamMemoMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamMemoMessageSaveTest.cmusv_lon})
         self.assertEqual(response.status_code, 200, "submitFormToCreateMessage Failed")
+
+    def test_submitFormToCreateMessageJSON(self):
+        msgCnt = MemoMessage.latest.all().count()
+        content = "Whoa man, that burning building almost collapsed on me!"
+        timestamp = self.now
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')        
+        response = self.client.post(reverse("memo_create_message_json"),
+                                  data={"message":json.dumps({
+                                        "content": content,
+                                        "contentTimestamp":timestamp.strftime("%m/%d/%y %H:%M:%S"),                                    
+                                        "latitude":GeocamMemoMessageSaveTest.cmusv_lat,
+                                        "longitude":GeocamMemoMessageSaveTest.cmusv_lon})})
+        newMsgCnt = MemoMessage.latest.all().count() 
+        self.assertEqual(response.status_code, 200, "submitFormToCreateMessageJSON Failed")
+        self.assertEqual(newMsgCnt, msgCnt+1)
         
     def test_MessagesJsonFeed(self):
         ordered_messages = MemoMessage.getMessages()
         # yes the order of this dict does matter... unfortunately
         stringified_msg_list = json.dumps([msg.getJson() for msg in ordered_messages ])
-        response = self.client.get('/memo/messages.json')
+
+        self.client.login(username="rhornsby", password='geocam')
+
+        response = self.client.get(reverse("memo_message_list_all_json"))
         
         self.assertContains(response,stringified_msg_list)
         
@@ -75,7 +95,7 @@ class GeocamMemoMessageSaveTest(TestCase):
         stringified_msg = json.dumps(msg.getJson())
         
         # act
-        response = self.client.get('/memo/messages/details/' + str(msg.pk) + '.json')
+        response = self.client.get(reverse("memo_message_details_json", args=[msg.pk]))
         
         # assert
         self.assertContains(response,stringified_msg)             
@@ -83,12 +103,12 @@ class GeocamMemoMessageSaveTest(TestCase):
     def test_index(self):
         """ Test that we are forced to login to view webroot """
         
-        response = self.client.get('/memo/messages')
+        response = self.client.get(reverse("memo_message_list_all"))
         # expect redirect to the login page:
         self.assertEqual(response.status_code, 302, "We didnt have to login to see the index page")
         self.assertTrue(self.client.login(username='jmiller',
                                         password='geocam'))
-        response = self.client.get('/memo/messages')
+        response = self.client.get(reverse("memo_message_list_all"))
         # expect success because we are logged in:
         self.assertEqual(response.status_code, 200, "Logged in user cant see index page")   
         
@@ -113,7 +133,7 @@ class GeocamMemoMessageEditAndDeleteTest(TestCase):
                 self.loginUser(user.pk)
                 break                    
         modified_content = "The content has been modified"
-        response = self.client.post("/memo/messages/edit/%s"% original_msg.pk,
+        response = self.client.post(reverse("memo_edit_message", args=[original_msg.pk]),
                                   data={"content":modified_content,
                                         "author":original_msg.author.pk})
         self.assertEqual(response.status_code, 302, "ensureEditByNonAuthorForbidden Failed") 
