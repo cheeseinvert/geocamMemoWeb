@@ -14,6 +14,7 @@ import re
 import array
 import random
 import os
+import string
 from django.core.urlresolvers import reverse
 
 class GeocamTalkMessageSaveTest(TestCase):
@@ -124,10 +125,14 @@ class GeocamTalkMessageSaveTest(TestCase):
         content = "Whoa man, that burning building almost collapsed on me!"
         timestamp = self.now
         author = User.objects.get(username="rhornsby")
-        self.client.login(username=author.username, password='geocam')   
-        audioFile = 'media/geocamTalk/test/test.mp4'
-        self._createFile(filename=audioFile, filesize=100*1024)
-        f = open(audioFile, "rb")
+        self.client.login(username=author.username, password='geocam')
+        year = timestamp.strftime("%Y")
+        month = timestamp.strftime("%m")
+        day = timestamp.strftime("%d")
+        
+        testAudioFile = 'media/geocamTalk/test/%s/%s/%s/test.mp4' % (year,month,day)
+        self._createFile(filename=testAudioFile, filesize=100*1024)
+        f = open(testAudioFile, "rb")
         response = self.client.post(reverse("talk_create_message_json"),
                                     data={'audio':f,
                                           "message":json.dumps({
@@ -136,8 +141,10 @@ class GeocamTalkMessageSaveTest(TestCase):
                                         "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamTalkMessageSaveTest.cmusv_lon})})
         f.close() 
-        self._clean_test_files('test.mp4')
         self.assertEqual(response.status_code, 200, "Failed to move message from phone to web app")
+        # get the message we just created:
+        postedFile = TalkMessage.latest.get(content=content).audio_file.name
+        self._clean_test_files(testAudioFile, postedFile)
     
     def _createFile(self, filename, filesize=5*1024*1024):
         """Create and fill a file with random data"""
@@ -148,7 +155,17 @@ class GeocamTalkMessageSaveTest(TestCase):
         while written < blocksize:
             datablock.append(random.getrandbits(32))
             written = written + 4
-            
+        
+        test_folder = os.path.dirname(filename)
+        post_folder = string.replace(test_folder, "test", "audio", 1)
+        try:
+            os.makedirs(test_folder)
+        except:
+            pass
+        try:
+            os.makedirs(post_folder)
+        except:
+            pass
         with open(filename, 'w') as f:
             written = 0
             while written < filesize:
@@ -156,14 +173,15 @@ class GeocamTalkMessageSaveTest(TestCase):
                 written += blocksize
             f.flush()
             os.fsync(f.fileno())
-    
-    def _clean_test_files(self, filename):
-        folder = 'media/geocamTalk/test'
-        post_folder = 'media/geocamTalk/audio'
-        post_file_path = os.path.join(post_folder, filename)
+            
+    def _clean_test_files(self, test_file_path, postedFile):
+        test_folder = os.path.dirname(test_file_path)
+        #post_folder = string.replace(test_folder,"test", "audio", 1)
+        
+        post_file_path = os.path.join('media/', postedFile)
         os.unlink(post_file_path)
-        for the_file in os.listdir(folder):
-            file_path = os.path.join(folder, the_file)
+        for the_file in os.listdir(test_folder):
+            file_path = os.path.join(test_folder, the_file)
             try:
                 os.unlink(file_path)
             except Exception, e:
@@ -290,6 +308,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         self.assertContains(response, '"latitude": %s' % ordered_messages[0].latitude)
         self.assertContains(response, '"longitude": %s' % ordered_messages[0].longitude)
         self.assertContains(response, '"accuracy": %s' % ordered_messages[0].accuracy)
+        self.assertContains(response, '"audioUrl": %s' % ordered_messages[0].get_audio_url())
         for msg in ordered_messages[1:]:
             self.assertNotContains(response, '"messageId": %s' % msg.pk)
       
