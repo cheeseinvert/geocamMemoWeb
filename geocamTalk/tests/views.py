@@ -111,7 +111,7 @@ class GeocamTalkMessageSaveTest(TestCase):
         response = self.client.post(reverse("talk_create_message_json"),
                                   data={"message":json.dumps({
                                         "content": content,
-                                        "contentTimestamp":timestamp.strftime("%m/%d/%y %H:%M:%S"),                                    
+                                        "contentTimestamp":time.mktime(timestamp.timetuple()),                                    
                                         "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamTalkMessageSaveTest.cmusv_lon})})
         newMsgCnt = TalkMessage.latest.all().count() 
@@ -137,7 +137,7 @@ class GeocamTalkMessageSaveTest(TestCase):
                                     data={'audio':f,
                                           "message":json.dumps({
                                         "content": content,
-                                        "contentTimestamp":timestamp.strftime("%m/%d/%y %H:%M:%S"),                                    
+                                        "contentTimestamp":time.mktime(timestamp.timetuple()),                                    
                                         "latitude":GeocamTalkMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamTalkMessageSaveTest.cmusv_lon})})
         f.close() 
@@ -303,12 +303,12 @@ class GeocamTalkMessageSaveTest(TestCase):
         recipient_string = ", ".join('"%s"' % r.username for r in ordered_messages[0].recipients.all())
         self.assertContains(response, '"recipients": [%s]' % recipient_string)
         self.assertContains(response, '"content": "%s"' % ordered_messages[0].content)
-        self.assertContains(response, '"contentTimestamp": "%s"' % ordered_messages[0].get_date_string())
+        self.assertContains(response, '"contentTimestamp": %s' % ordered_messages[0].get_date_timestamp())
         self.assertContains(response, '"hasGeolocation": %s' % str(ordered_messages[0].has_geolocation()).lower())
         self.assertContains(response, '"latitude": %s' % ordered_messages[0].latitude)
         self.assertContains(response, '"longitude": %s' % ordered_messages[0].longitude)
         self.assertContains(response, '"accuracy": %s' % ordered_messages[0].accuracy)
-        self.assertContains(response, '"audioUrl": %s' % ordered_messages[0].get_audio_url())
+        self.assertContains(response, '"audioUrl": "%s"' % ordered_messages[0].get_audio_url())
         for msg in ordered_messages[1:]:
             self.assertNotContains(response, '"messageId": %s' % msg.pk)
       

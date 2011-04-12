@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from geocamMemo.models import MemoMessage, get_user_string
 import json
+import time
 from django.core.urlresolvers import reverse
 
 class GeocamMemoMessageSaveTest(TestCase):
@@ -71,7 +72,7 @@ class GeocamMemoMessageSaveTest(TestCase):
         response = self.client.post(reverse("memo_create_message_json"),
                                   data={"message":json.dumps({
                                         "content": content,
-                                        "contentTimestamp":timestamp.strftime("%m/%d/%y %H:%M:%S"),                                    
+                                        "contentTimestamp":time.mktime(timestamp.timetuple()),                                    
                                         "latitude":GeocamMemoMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamMemoMessageSaveTest.cmusv_lon})})
         newMsgCnt = MemoMessage.latest.all().count() 
@@ -91,8 +92,10 @@ class GeocamMemoMessageSaveTest(TestCase):
         
     def test_MessageJsonFeed(self):
         # arrange
-        msg = MemoMessage.latest.all()[0]
+        msg = MemoMessage.latest.all().reverse()[0]
         stringified_msg = json.dumps(msg.getJson())
+        
+        #self.client.login(username="root", password='geocam')
         
         # act
         response = self.client.get(reverse("memo_message_details_json", args=[msg.pk]))

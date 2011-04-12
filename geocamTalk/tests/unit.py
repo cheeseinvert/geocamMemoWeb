@@ -11,6 +11,7 @@ from geocamTalk.models import TalkMessage
 from django.core.files.base import ContentFile
 import array, os, random
 import string
+import time
 
 
 class GeocamTalkUnitTest(TestCase):
@@ -107,7 +108,7 @@ class TalkUserProfileUnitTest(TestCase):
         message = dict(                    
                     userId=User.objects.all()[0].pk,
                     content="Sting!!!",
-                    contentTimestamp=timestamp.strftime("%m/%d/%y %H:%M:%S"),
+                    contentTimestamp=time.mktime(timestamp.timetuple()),
                     latitude=1.1,
                     longitude=222.2,
                     accuracy=60 )

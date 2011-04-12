@@ -48,6 +48,9 @@ class GeocamMessage(revisions.models.VersionedModel):
     def get_date_string(self):
         return self.content_timestamp.strftime("%m/%d/%y %H:%M:%S")
     
+    def get_date_timestamp(self):
+        return int(time.mktime(self.content_timestamp.timetuple()))
+    
     def get_author_string(self):
         return get_user_string(self.author)
     
@@ -83,7 +86,7 @@ class MemoMessage(GeocamMessage):
                     authorUsername=self.author.username,
                     authorFullname=self.get_author_string(), 
                     content=self.content,
-                    contentTimestamp=self.get_date_string(),
+                    contentTimestamp=self.get_date_timestamp(),
                     latitude=self.latitude,
                     longitude=self.longitude,
                     accuracy=self.accuracy,
@@ -95,8 +98,7 @@ class MemoMessage(GeocamMessage):
         if "content" in messageDict:
             message.content = messageDict["content"]   
         if "contentTimestamp" in messageDict:
-            time_format = "%m/%d/%y %H:%M:%S"
-            message.content_timestamp = datetime.datetime.fromtimestamp(time.mktime(time.strptime(messageDict["contentTimestamp"], time_format)))             
+            message.content_timestamp = datetime.datetime.fromtimestamp(float(messageDict["contentTimestamp"]))             
         if "latitude" in messageDict:
             message.latitude = messageDict["latitude"]
         if "longitude" in messageDict:

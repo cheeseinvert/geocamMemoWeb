@@ -59,7 +59,7 @@ class TalkMessage(GeocamMessage):
                        authorFullname=self.get_author_string(),
                        recipients=[r.username for r in self.recipients.all()],
                        content=self.content, 
-                       contentTimestamp=self.get_date_string(),
+                       contentTimestamp=self.get_date_timestamp(),
                        latitude=self.latitude,
                        longitude=self.longitude,
                        accuracy=self.accuracy,
@@ -72,8 +72,7 @@ class TalkMessage(GeocamMessage):
         if "content" in messageDict:
             message.content = messageDict["content"]   
         if "contentTimestamp" in messageDict:
-            time_format = "%m/%d/%y %H:%M:%S"
-            message.content_timestamp = datetime.datetime.fromtimestamp(time.mktime(time.strptime(messageDict["contentTimestamp"], time_format)))             
+            message.content_timestamp = datetime.datetime.fromtimestamp(float(messageDict["contentTimestamp"]))             
         if "latitude" in messageDict:
             message.latitude = messageDict["latitude"]
         if "longitude" in messageDict:

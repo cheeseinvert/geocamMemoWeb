@@ -7,6 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import datetime
+import time
 from geocamMemo.models import MemoMessage, get_user_string
 
 class GeocamMemoUnitTest(TestCase):
@@ -26,15 +27,6 @@ class GeocamMemoUnitTest(TestCase):
         # assert
         self.assertEquals(19, len(title))
         self.assertEquals(message.content[:16] + "...", title)
-        
-    def testEnsureDateStringFormat(self):
-        #arrange
-        d = datetime.now()
-        message = MemoMessage.objects.create(content="test", content_timestamp=d, author_id=1)
-        #act
-        datestring = message.get_date_string()
-        #assert
-        self.assertEqual(datestring, d.strftime("%m/%d/%y %H:%M:%S"))
         
     def testEnsureAuthorStringFormat(self):
         #arrange
@@ -86,7 +78,7 @@ class GeocamMemoUnitTest(TestCase):
         message = dict(                    
                     userId=User.objects.all()[0].pk,
                     content="Sting!!!",
-                    contentTimestamp=timestamp.strftime("%m/%d/%y %H:%M:%S"),
+                    contentTimestamp=time.mktime(timestamp.timetuple()),
                     latitude=1.1,
                     longitude=222.2,
                     accuracy=60 )
