@@ -108,7 +108,7 @@ class TalkUserProfileUnitTest(TestCase):
         message = dict(                    
                     userId=User.objects.all()[0].pk,
                     content="Sting!!!",
-                    contentTimestamp=time.mktime(timestamp.timetuple()),
+                    contentTimestamp=time.mktime(timestamp.timetuple()) * 1000,
                     latitude=1.1,
                     longitude=222.2,
                     accuracy=60 )

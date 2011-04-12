@@ -72,7 +72,7 @@ class TalkMessage(GeocamMessage):
         if "content" in messageDict:
             message.content = messageDict["content"]   
         if "contentTimestamp" in messageDict:
-            message.content_timestamp = datetime.datetime.fromtimestamp(float(messageDict["contentTimestamp"]))             
+            message.content_timestamp = datetime.datetime.fromtimestamp(float(messageDict["contentTimestamp"]) / 1000)             
         if "latitude" in messageDict:
             message.latitude = messageDict["latitude"]
         if "longitude" in messageDict:
