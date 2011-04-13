@@ -68,6 +68,7 @@ class TalkMessage(GeocamMessage):
     
     @staticmethod
     def fromJson(messageDict):
+        print "inside fromJson!\n"
         message = TalkMessage()    
         if "content" in messageDict:
             message.content = messageDict["content"]   
@@ -81,7 +82,15 @@ class TalkMessage(GeocamMessage):
         if "accuracy" in messageDict:
             message.accuracy = messageDict["accuracy"]                               
         if "userId" in messageDict:
-            message.author_id = messageDict["userId"]            
+            message.author_id = messageDict["userId"]
+        if "recipientUsername" in messageDict:
+            print "inside the iff satetment!\n"
+            r = User.objects.get(username=messageDict["recipientUsername"])
+            print "recipient is %s" % r
+            print "message is %s" % message
+            message.save()
+            message.recipients.add(r)
+            print "dont think I'll see this part...\n"         
         return message  
     
     @staticmethod

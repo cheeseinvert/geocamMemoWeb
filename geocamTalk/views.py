@@ -90,6 +90,12 @@ def message_details_json(request, message_id):
         message = get_object_or_404(TalkMessage, pk=message_id)
         return HttpResponse(json.dumps(message.getJson()))
   
+def teammates_json(request):
+    if not request.user.is_authenticated():
+        return HttpResponseForbidden()
+    else:
+        return HttpResponse(json.dumps([user.username for user in User.objects.all()]));
+    
 @login_required
 def index(request):
     return render_to_response('geocamTalk/home.html',
@@ -142,9 +148,10 @@ def create_message_json(request):
         if request.method == 'POST':
             jsonstring = request.POST["message"]
             messageDict = json.loads(jsonstring)
+            print "messageDict is %s" % messageDict
             messageDict["userId"] = request.user.pk
             message = TalkMessage.fromJson(messageDict)
-
+            print "message after fromJson is %s" % message
             if "audio" in request.FILES:
                 filename =  "%s%s.mp4" % (message.author,   message.content_timestamp.strftime("%H%M%S"))
                 file_content = ContentFile(request.FILES['audio'].read())

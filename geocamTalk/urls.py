@@ -9,6 +9,8 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns('geocamTalk.views',
     url(r'register$', 'register',
          name='talk_register_c2dm'),
+    url(r'teammates.json', 'teammates_json',
+         name='talk_teammates_json'),
     url(r'messages/create.json', 'create_message_json',
          name='talk_create_message_json'),
     url(r'messages/create', 'create_message',
