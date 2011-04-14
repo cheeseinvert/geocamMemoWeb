@@ -13,3 +13,5 @@ media/css/*.r*.css
 .pydevproject
 .tmp*
 .settings
+geocamMemo/authentication.py
+example/media/*

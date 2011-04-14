@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # __BEGIN_LICENSE__
 # Copyright (C) 2008-2010 United States Government as represented by
 # the Administrator of the National Aeronautics and Space Administration.

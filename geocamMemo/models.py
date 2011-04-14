@@ -10,6 +10,8 @@ from revisions.models import VersionedModel
 from revisions.shortcuts import VersionedModel as VersionedModelShortcuts
 import revisions
 import json
+import time, datetime
+from geocamMemo import authentication
 
 class GeocamMessage(revisions.models.VersionedModel):
     """ This is the abstract data model for geocam messages 
@@ -29,6 +31,7 @@ class GeocamMessage(revisions.models.VersionedModel):
     class Meta:
         abstract = True
     
+    server_timestamp = models.DateTimeField(auto_now_add = True)
     author = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_set")
     content = models.TextField(max_length=1024)
     # removed auto_add_now from content_timestamp since revisions are also instances in the 
@@ -44,6 +47,9 @@ class GeocamMessage(revisions.models.VersionedModel):
     
     def get_date_string(self):
         return self.content_timestamp.strftime("%m/%d/%y %H:%M:%S")
+    
+    def get_date_timestamp(self):
+        return int(time.mktime(self.content_timestamp.timetuple())) * 1000 # * 1000 for java timestamp
     
     def get_author_string(self):
         return get_user_string(self.author)
@@ -80,11 +86,28 @@ class MemoMessage(GeocamMessage):
                     authorUsername=self.author.username,
                     authorFullname=self.get_author_string(), 
                     content=self.content,
-                    contentTimestamp=self.get_date_string(),
+                    contentTimestamp=self.get_date_timestamp(),
                     latitude=self.latitude,
                     longitude=self.longitude,
                     accuracy=self.accuracy,
                     hasGeolocation=bool(self.has_geolocation()) )
+    
+    @staticmethod
+    def fromJson(messageDict):
+        message = MemoMessage()    
+        if "content" in messageDict:
+            message.content = messageDict["content"]   
+        if "contentTimestamp" in messageDict:
+            message.content_timestamp = datetime.datetime.fromtimestamp(float(messageDict["contentTimestamp"]) / 1000)             
+        if "latitude" in messageDict:
+            message.latitude = messageDict["latitude"]
+        if "longitude" in messageDict:
+            message.longitude = messageDict["longitude"]
+        if "accuracy" in messageDict:
+            message.accuracy = messageDict["accuracy"]                               
+        if "userId" in messageDict:
+            message.author_id = messageDict["userId"]            
+        return message            
         
     @staticmethod
     def getMessages(author=None):

@@ -56,7 +56,8 @@ class Command(BaseCommand):
         msg.save()
 
         msg.recipients = recipients
-
+        
+        msg.push_to_phone(True)
         
         print msg
         

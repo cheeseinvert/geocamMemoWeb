@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from geocamMemo.models import MemoMessage, get_user_string
 import json
+import time
 from django.core.urlresolvers import reverse
 
 class GeocamMemoMessageSaveTest(TestCase):
@@ -61,20 +62,40 @@ class GeocamMemoMessageSaveTest(TestCase):
                                         "latitude":GeocamMemoMessageSaveTest.cmusv_lat,
                                         "longitude":GeocamMemoMessageSaveTest.cmusv_lon})
         self.assertEqual(response.status_code, 200, "submitFormToCreateMessage Failed")
+
+    def test_submitFormToCreateMessageJSON(self):
+        msgCnt = MemoMessage.latest.all().count()
+        content = "Whoa man, that burning building almost collapsed on me!"
+        timestamp = self.now
+        author = User.objects.get(username="rhornsby")
+        self.client.login(username=author.username, password='geocam')        
+        response = self.client.post(reverse("memo_create_message_json"),
+                                  data={"message":json.dumps({
+                                        "content": content,
+                                        "contentTimestamp":time.mktime(timestamp.timetuple()),                                    
+                                        "latitude":GeocamMemoMessageSaveTest.cmusv_lat,
+                                        "longitude":GeocamMemoMessageSaveTest.cmusv_lon})})
+        newMsgCnt = MemoMessage.latest.all().count() 
+        self.assertEqual(response.status_code, 200, "submitFormToCreateMessageJSON Failed")
+        self.assertEqual(newMsgCnt, msgCnt+1)
         
     def test_MessagesJsonFeed(self):
         ordered_messages = MemoMessage.getMessages()
         # yes the order of this dict does matter... unfortunately
         stringified_msg_list = json.dumps([msg.getJson() for msg in ordered_messages ])
-        
+
+        self.client.login(username="rhornsby", password='geocam')
+
         response = self.client.get(reverse("memo_message_list_all_json"))
         
         self.assertContains(response,stringified_msg_list)
         
     def test_MessageJsonFeed(self):
         # arrange
-        msg = MemoMessage.latest.all()[0]
+        msg = MemoMessage.latest.all().reverse()[0]
         stringified_msg = json.dumps(msg.getJson())
+        
+        #self.client.login(username="root", password='geocam')
         
         # act
         response = self.client.get(reverse("memo_message_details_json", args=[msg.pk]))

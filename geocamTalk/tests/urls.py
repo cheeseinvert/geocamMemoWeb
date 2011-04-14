@@ -29,7 +29,29 @@ class GeocamTestUrls(TestCase):
 
         #act
         self.assertPathRequiresLoginAndUsesTemplate(path, template)
-   
+        
+    def testMessageCreateJSONFeed(self):
+        #arrange
+        path = "/talk/messages/create.json"
+
+        #act
+        guestResponse = self.client.post(path, {})
+                 
+        #assert    
+        self.assertEqual(403, guestResponse.status_code, "Unauthorized access if not logged in")
+
+    def testMessageJsonUrl(self):
+        #arrange
+        pk = str(TalkMessage.latest.all()[0].pk)
+        path = "/talk/messages/details/" + pk + ".json"
+        self.login()
+        
+        #act
+        memberResponse = self.getResponse(path)
+        
+        #assert
+        self.assertEqual(200, memberResponse.status_code, "should display single message")  
+  
     def testClearMyMessageCount(self):
         #arrange
         me = User.objects.all()[0]
@@ -61,7 +83,7 @@ class GeocamTestUrls(TestCase):
         memberResponse = self.getResponse(path)
         
         #assert
-        self.assertEqual(302, guestResponse.status_code, "should redirect if not logged in")
+        self.assertEqual(403, guestResponse.status_code, "should redirect if not logged in")
         self.assertEqual(200, memberResponse.status_code, "should display if logged in")
 
     def testMyMessageJSONFeedUrl(self):
@@ -75,7 +97,7 @@ class GeocamTestUrls(TestCase):
         memberResponse = self.getResponse(path)
         
         #assert
-        self.assertEqual(302, guestResponse.status_code, "should redirect if not logged in")
+        self.assertEqual(403, guestResponse.status_code, "should redirect if not logged in")
         self.assertEqual(200, memberResponse.status_code, "should display if logged in")
     
     def assertPathRequiresLoginAndUsesTemplate(self, path, template):
