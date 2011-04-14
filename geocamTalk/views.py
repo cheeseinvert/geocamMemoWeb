@@ -136,6 +136,15 @@ def register(request):
             return HttpResponse("", 200)
         else:
             return HttpResponseBadRequest()        
+
+def unregister(request):
+    if not request.user.is_authenticated():
+        return HttpResponseForbidden()
+    else:  
+        profile = request.user.profile
+        profile.registration_id = None
+        profile.save()
+        return HttpResponse("", 200)
         
 def create_message_json(request):    
     if request.user.is_authenticated():
