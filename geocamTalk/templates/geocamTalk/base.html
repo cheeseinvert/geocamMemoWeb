@@ -21,6 +21,77 @@
 				});
 			});
 		</script>
+		<script>
+		    $(document).ready(function() {
+		    	$('a.media').media( { width: 300, height: 20 } );
+		    	var running_timestamp = {{ timestamp }};
+		    	var new_message_count = {{ user.profile.getUnreadMessageCount }};
+		
+		    	var updateFunction = function(){
+		    		{% if author %}
+		    		var url = '{% url geocamTalk.views.feed_messages recipient.username author.username %}';
+		    		{% else %}
+			    		{% if recipient %}
+			    			var url = '{% url geocamTalk.views.feed_messages recipient.username %}';
+			    		{% else %}
+			    			var url = '{% url geocamTalk.views.feed_messages %}';
+			    		{% endif %}
+		    		{% endif %}
+		    		url = url + '?since=' + running_timestamp;
+		    		$.getJSON(url, function(data) {
+		    			var html_str = "";
+		    			for (var i in data['ms']) {
+		    				var msg = data['ms'][i];
+		    				var pk = msg['messageId'];
+		    				var content = msg['content'];
+		    				var content_timestamp = msg['contentTimestamp']; // TODO: convert this to a string
+		    				var has_geolocation = msg['hasGeolocation'];
+		    				var authorUsername = msg['authorUsername'];
+		    				var authorFullname = msg['authorFullname'];
+		    				{% if recipient %}
+		    				    authorFullname = '<a href="{% url geocamTalk.views.message_list recipient.username %}/' +authorUsername+ '">' +authorFullname+ '</a>' ;
+		    				{% endif %}
+		    				
+			        		html_str += '<dt id="message_'+pk+'">';
+			        		html_str += 'On '+content_timestamp+' '+authorFullname+' said';
+			        		if (has_geolocation == true) {
+			        			html_str += '<a data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>';
+			        		}
+			        		html_str += '</dt>';
+			        		html_str += '<dd id="message_'+pk+'_content">';
+			        		html_str += '<p>'+content+'</p>';
+			        		html_str += '</dd>';
+			        	}
+	        	
+			        	$.mobile.activePage.page().find('#message_list').prepend(html_str);
+			        	running_timestamp = data['ts'];
+			        	new_message_count += data['msgCnt'];
+			        	
+			        	$.mobile.pageContainer.find('div[data-role="page"]').each(function(i) {
+			        	    $(this).find('#new_message_count').html(new_message_count);
+						});
+	        	
+						if (new_message_count > 0
+							&& $.mobile.activePage.page().find('#clear_link').length == 0) {
+							var link = $('<li><a id="clear_link" href="#">(Clear)</a></li>');
+							link.click(function() {
+								$.get('{% url geocamTalk.views.clear_messages %}', function() {
+									new_message_count = 0;
+									
+									$.mobile.pageContainer.find('div[data-role="page"]').each(function(i) {
+										$(this).find('#new_message_count').html(0);
+										$(this).find('#clear_link').remove();
+									});
+								});
+							});
+							$.mobile.activePage.page().find('#my_messages_link').parent().after(link);
+						}
+			    	});
+				}; 
+				updateFunction();
+				setInterval(updateFunction, 3 *1000);
+			});
+        </script>
 		<script src="http://code.jquery.com/mobile/1.0a4/jquery.mobile-1.0a4.min.js"></script>
 		<script src="http://jquery.malsup.com/media/jquery.media.js?v.92"></script>
         {% block css %}{% endblock %}
