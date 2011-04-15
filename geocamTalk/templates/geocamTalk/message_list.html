@@ -3,6 +3,7 @@
 {% block title%}GeoCam Talk Messages{% endblock %}
 
 {% block content %}
+<a href="{% url geocamTalk.views.create_message %}" data-role="button" data-inline="true">New Message</a>
 <h1>
 	{% if recipient != None and author != None %}
 		Messages to
@@ -52,8 +53,6 @@
 	</dd>
 {% endfor %}
 </dl>
-
-<a href="{% url geocamTalk.views.create_message %}">New Message</a>
 </div>
 {% endblock %}
 
