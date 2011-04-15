@@ -59,7 +59,7 @@
 			        		html_str += '<li id="message_'+pk+'"><p id="message_'+pk+'_header">';
 			        		html_str += 'On '+content_timestamp+' '+authorFullname;
 			        		if (has_geolocation == true) {
-			        			html_str += '<a href="#" data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>';
+			        			html_str += '<a href="#" data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext" title="Map Info" data-theme="c" class="ui-btn ui-btn-inline ui-btn-icon-notext ui-btn-corner-all ui-shadow ui-btn-up-c"><span class="ui-btn-inner ui-btn-corner-all"><span class="ui-btn-text">Map Info</span><span class="ui-icon ui-icon-geoCam-map ui-icon-shadow"></span></span></a>';
 			        		}
 			        		html_str += '</p>';
 			        		html_str += '<p id="message_'+pk+'_content">'+content+'</p>';
