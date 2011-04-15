@@ -43,7 +43,7 @@
       {% else %}
           {{ m.get_author_string}}
       {% endif %}
-	  {% if m.has_geolocation %}<a data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>{%endif%}
+	  {% if m.has_geolocation %}<a href="#" data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>{%endif%}
 	  {% if m.has_audio %}
           <a class="media" href="{{m.audio_file.url}}"></a>
       {%endif%}
