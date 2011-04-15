@@ -5,7 +5,7 @@
 # __END_LICENSE__
 
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404,\
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404, \
     HttpResponseBadRequest
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -27,7 +27,7 @@ def clear_messages(request):
     profile.last_viewed_mymessages = TalkMessage.getLargestMessageId()
     profile.save()
     
-    return HttpResponse(status=200)
+    return HttpResponse(json.dumps({'ts': TalkMessage.getLargestMessageId()}))
 
 @login_required
 def message_list(request, recipient_username=None, author_username=None):   
@@ -47,9 +47,9 @@ def message_list(request, recipient_username=None, author_username=None):
         profile.last_viewed_mymessages = timestamp
         profile.save()
     
-    return render_to_response('geocamTalk/message_list.html', 
-                               dict(gc_msg=TalkMessage.getMessages(recipient,author), 
-                                   recipient=recipient, 
+    return render_to_response('geocamTalk/message_list.html',
+                               dict(gc_msg=TalkMessage.getMessages(recipient, author),
+                                   recipient=recipient,
                                    author=author,
                                    timestamp=timestamp),
                                context_instance=RequestContext(request))
@@ -93,7 +93,7 @@ def message_details_json(request, message_id):
 @login_required
 def index(request):
     return render_to_response('geocamTalk/home.html',
-                              dict(), 
+                              dict(),
                               context_instance=RequestContext(request))
 
 @login_required
@@ -116,7 +116,7 @@ def create_message(request):
     else:
         form = GeocamTalkForm()
         return render_to_response('geocamTalk/message_form.html',
-                                  dict(form=form),                               
+                                  dict(form=form),
                                   context_instance=RequestContext(request))
 
   
@@ -146,9 +146,9 @@ def create_message_json(request):
             message = TalkMessage.fromJson(messageDict)
 
             if "audio" in request.FILES:
-                filename =  "%s%s.mp4" % (message.author,   message.content_timestamp.strftime("%H%M%S"))
+                filename = "%s%s.mp4" % (message.author, message.content_timestamp.strftime("%H%M%S"))
                 file_content = ContentFile(request.FILES['audio'].read())
-                file_format = os.path.splitext( request.FILES['audio'].name)[-1]
+                file_format = os.path.splitext(request.FILES['audio'].name)[-1]
                 message.audio_file.save(filename, file_content)
             try:
                 print message
