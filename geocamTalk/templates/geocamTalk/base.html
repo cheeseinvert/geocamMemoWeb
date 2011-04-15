@@ -44,13 +44,17 @@
 		    				var msg = data['ms'][i];
 		    				var pk = msg['messageId'];
 		    				var content = msg['content'];
-		    				var content_timestamp = msg['contentTimestamp']; // TODO: convert this to a string
 		    				var has_geolocation = msg['hasGeolocation'];
 		    				var authorUsername = msg['authorUsername'];
 		    				var authorFullname = msg['authorFullname'];
 		    				{% if recipient %}
 		    				    authorFullname = '<a href="{% url geocamTalk.views.message_list recipient.username %}/' +authorUsername+ '">' +authorFullname+ '</a>' ;
 		    				{% endif %}
+		    				
+		    				var msgDate = new Date (msg['contentTimestamp']);
+		    				var content_timestamp =
+		    				msgDate.getDate() + "/" + msgDate.getMonth() + "/" + msgDate.getFullYear()
+		    				+ " " + msgDate.getHours() + ":" + msgDate.getMinutes();
 		    				
 			        		html_str += '<li id="message_'+pk+'"><p id="message_'+pk+'_header">';
 			        		html_str += 'On '+content_timestamp+' '+authorFullname+' said';
