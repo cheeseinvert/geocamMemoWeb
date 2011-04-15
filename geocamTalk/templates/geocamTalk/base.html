@@ -14,20 +14,20 @@
         <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
 		<script type="text/javascript">
 			$(document).bind("mobileinit", function () {
-				$.mobile.ajaxEnabled  = true;
+				$.mobile.ajaxEnabled = true;
 				$.extend($.mobile, {
 					ajaxFormsEnabled: false/*,
 					ajaxEnabled: false*/
 				});
 			});
-		</script>
-		<script>
-		    $(document).ready(function() {
-		    	$('a.media').media( { width: 300, height: 20 } );
-		    	var running_timestamp = {{ timestamp }};
-		    	var new_message_count = {{ user.profile.getUnreadMessageCount }};
-		
-		    	var updateFunction = function(){
+/*			$('#bodydiv').live('pageshow', function() {
+				$('a.media').media( { width: 300, height: 20 } );
+			});*/
+			var running_timestamp = {{ timestamp }};
+			var new_message_count = {{ user.profile.getUnreadMessageCount }};
+			
+			//var updateFunction = ;
+			$('div').live('pageshow', function(){
 		    		{% if author %}
 		    		var url = '{% url geocamTalk.views.feed_messages recipient.username author.username %}';
 		    		{% else %}
@@ -68,31 +68,19 @@
 	        	
 			        	running_timestamp = data['ts'];
 			        	new_message_count += data['msgCnt'];
-			        	//mobile.pageContainer.find
-			        	$('div[data-role="page"]').each(function(i) {
+			        	
+			        	$('div[data-role="page"]').each(function() {
 			        		$(this).find('#message_list').prepend(html_str);
 			        		$(this).find('#new_message_count').html(new_message_count);
 						});
-						
-						if (new_message_count > 0
-							&& $('div[data-role="page"]').find('#clear_link').length == 0) {
-							var link = $('<li><a id="clear_link" href="#">(Clear)</a></li>');
-							link.click(function() {
-								$.get('{% url geocamTalk.views.clear_messages %}', function() {
-									new_message_count = 0;
-									
-									$('div[data-role="page"]').each(function(i) {
-										$(this).find('#new_message_count').html(0);
-										$(this).find('#clear_link').remove();
-									});
-								});
-							});
-							$('div[data-role="page"]').find('#my_messages_link').parent().after(link);
-						}
 			    	});
-				}; 
-				updateFunction();
-				setInterval(updateFunction, 3 *1000);
+				});
+		</script>
+		<script>
+		    $(document).ready(function() {
+		    	//$('a.media').media( { width: 300, height: 20 } );
+				//updateFunction();
+				//setInterval(updateFunction, 3 *1000);
 			});
         </script>
 		<script src="http://code.jquery.com/mobile/1.0a4/jquery.mobile-1.0a4.min.js"></script>
