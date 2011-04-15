@@ -37,7 +37,24 @@ Dependencies
 
       git clone git@github.com:cheeseinvert/geocamMemoWeb.git
 
-2. CD into your ./geocamMemoWeb/example path and run syncdb, creating an admin user if prompted::
+2. If you haven't already, you'll need to register your gmail or google apps address here: http://code.google.com/android/c2dm/signup.html
+3. Before running the Django application, rename geocamMemoWeb/geocamMemo/authentication_example.py to geocamMemoWeb/geocamMemo/authentication.py::
+   
+      mv geocamMemoWeb/geocamMemo/authentication_example.py geocamMemoWeb/geocamMemo/authentication.py
+   
+4. Modify the newly moved file and follow the directions. You'll need to run the following from the console in order to retrieve your authentication token (curl with ssl libraries required: http://curl.haxx.se/)::
+
+      curl https://www.google.com/accounts/ClientLogin -k --data-urlencode Email=youraccount@gmail.com --data-urlencode Passwd=some_password -d accountType=GOOGLE -d source=com.patrickbaumann.pushprototype -d service=ac2dm
+  
+5. The response will contain an SID, AUTH, and LSID::
+
+      SID=alsdjfa;ljsdf;lajsdlfj...
+      AUTH=alsdjkfa;lskjdfl;asjd...
+      LSID=asl;dfjalskdjflasjdfl...
+   
+6. Paste the AUTH line after the '=' into authentication.py between the quotation marks.
+
+7. CD into your ./geocamMemoWeb/example path and run syncdb, creating an admin user if prompted::
       
       python manage.py syncdb
       
