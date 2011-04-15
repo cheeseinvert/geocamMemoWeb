@@ -20,6 +20,20 @@ from django.contrib.auth.models import User
 from django.db.models import Q, Count
 import json
 
+def get_first_geolocation(messages):
+    """ return the first geotagged message lat and long as tuple """
+    try:
+        return [(m.latitude, m.longitude) for m in messages if m.has_geolocation()][0]
+    except:
+        return ()
+
+@login_required
+def message_map(request):
+    messages = TalkMessage.getMessages()
+    return render_to_response('geocamTalk/map.html',
+                              dict(gc_msg=messages,
+                                   first_geolocation=get_first_geolocation(messages)),
+                              context_instance=RequestContext(request))
     
 @login_required
 def clear_messages(request):
@@ -89,7 +103,15 @@ def message_details_json(request, message_id):
     else:
         message = get_object_or_404(TalkMessage, pk=message_id)
         return HttpResponse(json.dumps(message.getJson()))
-  
+
+@login_required
+def message_details(request, message_id):
+    message = get_object_or_404(TalkMessage, pk=message_id)
+            
+    return render_to_response('geocamTalk/details.html',
+                              {'message':message},
+                              context_instance=RequestContext(request))
+
 @login_required
 def index(request):
     return render_to_response('geocamTalk/home.html',

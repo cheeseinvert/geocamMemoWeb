@@ -99,6 +99,7 @@
 		        		<ul id="bigsigh">
 		        			<li><a id="my_messages_link" href="{% url geocamTalk.views.message_list user.username%}">My Messages (<span id="new_message_count">{{user.profile.getUnreadMessageCount}}</span>)</a></li>
                 			<li><a href="{% url geocamTalk.views.message_list%}">All Messages</a></li>
+                			<li><a href="{% url geocamTalk.views.message_map %}">Talk Map</a></li>
 		        		</ul>
 	        		</div>
 	        	</div>
