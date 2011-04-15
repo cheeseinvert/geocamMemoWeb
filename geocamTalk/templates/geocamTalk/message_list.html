@@ -32,9 +32,10 @@
 	{% endif %}
 </h1>
 <div id="messages">
-<dl id="message_list">
+<ul id="message_list">
 {% for m in gc_msg %}
-	<dt id="message_{{m.pk}}">
+	<li id="message_{{m.pk}}">
+	  <p id="message_{{m.pk}}_header">
 	  On {{ m.get_date_string }}
 	  {% if recipient %} 
 	  <a href="{% url geocamTalk.views.message_list recipient.username m.author.username %}"> 
@@ -47,12 +48,13 @@
 	  {% if m.has_audio %}
           <a class="media" href="{{m.audio_file.url}}"></a>
       {%endif%}
-	</dt>
-	<dd id="message_{{m.pk}}_content">
-    	<p>{{ m.content}}</p>
-	</dd>
+      </p>
+      <p id="message_{{m.pk}}_content">
+    	{{ m.content}}
+	  </p>
+	</li>
 {% endfor %}
-</dl>
+</ul>
 </div>
 {% endblock %}
 

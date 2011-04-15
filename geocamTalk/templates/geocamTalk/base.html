@@ -52,15 +52,14 @@
 		    				    authorFullname = '<a href="{% url geocamTalk.views.message_list recipient.username %}/' +authorUsername+ '">' +authorFullname+ '</a>' ;
 		    				{% endif %}
 		    				
-			        		html_str += '<dt id="message_'+pk+'">';
+			        		html_str += '<li id="message_'+pk+'"><p id="message_'+pk+'_header">';
 			        		html_str += 'On '+content_timestamp+' '+authorFullname+' said';
 			        		if (has_geolocation == true) {
 			        			html_str += '<a data-rel="dialog" data-transition="pop" data-inline="true" data-role="button" data-icon="geoCam-map" data-iconpos="notext">Map Info</a>';
 			        		}
-			        		html_str += '</dt>';
-			        		html_str += '<dd id="message_'+pk+'_content">';
-			        		html_str += '<p>'+content+'</p>';
-			        		html_str += '</dd>';
+			        		html_str += '</p>';
+			        		html_str += '<p id="message_'+pk+'_content">'+content+'</p>';
+			        		html_str += '</li>';
 			        	}
 	        	
 			        	$.mobile.activePage.page().find('#message_list').prepend(html_str);
