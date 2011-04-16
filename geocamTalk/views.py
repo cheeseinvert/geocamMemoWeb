@@ -129,7 +129,7 @@ def create_message(request):
             msg.content_timestamp = datetime.now()
             msg.save()
             form.save_m2m()
-            msg.push_to_phone()
+            msg.push_to_phone(True)
             return HttpResponseRedirect(reverse("talk_message_list_all"))
         else:
             return render_to_response('geocamTalk/message_form.html',

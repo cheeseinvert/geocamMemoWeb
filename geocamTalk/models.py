@@ -116,8 +116,7 @@ class TalkMessage(GeocamMessage):
         return bool(self.audio_file != '')   
             
     def push_to_phone(self, pushToSender = True):
-        message = self
-    
+   
         # NOW SEND THE REQUEST TO GOOGLE SERVERS
         # first we need an https connection that ignores the certificate (for now)
         httpsconnection = httplib.HTTPSConnection("android.apis.google.com", 443)
@@ -128,12 +127,12 @@ class TalkMessage(GeocamMessage):
         
         for user in push_recipients:
             if(user.profile.registration_id):
-                if(pushToSender or user.pk != message.author.pk):
+                if(pushToSender == True or user.pk != self.author.pk):
                     # we need the following params set per http://code.google.com/android/c2dm/index.html#push
                     params = urllib.urlencode({
                              'registration_id': user.profile.registration_id,
-                             'collapse_key': "message"+str(message.pk),
-                             'data.message_id': str(message.pk),
+                             'collapse_key': "message"+str(self.pk),
+                             'data.message_id': str(self.pk),
                              'delay_when_idle':'TRUE',
                              })
             
