@@ -1,0 +1,55 @@
+{% extends "geocamTalk/base.html" %}
+
+{% block js %}
+<script>
+	$('#bodydiv').live('pageshow', function(event) {
+        createMap({{ first_geolocation.0 }},{{ first_geolocation.1 }});
+	});
+	
+function createMap(latitude, longitude) {
+    	var latlng = new google.maps.LatLng( latitude,longitude );
+		var myOptions = {
+			    zoom: 12,
+			    center: latlng,
+			    mapTypeControl: false,
+			    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
+			    mapTypeId: google.maps.MapTypeId.ROADMAP
+			  };
+		
+		var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+		
+		var messages =
+        [{% for m in gc_msg %}{% if m.has_geolocation %}
+		       	{marker:null,latitude:{{m.latitude}},longitude:{{m.longitude}},pk:{{m.pk}}},
+		   {% endif %}
+		{% endfor %}];
+		
+		$(messages).each(function(i,msg){
+			var pos = new google.maps.LatLng(msg.latitude,msg.longitude);
+			msg.marker = new google.maps.Marker({position:pos,map:map});
+		});
+		
+		var infoWindow = new google.maps.InfoWindow();
+		$(messages).each(function(i, msg) {
+			google.maps.event.addListener(msg.marker,"click", function() {
+				infoWindow.close();
+				$.getJSON("talk/messages/details/" + msg.pk + ".json", function(data) {
+					var messageHtml = "<strong>" + data['authorFullname'] + "</strong><br />"
+                                    + "<span>" + data['contentTimestamp'] + "</span>"
+					                + "<p>" + data['content'] + "</p>"
+					infoWindow.setContent(messageHtml);
+				});
+				infoWindow.open(map, msg.marker);
+			});
+		});
+		
+		google.maps.event.trigger(map,'resize');
+	}
+
+</script>
+{% endblock %}
+
+{% block content %}
+<section id="map_canvas" style="width: 320px; height: 400px">
+</section>
+{% endblock %}

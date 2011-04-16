@@ -5,7 +5,7 @@
 # __END_LICENSE__
 
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404,\
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404, \
     HttpResponseBadRequest
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -20,6 +20,20 @@ from django.contrib.auth.models import User
 from django.db.models import Q, Count
 import json
 
+def get_first_geolocation(messages):
+    """ return the first geotagged message lat and long as tuple """
+    try:
+        return [(m.latitude, m.longitude) for m in messages if m.has_geolocation()][0]
+    except:
+        return ()
+
+@login_required
+def message_map(request):
+    messages = TalkMessage.getMessages()
+    return render_to_response('geocamTalk/map.html',
+                              dict(gc_msg=messages,
+                                   first_geolocation=get_first_geolocation(messages)),
+                              context_instance=RequestContext(request))
     
 @login_required
 def clear_messages(request):
@@ -27,7 +41,7 @@ def clear_messages(request):
     profile.last_viewed_mymessages = TalkMessage.getLargestMessageId()
     profile.save()
     
-    return HttpResponse(status=200)
+    return HttpResponse(json.dumps({'ts': TalkMessage.getLargestMessageId()}))
 
 @login_required
 def message_list(request, recipient_username=None, author_username=None):   
@@ -47,9 +61,9 @@ def message_list(request, recipient_username=None, author_username=None):
         profile.last_viewed_mymessages = timestamp
         profile.save()
     
-    return render_to_response('geocamTalk/message_list.html', 
-                               dict(gc_msg=TalkMessage.getMessages(recipient,author), 
-                                   recipient=recipient, 
+    return render_to_response('geocamTalk/message_list.html',
+                               dict(gc_msg=TalkMessage.getMessages(recipient, author),
+                                   recipient=recipient,
                                    author=author,
                                    timestamp=timestamp),
                                context_instance=RequestContext(request))
@@ -89,11 +103,19 @@ def message_details_json(request, message_id):
     else:
         message = get_object_or_404(TalkMessage, pk=message_id)
         return HttpResponse(json.dumps(message.getJson()))
-  
+
+@login_required
+def message_details(request, message_id):
+    message = get_object_or_404(TalkMessage, pk=message_id)
+            
+    return render_to_response('geocamTalk/details.html',
+                              {'message':message},
+                              context_instance=RequestContext(request))
+
 @login_required
 def index(request):
     return render_to_response('geocamTalk/home.html',
-                              dict(), 
+                              dict(),
                               context_instance=RequestContext(request))
 
 @login_required
@@ -116,7 +138,7 @@ def create_message(request):
     else:
         form = GeocamTalkForm()
         return render_to_response('geocamTalk/message_form.html',
-                                  dict(form=form),                               
+                                  dict(form=form),
                                   context_instance=RequestContext(request))
 
   
@@ -155,9 +177,9 @@ def create_message_json(request):
             message = TalkMessage.fromJson(messageDict)
 
             if "audio" in request.FILES:
-                filename =  "%s%s.mp4" % (message.author,   message.content_timestamp.strftime("%H%M%S"))
+                filename = "%s%s.mp4" % (message.author, message.content_timestamp.strftime("%H%M%S"))
                 file_content = ContentFile(request.FILES['audio'].read())
-                file_format = os.path.splitext( request.FILES['audio'].name)[-1]
+                file_format = os.path.splitext(request.FILES['audio'].name)[-1]
                 message.audio_file.save(filename, file_content)
             try:
                 print message
