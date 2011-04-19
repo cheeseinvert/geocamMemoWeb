@@ -117,9 +117,6 @@ class TalkMessage(GeocamMessage):
             
     def push_to_phone(self, pushToSender = True):
    
-        # NOW SEND THE REQUEST TO GOOGLE SERVERS
-        # first we need an https connection that ignores the certificate (for now)
-        httpsconnection = httplib.HTTPSConnection("android.apis.google.com", 443)
     
         push_recipients = self.recipients.all()
         if(push_recipients.count() == 0):
@@ -142,6 +139,9 @@ class TalkMessage(GeocamMessage):
                                 "Authorization":"GoogleLogin auth=" + GOOGLE_TOKEN # TOKEN set manually in authentication.py
                                 }
                     
+                    # NOW SEND THE REQUEST TO GOOGLE SERVERS
+                    # first we need an https connection that ignores the certificate (for now)
+                    httpsconnection = httplib.HTTPSConnection("android.apis.google.com", 443)
                     httpsconnection.request("POST", "/c2dm/send", params, headers)
 
     def get_audio_url(self):
