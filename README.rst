@@ -64,7 +64,7 @@ To run a development server, navigate to your ./geocamMemoWeb/example path and e
       
       python manage.py runserver 0.0.0.0:8000
       
-Pleast note that this must be done before the geocamTalkForAndroid and geocamTalkForMemo can be successfully run on your mobile device.
+Pleast note that this must be done before the geocamTalkForAndroid and geocamTalkForAndroid can be successfully run on your mobile device.
 
 Testing
 -------
